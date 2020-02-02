@@ -141,7 +141,7 @@ class Nametag3d(Nametag, PandaNode):
 
     def generateName(self):
         v4 = self.getState()
-        v56 = Vec4(NametagGlobals.getNameFg(self.m_group.getColorCode(), v4))
+        v56 = Vec4(NametagGlobals.getNameFg(self.m_group.getColorCode(), v4, base.settings.getBool('game', 'retro-mode', False)))
         v54 = Vec4(NametagGlobals.getNameBg(self.m_group.getColorCode(), v4))
 
         self.m_name_frame = Vec4(*self.m_group.getNameFrame())

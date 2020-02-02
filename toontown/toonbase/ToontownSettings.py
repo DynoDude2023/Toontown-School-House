@@ -21,3 +21,9 @@ class ToontownSettings(Settings):
         magicWordActivator = self.getInt('game', 'magic-word-activator', 0)
         loadPrcFileData('toonBase Settings Magic Word Activator', 'magic-word-activator %d' % magicWordActivator)
         self.updateSetting('game', 'magic-word-activator', magicWordActivator)
+
+        # Setting for toggling retro mode.
+        # This is a mostly aesthetic mode.
+        retroMode = self.getBool('game', 'retro-mode', False)
+        loadPrcFileData('toonBase Settings Retro Mode', 'retro-mode %d' % int(retroMode))
+        self.updateSetting('game', 'retro-mode', retroMode)

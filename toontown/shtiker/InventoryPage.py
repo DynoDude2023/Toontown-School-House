@@ -77,6 +77,9 @@ class InventoryPage(ShtikerPage.ShtikerPage):
         trackName = TextEncoder.upper(ToontownBattleGlobals.Tracks[trackIndex])
         if base.localAvatar.hasTrackAccess(trackIndex):
             curExp, nextExp = base.localAvatar.inventory.getCurAndNextExpValues(trackIndex)
+            if curExp > 9999 and base.settings.getBool('game', 'retro-mode', False):
+                curExp = 9999
+                nextExp = 9999
             trackText = '%s / %s' % (curExp, nextExp)
             self.trackProgress['range'] = nextExp
             self.trackProgress['value'] = curExp

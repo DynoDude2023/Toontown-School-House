@@ -174,7 +174,7 @@ class Nametag2d(Nametag, MarginPopup):
 
     def generateName(self):
         v4 = self.getState()
-        v84 = Vec4(NametagGlobals.getNameFg(self.m_group.getColorCode(), v4))
+        v84 = Vec4(NametagGlobals.getNameFg(self.m_group.getColorCode(), v4, base.settings.getBool('game', 'retro-mode', False)))
         v75 = Vec4(NametagGlobals.getNameBg(self.m_group.getColorCode(), v4))
         v75[3] = max(v75[3], NametagGlobals._min_2d_alpha)
         v75[3] = min(v75[3], NametagGlobals._max_2d_alpha)
@@ -234,7 +234,7 @@ class Nametag2d(Nametag, MarginPopup):
 
             self.m_trans_vec = a3.xformPoint(Point3(0, 0, v68 - 1.0))
 
-            color = Vec4(NametagGlobals.getArrowColor(self.m_group.getColorCode()))
+            color = Vec4(NametagGlobals.getArrowColor(self.m_group.getColorCode(), base.settings.getBool('game', 'retro-mode', False)))
             self.m_arrow.setColor(color)
             if color[3] != 1.0:
                 self.m_arrow.setTransparency(1)

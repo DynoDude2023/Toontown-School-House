@@ -75,7 +75,10 @@ _arrow_color = [
 ]
 
 
-def getArrowColor(index):
+def getArrowColor(index, isRetro=False):
+    if isRetro:
+        if index in (7, 8):
+            index = 0
     return _arrow_color[index]
 
 
@@ -395,7 +398,12 @@ _name_fg = [
 ]
 
 
-def getNameFg(color_code, state):
+def getNameFg(color_code, state, isRetro=False):
+    if isRetro:
+        if color_code in (1, 2):
+            color_code = 7
+        elif color_code == 7:
+            color_code = 1
     return _name_fg[4 * color_code + state]
 
 
