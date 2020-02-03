@@ -150,6 +150,8 @@ bw = (('finger-wag', 'fingerwag', 5),
  ('magic1', 'magic1', 5),
  ('throw-object', 'throw-object', 5),
  ('throw-paper', 'throw-paper', 5))
+g = (('magic1', 'magic1', 5),
+    ('glower', 'glower', 5))
 if not base.config.GetBool('want-new-cogs', 0):
     ModelDict = {'a': ('/models/char/suitA-', 4),
      'b': ('/models/char/suitB-', 4),
@@ -399,6 +401,8 @@ class Suit(Avatar.Avatar):
             self.generateSuit()
             self.initializeDropShadow()
             self.initializeNametag3d()
+            if dna.name == 'g':
+                self.makeSkeleton()
 
     def generateSuit(self):
         dna = self.style
@@ -609,6 +613,12 @@ class Suit(Avatar.Avatar):
             self.generateBody()
             self.generateHead('yesman')
             self.setHeight(8.95)
+        elif dna.name == 'g':
+            self.scale = 8.0 / aSize
+            self.handColor = VBase4(0.15, 0.15, 0.15, 1.0)
+            self.generateBody()
+            self.generateHead('yesman')
+            self.setHeight(10.0)
         self.setName(SuitBattleGlobals.SuitAttributes[dna.name]['name'])
         self.getGeomNode().setScale(self.scale)
         self.generateHealthBar()
@@ -791,7 +801,9 @@ class Suit(Avatar.Avatar):
         if tie.isEmpty():
             self.notify.warning('skelecog has no tie model!!!')
             return
-        if dept == 'c':
+        if self.style.name == 'g':
+            tieTex = loader.loadTexture('phase_5/maps/cog_robot_tie_redacted.jpg')
+        elif dept == 'c':
             tieTex = loader.loadTexture('phase_5/maps/cog_robot_tie_boss.jpg')
         elif dept == 's':
             tieTex = loader.loadTexture('phase_5/maps/cog_robot_tie_sales.jpg')
@@ -970,11 +982,31 @@ class Suit(Avatar.Avatar):
             bb = parts.getPath(partNum)
             bb.setTwoSided(1)
 
+        for texture in self.findAllTextures().getTextures():
+            fullPath = texture.getFilename().getFullpath()
+            if ("phase_5_" in fullPath or "cog" in fullPath) and not "redacted" in fullPath:
+                path = os.path.splitext(texture.getFilename().getFullpath())[0]
+                while path.startswith("/"):
+                    path = path[1:]
+                if path.__contains__("cogB"):
+                    newTexture = loader.loadTexture("phase_5/maps/cog_robot_tie_redacted.jpg")
+                elif texture.hasAlphaFilename():
+                    newTexture = loader.loadTexture(path + "_redacted.jpg", path + "_a.rgb")
+                else:
+                    newTexture = loader.loadTexture(path + "_redacted.jpg")
+                newImage = PNMImage()
+                newTexture.store(newImage)
+                texture.load(newImage)
+
+
         self.setName(TTLocalizer.Skeleton)
         nameInfo = TTLocalizer.SuitBaseNameWithLevel % {'name': self._name,
          'dept': self.getStyleDept(),
          'level': self.getActualLevel()}
         self.setDisplayName(nameInfo)
+        if self.style.name == 'g':
+            self.setName(TTLocalizer.SuitGhost)
+            self.setDisplayName(TTLocalizer.SuitGhost)
         self.leftHand = self.find('**/joint_Lhold')
         self.rightHand = self.find('**/joint_Rhold')
         self.shadowJoint = self.find('**/joint_shadow')

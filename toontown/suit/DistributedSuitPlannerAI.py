@@ -393,7 +393,10 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
             else:
                 suitLevel = self.SuitHoodInfo[self.hoodInfoIdx][self.SUIT_HOOD_INFO_LVL][-1] + 1
         suitLevel, suitType, suitTrack = self.pickLevelTypeAndTrack(suitLevel, suitType, suitTrack)
-        newSuit.setupSuitDNA(suitLevel, suitType, suitTrack)
+        if suitName in SuitDNA.customSuitDepts.keys():
+            newSuit.setupCustomDNA(suitLevel, suitName, suitTrack)
+        else:
+            newSuit.setupSuitDNA(suitLevel, suitType, suitTrack)
         newSuit.buildingHeight = buildingHeight
         gotDestination = self.chooseDestination(newSuit, startTime, toonBlockTakeover=toonBlockTakeover, cogdoTakeover=cogdoTakeover, minPathLen=minPathLen, maxPathLen=maxPathLen)
         if not gotDestination:

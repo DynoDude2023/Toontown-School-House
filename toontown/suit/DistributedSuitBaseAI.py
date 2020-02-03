@@ -65,6 +65,14 @@ class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.Su
         self.setLevel(level)
         return None
 
+    def setupCustomDNA(self, level, name, track):
+        dna = SuitDNA.SuitDNA()
+        dna.newSuit(name)
+        self.dna = dna
+        self.track = track
+        self.setLevel(level)
+        return None
+
     def getDNAString(self):
         if self.dna:
             return self.dna.makeNetString()

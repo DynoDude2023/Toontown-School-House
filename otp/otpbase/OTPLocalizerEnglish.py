@@ -863,7 +863,8 @@ SuitFaceoffTaunts = {'b': ['Do you have a donation for me?',
         "It's all uphill from here.",
         "You're going to need some urgent care soon.",
         'This is no laughing matter.',
-        "I'm going to give you the business."]}
+        "I'm going to give you the business."],
+ 'g': ["You will regret coming here."]}
 SpeedChatStaticTextCommon = {1: lYes,
  2: lNo,
  3: lOK,

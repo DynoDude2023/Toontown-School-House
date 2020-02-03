@@ -38,7 +38,8 @@ suitHeadTypes = ['f',
  'ms',
  'tf',
  'm',
- 'mh']
+ 'mh',
+ 'g']
 suitATypes = ['ym',
  'hh',
  'tbc',
@@ -52,7 +53,8 @@ suitATypes = ['ym',
  'nd',
  'tf',
  'm',
- 'mh']
+ 'mh',
+ 'g']
 suitBTypes = ['p',
  'ds',
  'b',
@@ -75,6 +77,12 @@ suitDepts = ['c',
  'l',
  'm',
  's']
+customSuitDepts = {
+    'g': 'l'
+}
+customSuitLevels = {
+    'g': 10
+}
 suitDeptFullnames = {'c': TTLocalizer.Bossbot,
  'l': TTLocalizer.Lawbot,
  'm': TTLocalizer.Cashbot,
@@ -119,6 +127,8 @@ def getSuitDept(name):
         return suitDepts[2]
     elif index < suitsPerDept * 4:
         return suitDepts[3]
+    elif name in customSuitDepts.keys():
+        return customSuitDepts.get(name)
     else:
         print 'Unknown dept for suit name: ', name
         return None
