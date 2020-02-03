@@ -72,6 +72,8 @@ class DistributedButterfly(DistributedObject.DistributedObject):
                     color = Vec4(1, 1, 1, 1)
                 wing.setColor(color)
 
+        self.butterfly.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
+
         self.butterfly2 = Actor.Actor(other=self.butterfly)
         self.butterfly.enableBlend(blendType=PartBundle.BTLinear)
         self.butterfly.loop('flutter')
@@ -92,6 +94,7 @@ class DistributedButterfly(DistributedObject.DistributedObject):
         self.butterflyNode = NodePath(lodNode)
         self.butterfly2.setH(180.0)
         self.butterfly2.reparentTo(self.butterflyNode)
+        self.butterfly2.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
         self.butterfly.setH(180.0)
         self.butterfly.reparentTo(self.butterflyNode)
         self.__initCollisions()

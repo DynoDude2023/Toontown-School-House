@@ -698,6 +698,7 @@ class Toon(Avatar.Avatar, ToonHead):
         self.rescaleToon()
         self.resetHeight()
         self.setupToonNodes()
+        self.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
 
     def setupToonNodes(self):
         rightHand = NodePath('rightHand')
@@ -749,6 +750,7 @@ class Toon(Avatar.Avatar, ToonHead):
         for bookActor, hand in zip(self.__bookActors, hands):
             bookActor.reparentTo(hand)
             bookActor.hide()
+            bookActor.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
 
         return self.__bookActors
 
@@ -765,6 +767,7 @@ class Toon(Avatar.Avatar, ToonHead):
             else:
                 holeName = 'toon-portal'
             ha.setName(holeName)
+            ha.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
 
         return self.__holeActors
 
@@ -829,6 +832,7 @@ class Toon(Avatar.Avatar, ToonHead):
         del self.shadowJoint
         self.initializeDropShadow()
         self.initializeNametag3d()
+        self.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
 
     def generateToonTorso(self, copy = 1, genClothes = 1):
         torsoStyle = self.style.torso
@@ -866,6 +870,7 @@ class Toon(Avatar.Avatar, ToonHead):
         self.resetHeight()
         self.setupToonNodes()
         self.generateBackpack()
+        self.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
 
     def generateToonHead(self, copy = 1):
         headHeight = ToonHead.generateToonHead(self, copy, self.style, ('1000', '500', '250'))
@@ -889,6 +894,7 @@ class Toon(Avatar.Avatar, ToonHead):
         self.resetHeight()
         self.eyelids.request('open')
         self.startLookAround()
+        self.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
 
     def generateToonColor(self):
         ToonHead.generateToonColor(self, self.style)
@@ -1775,6 +1781,7 @@ class Toon(Avatar.Avatar, ToonHead):
         def showHoles(holes, hands):
             for hole, hand in zip(holes, hands):
                 hole.reparentTo(hand)
+                hole.setBlend(frameBlend=False)
 
         def reparentHoles(holes, toon):
             holes[0].reparentTo(toon)
@@ -1783,6 +1790,8 @@ class Toon(Avatar.Avatar, ToonHead):
             holes[0].setBin('shadow', 0)
             holes[0].setDepthTest(0)
             holes[0].setDepthWrite(0)
+            for hole in holes:
+                hole.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
 
         def cleanupHoles(holes):
             holes[0].detachNode()

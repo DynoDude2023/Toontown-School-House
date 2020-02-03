@@ -82,6 +82,7 @@ class Goon(Avatar.Avatar):
             animDict[anim[0]] = filePrefix + anim[1]
 
         self.loadAnims(animDict)
+        self.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
 
     def getShadowJoint(self):
         return self.getGeomNode()

@@ -75,6 +75,7 @@ class GenericAnimatedProp(AnimatedProp.AnimatedProp):
         self.trashcan.reparentTo(node)
         self.trashcan.loadAnims({'anim': '%s/%s' % (self.path, anim)})
         self.trashcan.pose('anim', 0)
+        self.trashcan.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
         self.node = self.trashcan
 
     def calcHoodId(self, node):

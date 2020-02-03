@@ -21,3 +21,8 @@ class ToontownSettings(Settings):
         magicWordActivator = self.getInt('game', 'magic-word-activator', 0)
         loadPrcFileData('toonBase Settings Magic Word Activator', 'magic-word-activator %d' % magicWordActivator)
         self.updateSetting('game', 'magic-word-activator', magicWordActivator)
+
+        # Setting for Interpolating Animations.
+        smoothAnims = self.getBool('game', 'interpolate-animations', False)
+        loadPrcFileData('toonBase Settings Interpolating Animations', 'interpolate-animations %s' % smoothAnims)
+        self.updateSetting('game', 'interpolate-animations', smoothAnims)

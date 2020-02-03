@@ -13,6 +13,7 @@ class FishAnimatedProp(AnimatedProp.AnimatedProp):
         self.fish = Actor.Actor(node, copy=0)
         self.fish.reparentTo(parent)
         self.fish.setTransform(node.getTransform())
+        self.fish.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
         node.clearMat()
         self.fish.loadAnims({'jump': 'phase_4/models/props/SZ_fish-jump',
          'swim': 'phase_4/models/props/SZ_fish-swim'})

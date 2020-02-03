@@ -337,6 +337,7 @@ class Char(Avatar.Avatar):
             pupilOffsetNode.setPos(0, 0.025, 0)
             self.rpupil.reparentTo(pupilOffsetNode)
         self.__blinkName = 'blink-' + self._name
+        self.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
         return
 
     def swapCharModel(self, charStyle):

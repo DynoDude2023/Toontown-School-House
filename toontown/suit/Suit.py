@@ -613,6 +613,7 @@ class Suit(Avatar.Avatar):
         self.getGeomNode().setScale(self.scale)
         self.generateHealthBar()
         self.generateCorporateMedallion()
+        self.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
         return
 
     def generateBody(self):
@@ -935,6 +936,7 @@ class Suit(Avatar.Avatar):
         self.loseActor.setScale(self.scale)
         self.loseActor.setPos(self.getPos())
         self.loseActor.setHpr(self.getHpr())
+        self.loseActor.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
         shadowJoint = self.loseActor.find('**/joint_shadow')
         dropShadow = loader.loadModel('phase_3/models/props/drop_shadow')
         dropShadow.setScale(0.45)
@@ -985,6 +987,7 @@ class Suit(Avatar.Avatar):
                 dropShadow.reparentTo(self.shadowJoint)
         self.loop(anim)
         self.isSkeleton = 1
+        self.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
 
     def getHeadParts(self):
         return self.headParts

@@ -259,6 +259,7 @@ class Pet(Avatar.Avatar):
         self.eyesClosedTexture.setMinfilter(Texture.FTLinear)
         self.eyesClosedTexture.setMagfilter(Texture.FTLinear)
         self.eyesOpen()
+        self.setBlend(frameBlend=base.settings.getBool('game', 'interpolate-animations', False))
         return None
 
     def initializeBodyCollisions(self, collIdStr):
