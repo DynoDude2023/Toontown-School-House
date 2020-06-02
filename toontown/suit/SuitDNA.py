@@ -80,9 +80,6 @@ suitDepts = ['c',
 customSuitDepts = {
     'g': 'l'
 }
-customSuitLevels = {
-    'g': 10
-}
 suitDeptFullnames = {'c': TTLocalizer.Bossbot,
  'l': TTLocalizer.Lawbot,
  'm': TTLocalizer.Cashbot,

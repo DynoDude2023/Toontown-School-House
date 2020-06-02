@@ -907,28 +907,19 @@ SuitAttributes = {'f': {'name': TTLocalizer.SuitFlunky, # cog name
  'g': {'name': TTLocalizer.SuitGhost,
          'singularname': TTLocalizer.SuitGhostS,
          'pluralname': TTLocalizer.SuitGhostP,
-         'level': 7,
-         'hp': (90, 110, 132, 156, 200, 462, 992, 1722, 2652, 3382, 4112, 4842, 5572, 6302),
-         'def': (35, 40, 45, 50, 55, 60, 65, 70, 70, 70, 70, 70, 70, 70),
+         'level': 14,
+         'hp': (1722,2652,3382,4112,4842),
+         'def': (70,70,70,70,70),
          'freq': (50, 30, 10, 5, 5),
-         'acc': (35, 40, 45, 50, 55, 60, 65, 70, 70, 70, 70, 70, 70, 70),
-         'attacks':
-             (('CigarSmoke',
-               (10, 12, 15, 18, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30),
-               (55, 65, 75, 85, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95),
-               (20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20)),
-              ('FloodTheMarket',
-               (14, 16, 18, 20, 22, 23, 23, 24, 25, 26, 27, 28, 29, 30),
-               (70, 75, 85, 90, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95),
-               (10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10)),
-              ('SongAndDance',
-               (14, 15, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29),
-               (60, 65, 70, 75, 80, 85, 90, 90, 90, 90, 90, 90, 90, 90),
-               (20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20)),
-              ('TeeOff',
-               (8, 11, 14, 17, 20, 21, 21, 22, 22, 23, 23, 24, 24, 25),
-               (55, 65, 70, 75, 80, 85, 90, 90, 90, 90, 90, 90, 90, 90),
-               (50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50)))},
+         'acc': (70,70,70,70,70),
+         'attacks': (('ShadowToon',
+                       (40,40,40,40,40),
+                       (75,75,75,75,75),
+                       (50,50,50,50,50)),
+                      ('EvilEye',
+                        (34,34,34,34,34),
+                        (75,75,75,75,75),
+                        (50,50,50,50,50)))},
  }
 
 ATK_TGT_UNKNOWN = 1
@@ -1000,7 +991,8 @@ SuitAttacks = {'Audit': ('phone', ATK_TGT_SINGLE),
  'Tremor': ('stomp', ATK_TGT_GROUP),
  'Watercooler': ('watercooler', ATK_TGT_SINGLE),
  'Withdrawal': ('magic1', ATK_TGT_SINGLE),
- 'WriteOff': ('hold-pencil', ATK_TGT_SINGLE)}
+ 'WriteOff': ('hold-pencil', ATK_TGT_SINGLE),
+ 'ShadowToon': ('magic2', ATK_TGT_SINGLE)}
 AUDIT = SuitAttacks.keys().index('Audit')
 BITE = SuitAttacks.keys().index('Bite')
 BOUNCE_CHECK = SuitAttacks.keys().index('BounceCheck')
@@ -1068,6 +1060,7 @@ TREMOR = SuitAttacks.keys().index('Tremor')
 WATERCOOLER = SuitAttacks.keys().index('Watercooler')
 WITHDRAWAL = SuitAttacks.keys().index('Withdrawal')
 WRITE_OFF = SuitAttacks.keys().index('WriteOff')
+SHADOW_TOON = SuitAttacks.keys().index('ShadowToon')
 
 def getFaceoffTaunt(suitName, doId):
     if suitName in SuitFaceoffTaunts:

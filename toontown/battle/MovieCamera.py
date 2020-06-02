@@ -227,6 +227,34 @@ def chooseThrowCloseShot(throws, suitThrowsDict, openDuration, openName, attackD
     track = apply(random.choice(shotChoices), [av, duration])
     return track
 
+def chooseThrowShadowShot(toon, suit, attackDuration):
+    openShot = chooseThrowShadowOpenShot(1, suit, attackDuration)
+    openDuration = openShot.getDuration()
+    openName = openShot.getName()
+    closeShot = chooseThrowShadowCloseShot(1, toon, openDuration, openName, attackDuration)
+    track = Sequence(openShot, closeShot)
+    return track
+
+def chooseThrowShadowOpenShot(throws, suit, attackDuration):
+    duration = 3.0
+    try:
+        av = suit.evilToon
+    except:
+        av = suit
+    shotChoices = [avatarBehindShot,
+     allGroupLowShot,
+     suitGroupThreeQuarterLeftBehindShot]
+    track = apply(random.choice(shotChoices), [av, duration])
+    return track
+
+
+def chooseThrowShadowCloseShot(throws, suitThrowsDict, openDuration, openName, attackDuration):
+    duration = attackDuration - openDuration
+    av = suitThrowsDict
+    shotChoices = [allGroupLowShot,
+     suitGroupThreeQuarterLeftBehindShot]
+    track = apply(random.choice(shotChoices), [av, duration])
+    return track
 
 def chooseSquirtShot(squirts, suitSquirtsDict, attackDuration):
     openShot = chooseSquirtOpenShot(squirts, suitSquirtsDict, attackDuration)
@@ -477,6 +505,8 @@ def chooseSuitShot(attack, attackDuration):
         camTrack.append(defaultCamera(openShotDuration=1.2))
     elif name == WRITE_OFF:
         camTrack.append(defaultCamera())
+    elif name == SHADOW_TOON:
+        camTrack.append(shadowShot(attack['suit'], target['toon'], attack['battle'], attack, attackDuration - 3.29166666667))
     else:
         notify.warning('unknown attack id in chooseSuitShot: %d using default cam' % name)
         camTrack.append(defaultCamera())
@@ -850,6 +880,10 @@ def randomActorShot(actor, battle, duration, actorType, groupShot = 0):
         x = -x
     return focusShot(x, y, z, duration, centralPoint)
 
+def shadowShot(suit, toon, battle, attack, duration):
+    shot1 = chooseThrowShadowOpenShot(1, suit, 3.29166666667)
+    shot2 = chooseThrowShadowShot(toon, suit, duration)
+    return Sequence(shot1, shot2)
 
 def randomSplitShot(suit, toon, battle, duration):
     suitHeight = suit.getHeight()

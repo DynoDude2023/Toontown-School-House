@@ -150,7 +150,7 @@ bw = (('finger-wag', 'fingerwag', 5),
  ('magic1', 'magic1', 5),
  ('throw-object', 'throw-object', 5),
  ('throw-paper', 'throw-paper', 5))
-g = (('magic1', 'magic1', 5),
+g = (('magic2', 'magic2', 5),
     ('glower', 'glower', 5))
 if not base.config.GetBool('want-new-cogs', 0):
     ModelDict = {'a': ('/models/char/suitA-', 4),
@@ -944,6 +944,23 @@ class Suit(Avatar.Avatar):
                 loseAnim = 'phase_' + str(phase) + filePrefix + 'lose'
                 self.loseActor = Actor.Actor(loseModel, {'lose': loseAnim})
                 self.generateCorporateTie(self.loseActor)
+                if self.style.name == 'g':
+                    for texture in self.loseActor.findAllTextures().getTextures():
+                        fullPath = texture.getFilename().getFullpath()
+                        if ("phase_5_" in fullPath or "cog" in fullPath) and not "redacted" in fullPath:
+                            path = os.path.splitext(texture.getFilename().getFullpath())[0]
+                            while path.startswith("/"):
+                                path = path[1:]
+                            if path.__contains__("cogB"):
+                                newTexture = loader.loadTexture("phase_5/maps/cog_robot_tie_redacted.jpg")
+                            elif texture.hasAlphaFilename():
+                                newTexture = loader.loadTexture(path + "_redacted.jpg", path + "_a.rgb")
+                            else:
+                                newTexture = loader.loadTexture(path + "_redacted.jpg")
+                            newImage = PNMImage()
+                            newTexture.store(newImage)
+                            texture.load(newImage)
+
         self.loseActor.setScale(self.scale)
         self.loseActor.setPos(self.getPos())
         self.loseActor.setHpr(self.getHpr())
@@ -982,21 +999,22 @@ class Suit(Avatar.Avatar):
             bb = parts.getPath(partNum)
             bb.setTwoSided(1)
 
-        for texture in self.findAllTextures().getTextures():
-            fullPath = texture.getFilename().getFullpath()
-            if ("phase_5_" in fullPath or "cog" in fullPath) and not "redacted" in fullPath:
-                path = os.path.splitext(texture.getFilename().getFullpath())[0]
-                while path.startswith("/"):
-                    path = path[1:]
-                if path.__contains__("cogB"):
-                    newTexture = loader.loadTexture("phase_5/maps/cog_robot_tie_redacted.jpg")
-                elif texture.hasAlphaFilename():
-                    newTexture = loader.loadTexture(path + "_redacted.jpg", path + "_a.rgb")
-                else:
-                    newTexture = loader.loadTexture(path + "_redacted.jpg")
-                newImage = PNMImage()
-                newTexture.store(newImage)
-                texture.load(newImage)
+        if self.style.name == 'g':
+            for texture in self.findAllTextures().getTextures():
+                fullPath = texture.getFilename().getFullpath()
+                if ("phase_5_" in fullPath or "cog" in fullPath) and not "redacted" in fullPath:
+                    path = os.path.splitext(texture.getFilename().getFullpath())[0]
+                    while path.startswith("/"):
+                        path = path[1:]
+                    if path.__contains__("cogB"):
+                        newTexture = loader.loadTexture("phase_5/maps/cog_robot_tie_redacted.jpg")
+                    elif texture.hasAlphaFilename():
+                        newTexture = loader.loadTexture(path + "_redacted.jpg", path + "_a.rgb")
+                    else:
+                        newTexture = loader.loadTexture(path + "_redacted.jpg")
+                    newImage = PNMImage()
+                    newTexture.store(newImage)
+                    texture.load(newImage)
 
 
         self.setName(TTLocalizer.Skeleton)

@@ -12,6 +12,8 @@ from direct.directnotify import DirectNotifyGlobal
 import MovieUtil
 from direct.particles import ParticleEffect
 import BattleParticles
+from toontown.effects import DustCloud
+from toontown.toon import Toon
 from toontown.toonbase import ToontownGlobals
 from toontown.toonbase import TTLocalizer
 notify = DirectNotifyGlobal.directNotify.newCategory('MovieSuitAttacks')
@@ -248,6 +250,8 @@ def doSuitAttack(attack):
         suitTrack = doWithdrawal(attack)
     elif name == WRITE_OFF:
         suitTrack = doWriteOff(attack)
+    elif name == SHADOW_TOON:
+        suitTrack = doShadowToon(attack)
     else:
         notify.warning('unknown attack: %d substituting Finger Wag' % name)
         suitTrack = doDefault(attack)
@@ -467,8 +471,13 @@ def doDefault(attack):
         attack['name'] = 'FingerWag'
         attack['animName'] = 'finger-wag'
         return doFingerWag(attack)
+    elif suitName == 'g':
+        attack['id'] = GLOWER_POWER
+        attack['name'] = 'GlowerPower'
+        attack['animName'] = 'glower'
+        return doGlowerPower(attack)
     else:
-        self.notify.error('doDefault() - unsupported suit type: %s' % suitName)
+        notify.error('doDefault() - unsupported suit type: %s' % suitName)
     return None
 
 
@@ -2102,6 +2111,184 @@ def doDoubleTalk(attack):
     toonTrack = getToonTrack(attack, damageDelay=damageDelay, splicedDamageAnims=damageAnims, dodgeDelay=dodgeDelay, splicedDodgeAnims=[['duck', 0.01, 1.4]], showMissedExtraTime=0.9, showDamageExtraTime=0.8)
     soundTrack = getSoundTrack('SA_filibuster.ogg', delay=2.5, node=suit)
     return Parallel(suitTrack, toonTrack, partTrack, partTrack2, soundTrack)
+
+def doShadowToon(attack):
+    suit = attack['suit']
+    toon = attack['target']['toon']
+    hp = attack['target']['hp']
+    battle = attack['battle']
+    tauntIndex = attack['taunt']
+    taunt = getAttackTaunt(attack['name'], tauntIndex)
+    oldPos = suit.getPos(battle)
+    oldHpr = suit.getHpr(battle)
+    toonPos = toon.getPos(battle)
+    newPos = oldPos + Point3(0, 5, 0)
+    tPieLeavesHand = 2.7
+    tPieHitsSuit = 3.0
+    tSuitDodges = 2.45
+    ratioMissToHit = 1.5
+
+    def createEvilToon(toon = toon, oldPos = oldPos):
+        evilToon = Toon.Toon()
+        style = toon.style.clone()
+        evilToon.setDNA(style)
+        evilToon.hat = toon.getHat()
+        evilToon.glasses = toon.getGlasses()
+        evilToon.backpack = toon.getBackpack()
+        evilToon.shoes = toon.getShoes()
+        evilToon.generateToonAccessories()
+        evilToon.setColorScale(0, 0, 0, 1)
+        evilToon.setPos(battle, oldPos)
+        evilToon.setHpr(battle, oldHpr)
+        return evilToon
+
+    suit.evilToon = createEvilToon()
+    suit.evilToon.loop('neutral')
+
+    def getDustCloudIval(evilToon = suit.evilToon, oldPos = oldPos):
+        dustCloud = DustCloud.DustCloud(fBillboard=0, wantSound=1)
+        dustCloud.setBillboardAxis(2.0)
+        dustCloud.setZ(3)
+        dustCloud.setScale(0.4)
+        dustCloud.createTrack()
+        dustCloud.setColorScale(0.2, 0.2, 0.2, 1)
+        return Sequence(Func(dustCloud.reparentTo, render), Func(dustCloud.setPos, battle, oldPos + (0, 0, evilToon.getHeight())), dustCloud.track, Func(dustCloud.destroy),
+                        name='dustCloadIval')
+
+    def __propPreflight(props, suit, toon, battle):
+        prop = props[0]
+        toon.update(0)
+        prop.wrtReparentTo(battle)
+        props[1].reparentTo(hidden)
+        for ci in range(prop.getNumChildren()):
+            prop.getChild(ci).setHpr(0, -90, 0)
+
+        targetPnt = MovieUtil.avatarFacePoint(suit, other=battle)
+        prop.lookAt(targetPnt)
+
+    def __getSoundTrack(level, hitSuit, tPieLeavesHand, node=None):
+        throwSound = globalBattleSoundCache.getSound('AA_pie_throw_only.ogg')
+        throwTrack = Sequence(Wait(2.6), SoundInterval(throwSound, node=node))
+        if hitSuit:
+            hitSound = globalBattleSoundCache.getSound('AA_wholepie_only.ogg')
+            hitTrack = Sequence(Wait(tPieLeavesHand), SoundInterval(hitSound, node=node))
+            return Parallel(throwTrack, hitTrack)
+        else:
+            return throwTrack
+
+    def __billboardProp(prop):
+        scale = prop.getScale()
+        prop.setBillboardPointWorld()
+        prop.setScale(scale)
+
+    def __suitMissPoint(suit, other=render):
+        pnt = suit.getPos(other)
+        pnt.setZ(pnt[2] + suit.getHeight() * 1.3)
+        return pnt
+
+    def __piePreMiss(missDict, pie, suitPoint, other=render):
+        ratioMissToHit = 1.5
+        missDict['pie'] = pie
+        missDict['startScale'] = pie.getScale()
+        missDict['startPos'] = pie.getPos(other)
+        v = Vec3(suitPoint - missDict['startPos'])
+        endPos = missDict['startPos'] + v * ratioMissToHit
+        missDict['endPos'] = endPos
+
+    def __pieMissLerpCallback(t, missDict):
+        tPieShrink = 0.7
+        pie = missDict['pie']
+        newPos = missDict['startPos'] * (1.0 - t) + missDict['endPos'] * t
+        if t < tPieShrink:
+            tScale = 0.0001
+        else:
+            tScale = (t - tPieShrink) / (1.0 - tPieShrink)
+        newScale = missDict['startScale'] * max(1.0 - tScale, 0.01)
+        pie.setPos(newPos)
+        pie.setScale(newScale)
+
+    suitTrack = Sequence(
+                    Parallel(
+                        LerpPosInterval(suit, duration=1.0, pos=(newPos), other=battle),
+                        ActorInterval(suit, 'walk', loop=1, playRate=-1, duration=1.0)),
+                    Parallel(
+                        Sequence(
+                            Func(suit.setChatAbsolute, taunt, CFSpeech | CFTimeout),
+                            ActorInterval(suit, 'magic2'),
+                            Func(suit.loop, 'neutral')),
+                        Sequence(
+                            Wait(1.35),
+                            Func(getDustCloudIval().start),
+                            Wait(0.5),
+                            Func(suit.evilToon.addActive),
+                            Func(suit.evilToon.reparentTo, render)
+                        ),
+                    ),
+                )
+    pieName = 'creampie'
+    pie = globalPropPool.getProp(pieName)
+    pieType = globalPropPool.getPropType(pieName)
+    pie2 = MovieUtil.copyProp(pie)
+    pies = [pie, pie2]
+    for p in pies:
+        p.setColorScale(0, 0, 0, 1)
+    hands = suit.evilToon.getRightHands()
+    splatName = 'splat-' + pieName
+    splat = globalPropPool.getProp(splatName)
+    splat.setColorScale(0, 0, 0, 1)
+    evilToonTrack = Sequence()
+    toonFace = Func(suit.evilToon.headsUp, battle, toonPos)
+    evilToonTrack.append(toonFace)
+    evilToonTrack.append(ActorInterval(suit.evilToon, 'throw'))
+    evilToonTrack.append(Func(suit.evilToon.loop, 'neutral'))
+    evilToonTrack.append(Func(getDustCloudIval().start))
+    evilToonTrack.append(Wait(0.5))
+    evilToonTrack.append(Func(suit.evilToon.reparentTo, hidden))
+    evilToonTrack.append(Sequence(Func(suit.evilToon.removeActive), Func(suit.evilToon.cleanup), Func(suit.evilToon.removeNode)))
+
+    hitToon = hp > 0
+
+    pieShow = Func(MovieUtil.showProps, pies, hands)
+    pieAnim = Func(__animProp, pies, pieName, pieType)
+    pieScale1 = LerpScaleInterval(pie, 1.0, pie.getScale(), startScale=MovieUtil.PNT3_NEARZERO)
+    pieScale2 = LerpScaleInterval(pie2, 1.0, pie2.getScale(), startScale=MovieUtil.PNT3_NEARZERO)
+    pieScale = Parallel(pieScale1, pieScale2)
+    piePreflight = Func(__propPreflight, pies, toon, suit.evilToon, battle)
+    pieTrack = Sequence(pieShow, pieAnim, pieScale, Func(battle.movie.needRestoreRenderProp, pies[0]), Wait(tPieLeavesHand - 1.0), piePreflight)
+    soundTrack = __getSoundTrack(0, hitToon, tPieLeavesHand, suit.evilToon)
+
+    if hitToon:
+        pieFly = LerpPosInterval(pie, tPieHitsSuit - tPieLeavesHand, pos=MovieUtil.avatarFacePoint(toon, other=battle), other=battle)
+        pieHide = Func(MovieUtil.removeProps, pies)
+        splatShow = Func(__showProp, splat, toon, Point3(0, 0, toon.getHeight()))
+        splatBillboard = Func(__billboardProp, splat)
+        splatAnim = ActorInterval(splat, splatName)
+        splatHide = Func(MovieUtil.removeProp, splat)
+        pieTrack.append(pieFly)
+        pieTrack.append(pieHide)
+        pieTrack.append(Func(battle.movie.clearRenderProp, pies[0]))
+        pieTrack.append(splatShow)
+        pieTrack.append(splatBillboard)
+        pieTrack.append(splatAnim)
+        pieTrack.append(splatHide)
+    else:
+        missDict = {}
+        suitPoint = __suitMissPoint(toon, other=battle)
+        piePreMiss = Func(__piePreMiss, missDict, pie, suitPoint, battle)
+        pieMiss = LerpFunctionInterval(__pieMissLerpCallback, extraArgs=[missDict], duration=(tPieHitsSuit - tPieLeavesHand) * ratioMissToHit)
+        pieHide = Func(MovieUtil.removeProps, pies)
+        pieTrack.append(piePreMiss)
+        pieTrack.append(pieMiss)
+        pieTrack.append(pieHide)
+        pieTrack.append(Func(battle.movie.clearRenderProp, pies[0]))
+
+    moveUp = Sequence(Parallel(LerpPosInterval(suit, duration=1.0, pos=(oldPos), other=battle), ActorInterval(suit, 'walk', loop=1, duration=1.0)),
+                      Func(suit.loop, 'neutral'))
+    if toon.isDisguised:
+        toonTrack = getToonTrack(attack, tPieHitsSuit, ['cringe'], tSuitDodges, ['sidestep'])
+    else:
+        toonTrack = getToonTrack(attack, tPieHitsSuit, ['slip-backward'], tSuitDodges, ['sidestep'])
+    return Sequence(suitTrack, Parallel(evilToonTrack, pieTrack, soundTrack, toonTrack), moveUp)
 
 
 def doFreezeAssets(attack):
