@@ -4,5 +4,6 @@ pview.exe
 *.lnk
 *.sfk
 *.psd
+*.egg
 .DS_Store
 Library/
