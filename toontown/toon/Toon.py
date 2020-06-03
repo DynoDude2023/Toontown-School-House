@@ -928,21 +928,20 @@ class Toon(Avatar.Avatar, ToonHead):
     def generateToonClothes(self, fromNet = 0):
         swappedTorso = 0
         if self.hasLOD():
-            if self.style.getGender() == 'f' and fromNet == 0:
-                try:
-                    bottomPair = ToonDNA.GirlBottoms[self.style.botTex]
-                except:
-                    bottomPair = ToonDNA.GirlBottoms[0]
+            try:
+                bottomPair = ToonDNA.Bottoms[self.style.botTex]
+            except:
+                bottomPair = ToonDNA.Bottoms[0]
+            if len(self.style.torso) < 2:
+                self.sendLogSuspiciousEvent('nakedToonDNA %s was requested' % self.style.torso)
+                return 0
+            elif self.style.torso[1] == 's' and bottomPair[1] == ToonDNA.SKIRT:
+                self.swapToonTorso(self.style.torso[0] + 'd', genClothes=0)
+                swappedTorso = 1
+            elif self.style.torso[1] == 'd' and bottomPair[1] == ToonDNA.SHORTS:
+                self.swapToonTorso(self.style.torso[0] + 's', genClothes=0)
+                swappedTorso = 1
 
-                if len(self.style.torso) < 2:
-                    self.sendLogSuspiciousEvent('nakedToonDNA %s was requested' % self.style.torso)
-                    return 0
-                elif self.style.torso[1] == 's' and bottomPair[1] == ToonDNA.SKIRT:
-                    self.swapToonTorso(self.style.torso[0] + 'd', genClothes=0)
-                    swappedTorso = 1
-                elif self.style.torso[1] == 'd' and bottomPair[1] == ToonDNA.SHORTS:
-                    self.swapToonTorso(self.style.torso[0] + 's', genClothes=0)
-                    swappedTorso = 1
             try:
                 texName = ToonDNA.Shirts[self.style.topTex]
             except:
@@ -975,25 +974,15 @@ class Toon(Avatar.Avatar, ToonHead):
             except:
                 sleeveColor = ToonDNA.ClothesColors[0]
 
-            if self.style.getGender() == 'm':
-                try:
-                    texName = ToonDNA.BoyShorts[self.style.botTex]
-                except:
-                    texName = ToonDNA.BoyShorts[0]
-
-            else:
-                try:
-                    texName = ToonDNA.GirlBottoms[self.style.botTex][0]
-                except:
-                    texName = ToonDNA.GirlBottoms[0][0]
+            try:
+                texName = ToonDNA.Bottoms[self.style.botTex][0]
+            except:
+                texName = ToonDNA.Bottoms[0][0]
 
             bottomTex = loader.loadTexture(texName, okMissing=True)
             if bottomTex is None:
                 self.sendLogSuspiciousEvent('failed to load texture %s' % texName)
-                if self.style.getGender() == 'm':
-                    bottomTex = loader.loadTexture(ToonDNA.BoyShorts[0])
-                else:
-                    bottomTex = loader.loadTexture(ToonDNA.GirlBottoms[0][0])
+                bottomTex = loader.loadTexture(ToonDNA.Bottoms[0][0])
             bottomTex.setMinfilter(Texture.FTLinearMipmapLinear)
             bottomTex.setMagfilter(Texture.FTLinear)
             try:
