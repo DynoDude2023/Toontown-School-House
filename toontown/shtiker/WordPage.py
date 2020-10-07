@@ -29,12 +29,9 @@ class WordPage(ShtikerPage.ShtikerPage):
 
         # Set global Toon variables for Toon DNA and Accessories
         global toonDNA, toonAcc
-        #toonDNA = base.localAvatar.getStyle()
-        #toonAcc = [base.localAvatar.getHat(), base.localAvatar.getGlasses(),
-        #           base.localAvatar.getBackpack(), base.localAvatar.getShoes()]
-        toonDNA = ToonDNA.ToonDNA()
-        toonDNA.newToonFromProperties('dls', 'ls', 'l', 'f', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-        toonAcc = [(1, 0, 0), (1, 0, 0), (1, 0, 0), (1, 0, 0)]
+        toonDNA = base.localAvatar.getStyle()
+        toonAcc = [base.localAvatar.getHat(), base.localAvatar.getGlasses(),
+                   base.localAvatar.getBackpack(), base.localAvatar.getShoes()]
 
         # Load pages
         self.wordsTabPage = WordsTabPage(self)
