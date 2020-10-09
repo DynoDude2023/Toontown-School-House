@@ -27,9 +27,10 @@ class WordPage(ShtikerPage.ShtikerPage):
     def load(self):
         ShtikerPage.ShtikerPage.load(self)
 
-        # Set global Toon variables for Toon DNA and Accessories
+        # Copy player Toon attributes for preview Toon DNA and Accessories
         global toonDNA, toonAcc
-        toonDNA = base.localAvatar.getStyle()
+        toonDNA = ToonDNA.ToonDNA()
+        toonDNA.makeFromNetString(base.localAvatar.style.makeNetString())
         toonAcc = [base.localAvatar.getHat(), base.localAvatar.getGlasses(),
                    base.localAvatar.getBackpack(), base.localAvatar.getShoes()]
 
@@ -472,6 +473,7 @@ class ToonTabPageBase(DirectFrame):
         self.load()
 
     def load(self):
+        global toonDNA
         # Create Toon
         self.toon = Toon.Toon()
         self.toon.setDNA(toonDNA)
@@ -511,7 +513,9 @@ class ToonTabPageBase(DirectFrame):
 
     def unload(self):
         self.toon.delete()
-        self.toonRotateSlider.removeNode()
+        self.toonRotateSlider.destroy()
+        self.resetToonButton.destroy()
+        self.applyChangesButton.destroy()
 
     def enter(self):
         # Update Toon model to accomodate for any changes made on different tabs
@@ -554,11 +558,11 @@ class ToonTabPageBase(DirectFrame):
                                       style=TTDialog.YesNo, fadeScreen=0.5, command=self.resetToon)
         self.diag.show()
 
-    # Resets the Toon
+    # Resets the preview Toon to that of the current player Toon.
     def resetToon(self, choice = 0):
         global toonDNA, toonAcc
         if choice == 1:
-            toonDNA = base.localAvatar.getStyle()
+            toonDNA.makeFromNetString(base.localAvatar.style.makeNetString())
             toonAcc = [base.localAvatar.getHat(), base.localAvatar.getGlasses(),
                        base.localAvatar.getBackpack(), base.localAvatar.getShoes()]
             self.updateToon()
@@ -569,60 +573,100 @@ class BodyTabPage(ToonTabPageBase):
     notify = DirectNotifyGlobal.directNotify.newCategory('BodyTabPage')
 
     def __init__(self, parent = aspect2d):
-        self.speciesButtons = []
+
+        # Create UI lists
+        self.speciesGui = []
         ToonTabPageBase.__init__(self, parent=parent)
 
     def load(self):
         ToonTabPageBase.load(self)
 
-        # Create Species Buttons
-        gui = loader.loadModel('phase_3/models/gui/laff_o_meter')
+        # Create Species Section
+        laffMeterGui = loader.loadModel('phase_3/models/gui/laff_o_meter')
 
-        # Position multipliers, for versatility with species.
+        # Position multipliers for button positions, for versatility with species.
         x = 0
-        y = 0
+        z = 0
+
+        # Species Section Buttons
         for species in ToonDNA.toonSpeciesTypes:
             head = ToonDNA.getSpeciesName(species)
             # Because the rabbit's laff meter model is called "bunnyhead", we change head to match that.
             if head == 'rabbit':
                 head = 'bunny'
             # TODO: Add functionality for the buttons.
-            button = DirectButton(parent=self, state=DGG.DISABLED, geom=gui.find('**/' + head + 'head'),
-                                  relief=None, pos=(0.1 + ((0.7 / 5) * x), 0, 0.45 - (0.1 * y)),
-                                  scale=0.04)
+            button = DirectButton(parent=self, state=DGG.DISABLED, geom=laffMeterGui.find('**/' + head + 'head'),
+                                  relief=None, pos=(0.45 + (0.14 * x), 0, 0.6 - (0.125 * z)),
+                                  scale=0.04, command=self.changeSpecies, extraArgs=[species])
             button.hide()
-            self.speciesButtons.append(button)
-            # Start a new row if we're starting a row higher than 6.
+            self.speciesGui.append(button)
+            # Start a new row if we're starting a row higher than 3.
             x += 1
-            if x > 5:
+            if x > 2:
                 x = 0
-                y += 1
-        gui.removeNode()
+                z += 1
+
+        # Species Section Label (vertically centered according to the amount of rows)
+        zDiff = 0.0625 * z
+        if x == 0:
+            zDiff -= 0.0625
+
+        speciesLabel = DirectLabel(parent=self, relief=None, text="Species", text_scale=0.1, text_align=TextNode.ACenter,
+                                   pos=(0.2, 0, 0.6 - zDiff))
+        self.speciesGui.append(speciesLabel)
+
+        laffMeterGui.removeNode()
 
         # Create Head Buttons
         # TODO: Create a Direct Frame that encapsulates 4 ToonHeads (2 for mouse) that act as buttons to change the head. Do a similar thing for Torsos and Legs.
 
     def unload(self):
         ToonTabPageBase.unload(self)
+        # Destroy all GUI
+        for button in self.speciesGui:
+            button.destroy()
+        del self.speciesGui
 
     def enter(self):
         ToonTabPageBase.enter(self)
-        for button in self.speciesButtons:
+        # Show GUI. If a button, allow it to be clickable.
+        for button in self.speciesGui:
             button.show()
-            button['state'] = DGG.NORMAL
+            if isinstance(button, DirectButton):
+                button['state'] = DGG.NORMAL
 
     def exit(self):
         ToonTabPageBase.exit(self)
-        for button in self.speciesButtons:
+        # Hide GUI. If a button, disable it.
+        for button in self.speciesGui:
             button.hide()
-            button['state'] = DGG.DISABLED
+            if isinstance(button, DirectButton):
+                button['state'] = DGG.DISABLED
 
     # When the preview Toon updates, update the buttons to match.
     def updateToon(self):
         global toonDNA
         ToonTabPageBase.updateToon(self)
-        for button in self.speciesButtons:
+        for button in self.speciesGui:
             button['geom_color'] = toonDNA.getHeadColor()
+
+    # Changes the species of the preview Toon.
+    def changeSpecies(self, type):
+        global toonDNA
+        # If the species type is valid, replace the DNA's head type with the species and update the preview Toon.
+        # Otherwise, just notify console that the species is invalid.
+        if type in ToonDNA.toonSpeciesTypes:
+            newHead = type + toonDNA.head[1:]
+            # If the current head type uses a long muzzle and the new species is mouse, change muzzle to short since
+            # long mouse muzzles don't exist. (yet)
+            # TODO: Test to make sure this code works
+            if type == 'm' and newHead[2:] == 'l':
+                newHead = newHead[:2] + 's'
+            toonDNA.head = newHead
+            self.updateToon()
+        else:
+            self.notify.warning("Species type '%s' does not exist" % type)
+
 
 # TODO: Create different sections for shirts. Section 1: Combined TopTex and SleeveTex combos. Section 2: All TopTex. Section 3: All SleeveTex
 class ClothingTabPage(ToonTabPageBase):
@@ -643,6 +687,7 @@ class ClothingTabPage(ToonTabPageBase):
     def exit(self):
         ToonTabPageBase.exit(self)
 
+# TODO: Merge accessory tabs into a single Accessory tab, where a button swaps which accessories are being modified.
 class AccTabPage1(ToonTabPageBase):
     notify = DirectNotifyGlobal.directNotify.newCategory('AccTabPage1')
 
