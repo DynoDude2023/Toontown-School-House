@@ -8,6 +8,7 @@ from toontown.toonbase import ToontownGlobals
 from toontown.toonbase import TTLocalizer
 from toontown.toon import Toon
 from toontown.toon import ToonDNA
+from toontown.toon import ToonHead
 from toontown.toontowngui import TTDialog
 from toontown.spellbook.MagicWordIndex import *
 import ShtikerPage
@@ -106,11 +107,13 @@ class WordPage(ShtikerPage.ShtikerPage):
         ShtikerPage.ShtikerPage.exit(self)
 
     def unload(self):
+        global toonDNA
         self.wordsTabPage.unload()
         self.clothingTabPage.unload()
         self.acc1Page.unload()
         self.acc2Page.unload()
         del self.title
+        del toonDNA
         ShtikerPage.ShtikerPage.unload(self)
 
     def setMode(self, mode, updateAnyways = 0):
@@ -466,6 +469,7 @@ class WordsTabPage(DirectFrame):
         self.magicWordInfo.hide()
 
 # Base class for Toon customization tabs
+# TODO: Create copy DNA buttons
 class ToonTabPageBase(DirectFrame):
 
     def __init__(self, parent = aspect2d):
@@ -496,14 +500,14 @@ class ToonTabPageBase(DirectFrame):
                                                          gui.find('**/QuitBtn_RLVR'),
                                                          gui.find('**/QuitBtn_UP')), thumb_relief=None,
                                              thumb_geom_scale=(0.75, 1, 0.75), command=self.setToonRotation)
-        self.resetToonButton = DirectButton(parent=self,
+        self.resetToonButton = DirectButton(parent=self, state=DGG.DISABLED,
                                             image=(gui.find('**/QuitBtn_UP'),
                                                    gui.find('**/QuitBtn_DN'),
                                                     gui.find('**/QuitBtn_RLVR')), relief=None,
                                             text='Reset Toon', text_scale=0.05, text_pos=(0, -0.0125), scale=0.8,
                                             pos=(-0.25, 0, -0.6), command=self.resetToonPrompt)
         # TODO: Create functionality for Apply Changes button.
-        self.applyChangesButton = DirectButton(parent=self,
+        self.applyChangesButton = DirectButton(parent=self, state=DGG.DISABLED,
                                             image=(gui.find('**/QuitBtn_UP'),
                                                    gui.find('**/QuitBtn_DN'),
                                                    gui.find('**/QuitBtn_RLVR')), relief=None,
@@ -526,10 +530,14 @@ class ToonTabPageBase(DirectFrame):
         # Update Toon Rotation Slider
         self.toonRotateSlider['state'] = DGG.NORMAL
         self.toonRotateSlider['value'] = toonRotation
+        self.resetToonButton['state'] = DGG.NORMAL
+        self.applyChangesButton['state'] = DGG.NORMAL
         self.show()
 
     def exit(self):
         self.toonRotateSlider['state'] = DGG.DISABLED
+        self.resetToonButton['state'] = DGG.DISABLED
+        self.applyChangesButton['state'] = DGG.DISABLED
         self.hide()
 
     # Updates the Toon model
@@ -576,29 +584,37 @@ class BodyTabPage(ToonTabPageBase):
 
         # Create UI lists
         self.speciesGui = []
+        self.bodyGui = []
+        self.headGui = []
+        self.torsoGui = []
+        self.legGui = []
+        self.colorGui = []
+
+        # Create other variables
+        self.focusType = 0 # Determines which part is being focused: 0 = Head, 1 = Torso, 2 = Legs
+        self.colorTargetAll = True
+
         ToonTabPageBase.__init__(self, parent=parent)
 
     def load(self):
         ToonTabPageBase.load(self)
 
-        # Create Species Section
+        # -= Create Species Section =-
         laffMeterGui = loader.loadModel('phase_3/models/gui/laff_o_meter')
 
         # Position multipliers for button positions, for versatility with species.
         x = 0
         z = 0
 
-        # Species Section Buttons
+        # -= Create Species Section =-
         for species in ToonDNA.toonSpeciesTypes:
             head = ToonDNA.getSpeciesName(species)
             # Because the rabbit's laff meter model is called "bunnyhead", we change head to match that.
             if head == 'rabbit':
                 head = 'bunny'
-            # TODO: Add functionality for the buttons.
             button = DirectButton(parent=self, state=DGG.DISABLED, geom=laffMeterGui.find('**/' + head + 'head'),
                                   relief=None, pos=(0.45 + (0.14 * x), 0, 0.6 - (0.125 * z)),
                                   scale=0.04, command=self.changeSpecies, extraArgs=[species])
-            button.hide()
             self.speciesGui.append(button)
             # Start a new row if we're starting a row higher than 3.
             x += 1
@@ -611,44 +627,195 @@ class BodyTabPage(ToonTabPageBase):
         if x == 0:
             zDiff -= 0.0625
 
-        speciesLabel = DirectLabel(parent=self, relief=None, text="Species", text_scale=0.1, text_align=TextNode.ACenter,
+        speciesLabel = DirectLabel(parent=self, relief=None, text="Species", text_scale=0.07, text_align=TextNode.ACenter,
                                    pos=(0.2, 0, 0.6 - zDiff))
         self.speciesGui.append(speciesLabel)
 
+        # -= Create Body Header =-
+        bodyLabel = DirectLabel(parent=self, relief=None, text="Head", text_scale=0.07, text_align=TextNode.ACenter,
+                                pos=(0.425, 0, 0.175))
+        self.bodyGui.append(bodyLabel)
+        arrowGui = loader.loadModel('phase_3/models/gui/create_a_toon_gui')
+        leftArrow = DirectButton(parent=self, state=DGG.DISABLED, geom=(arrowGui.find('**/CrtATn_R_Arrow_UP'),
+                                                                        arrowGui.find('**/CrtATn_R_Arrow_DN'),
+                                                                        arrowGui.find('**/CrtATn_R_Arrow_RLVR'),
+                                                                        arrowGui.find('**/CrtATn_R_Arrow_DN')),
+                                 scale=(0.5, 0.5, 0.5), relief=None, pos=(0.2, 0, 0.2), hpr=(180, 0, 0),
+                                 command=self.changeFocusType, extraArgs=[-1])
+        self.bodyGui.append(leftArrow)
+        rightArrow = DirectButton(parent=self, state=DGG.DISABLED, geom=(arrowGui.find('**/CrtATn_R_Arrow_UP'),
+                                                                        arrowGui.find('**/CrtATn_R_Arrow_DN'),
+                                                                        arrowGui.find('**/CrtATn_R_Arrow_RLVR'),
+                                                                        arrowGui.find('**/CrtATn_R_Arrow_DN')),
+                                  scale=(-0.5, 0.5, 0.5), relief=None, pos=(0.65, 0, 0.2), hpr=(180, 0, 0),
+                                  command=self.changeFocusType, extraArgs=[1])
+        self.bodyGui.append(rightArrow)
+
+        # -= Create Head Section =-
+        headFrame = DirectFrame(parent=self, pos=(0.45, 0, 0), relief=DGG.SUNKEN, frameSize=(-0.355, 0.355, -0.1, 0.1),
+                                frameColor=(0.85, 0.95, 1, 1), borderWidth=(0.01, 0.01))
+        self.headGui.append(headFrame)
+
+        x = 0
+        for headType in ['ls', 'ss', 'sl', 'll']:
+            # Use image of laff meter GUI in order to set a hitbox, pretty much.
+            headButton = DirectButton(parent=headFrame, state=DGG.DISABLED, image=laffMeterGui.find('**/doghead'),
+                                      image_pos=(0, 0, 0.4), image_scale=(0.45, 0.45, 0.6), image_color=(1, 1, 1, 0),
+                                      scale=0.1, relief=None, pos=(-0.2625 + x, 0, -0.035), hpr=(180, 0, 0),
+                                      command=self.changeHead, extraArgs=[headType])
+
+            self.headGui.append(headButton)
+
+            x += 0.175
+
         laffMeterGui.removeNode()
 
-        # Create Head Buttons
-        # TODO: Create a Direct Frame that encapsulates 4 ToonHeads (2 for mouse) that act as buttons to change the head. Do a similar thing for Torsos and Legs.
+        # -= Create Torso Section =-
+        torsoFrame = DirectFrame(parent=self, pos=(0.45, 0, 0), relief=DGG.SUNKEN,
+                                 frameSize=(-0.355, 0.355, -0.1, 0.1), frameColor=(0.85, 0.95, 1, 1),
+                                 borderWidth=(0.01, 0.01))
+        torsoFrame.hide()
+        self.torsoGui.append(torsoFrame)
+
+        x = 0
+        for torsoType in ['s', 'm', 'l']:
+            # Create torso model and button.  Torso won't have
+            size = torsoType.upper() + torsoType.upper()
+            torsoModel = loader.loadModel('phase_3/models/char/dog%s_Naked-torso-1000' % size)
+            torsoModel.find('**/arms').removeNode()
+            torsoModel.find('**/hands').removeNode()
+            torsoModel.find('**/neck').removeNode()
+            torsoButton = DirectButton(parent=torsoFrame, state=DGG.DISABLED, geom=torsoModel, scale=0.075, relief=None,
+                                       pos=(-0.2 + x, 0, -0.05), hpr=(180, 0, 0), command=self.changeTorso,
+                                       extraArgs=[torsoType])
+
+            self.torsoGui.append(torsoButton)
+            x += 0.2
+
+        # -= Create Color Section =-
+        # TODO: Add a button that updates self.colorTargetAll
+        colorLabel = DirectLabel(parent=self, relief=None, text="Color", text_scale=0.07, text_align=TextNode.ACenter,
+                                 pos=(0.425, 0, -0.1875))
+        self.colorGui.append(colorLabel)
+
+        pickAToonGui = loader.loadModel('phase_3.5/models/gui/matching_game_gui')
+        i = 0
+        x = 0
+        z = 0
+        rowLimit = 8
+        for color in ToonDNA.allColorsList:
+            # FrameSize is still being set for hitbox.
+            colorButton = DirectButton(parent=self, state=DGG.DISABLED, relief=None,
+                                       image=pickAToonGui.find('**/minnieCircle'), image_scale=0.4,
+                                       image_color=color, image_pos=(0.355 / rowLimit, 0, 0.04),
+                                       frameSize=(0, 0.71 / rowLimit, 0, 0.08),
+                                       pos=(0.095 + ((0.71 * x) / rowLimit), 0, -0.3 - (z * 0.08)),
+                                       command=self.changeColors, extraArgs=[i])
+            self.colorGui.append(colorButton)
+
+            i += 1
+            x += 1
+            if x >= rowLimit:
+                x = 0
+                z += 1
+        pickAToonGui.removeNode()
+
 
     def unload(self):
         ToonTabPageBase.unload(self)
         # Destroy all GUI
-        for button in self.speciesGui:
-            button.destroy()
-        del self.speciesGui
+        for list in [self.speciesGui, self.bodyGui, self.headGui, self.torsoGui, self.legGui, self.colorGui]:
+            for button in list:
+                button.destroy()
+            del list
 
     def enter(self):
         ToonTabPageBase.enter(self)
         # Show GUI. If a button, allow it to be clickable.
-        for button in self.speciesGui:
-            button.show()
-            if isinstance(button, DirectButton):
+        for list in [self.speciesGui, self.bodyGui, self.colorGui]:
+            for button in list:
                 button['state'] = DGG.NORMAL
+        self.changeFocusType()
 
     def exit(self):
         ToonTabPageBase.exit(self)
         # Hide GUI. If a button, disable it.
-        for button in self.speciesGui:
-            button.hide()
-            if isinstance(button, DirectButton):
+        for list in [self.speciesGui, self.bodyGui, self.headGui, self.torsoGui, self.legGui, self.colorGui]:
+            for button in list:
                 button['state'] = DGG.DISABLED
 
     # When the preview Toon updates, update the buttons to match.
     def updateToon(self):
         global toonDNA
         ToonTabPageBase.updateToon(self)
+
+        buttonToonDNA = ToonDNA.ToonDNA()
+        # Update species buttons to match head color
         for button in self.speciesGui:
             button['geom_color'] = toonDNA.getHeadColor()
+
+        # Update head buttons to accommodate for species and head color.
+        # This for loop is assuming that the buttons in self.headGui are in this order: ls, ss, sl, ll
+        typeId = 0
+        headTypes = ['ls', 'ss', 'sl', 'll']
+        for button in self.headGui:
+            # For each Toon Head button, replace the button geom with a new geom of the head.
+            if isinstance(button, DirectButton):
+                if not (typeId >= 2 and toonDNA.head[0] == 'm'):
+                    # If the button is hidden, unhide it.
+                    if button.isHidden():
+                        button.show()
+                        button['state'] = DGG.NORMAL
+                    head = ToonHead.ToonHead()
+                    # Copy preview Toon DNA, change the DNA head, then set up head.
+                    buttonToonDNA.makeFromNetString(toonDNA.makeNetString())
+                    buttonToonDNA.head = toonDNA.head[0] + headTypes[typeId]
+                    head.setupHead(buttonToonDNA, forGui=True)
+                    # If a head already exists on the button, get rid of it.
+                    if button['geom']:
+                        button['geom'].stopLookAroundNow()
+                        button['geom'].removeNode()
+                    # Set head as new button head.
+                    button['geom'] = head
+                    button['geom_scale'] = ToontownGlobals.toonBodyScales[buttonToonDNA.getAnimal()] / 0.85
+                    typeId += 1
+                else:
+                    button.hide()
+                    button['state'] = DGG.DISABLED
+
+        # Update torso buttons to accomodate for torso color.
+        for button in self.torsoGui:
+            if isinstance(button, DirectButton):
+                button['geom_color'] = ToonDNA.allColorsList[toonDNA.armColor]
+
+        del buttonToonDNA
+
+    # Change focused body type. Enables the current body section and disables all other body sections.
+    def changeFocusType(self, typeChange=0):
+        global toonDNA
+        self.focusType = (self.focusType + typeChange) % 3
+        labelNames = ['Head', 'Torso', 'Legs']
+        self.bodyGui[0]['text'] = labelNames[self.focusType]
+
+        i = 0
+        b = 0
+        for list in [self.headGui, self.torsoGui, self.legGui]:
+            # If current ID matches the focus type, enable the buttons. Otherwise, disable them.
+            if i == self.focusType:
+                for button in list:
+                    # Prevent long muzzle mouse head buttons from showing
+                    button.show()
+                    button['state'] = DGG.NORMAL
+                    if i == 0 and isinstance(button, DirectButton):
+                        if b >= 2 and toonDNA.head[0] == 'm':
+                            button.hide()
+                            button['state'] = DGG.DISABLED
+                        b += 1
+            else:
+                for button in list:
+                    button.hide()
+                    button['state'] = DGG.DISABLED
+            i += 1
 
     # Changes the species of the preview Toon.
     def changeSpecies(self, type):
@@ -659,13 +826,48 @@ class BodyTabPage(ToonTabPageBase):
             newHead = type + toonDNA.head[1:]
             # If the current head type uses a long muzzle and the new species is mouse, change muzzle to short since
             # long mouse muzzles don't exist. (yet)
-            # TODO: Test to make sure this code works
             if type == 'm' and newHead[2:] == 'l':
                 newHead = newHead[:2] + 's'
             toonDNA.head = newHead
             self.updateToon()
         else:
             self.notify.warning("Species type '%s' does not exist" % type)
+
+    # Changes the head of the preview Toon.
+    def changeHead(self, type):
+        global toonDNA
+        toonDNA.head = toonDNA.head[0] + type
+        self.updateToon()
+
+    # Changes the torso of the preview Toon.
+    def changeTorso(self, type):
+        global toonDNA
+        if len(toonDNA.torso) == 1:
+            toonDNA.torso = type
+        else:
+            toonDNA.torso = type + toonDNA.torso[1]
+        self.updateToon()
+
+    # Changes the legs of the preview Toon.
+    def changeLegs(self, type):
+        global toonDNA
+        toonDNA.legs = type
+        self.updateToon()
+
+    # Changes the colors of the preview Toon.
+    def changeColors(self, id):
+        global toonDNA
+
+        # If the color buttons are targetting all parts, change all parts. If not, change only the one that's being focused.
+        # There's probably a better way to do this.
+        if self.colorTargetAll or self.focusType == 0:
+            toonDNA.headColor = id
+        if self.colorTargetAll or self.focusType == 1:
+            toonDNA.armColor = id
+        if self.colorTargetAll or self.focusType == 2:
+            toonDNA.legColor = id
+
+        self.updateToon()
 
 
 # TODO: Create different sections for shirts. Section 1: Combined TopTex and SleeveTex combos. Section 2: All TopTex. Section 3: All SleeveTex
