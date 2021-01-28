@@ -30,8 +30,7 @@ class WordPage(ShtikerPage.ShtikerPage):
 
         # Copy player Toon attributes for preview Toon DNA and Accessories
         global toonDNA, toonAcc
-        toonDNA = ToonDNA.ToonDNA()
-        toonDNA.makeFromNetString(base.localAvatar.style.makeNetString())
+        toonDNA = ToonDNA.ToonDNA(type='t', dna=base.localAvatar.style)
         toonAcc = [base.localAvatar.getHat(), base.localAvatar.getGlasses(),
                    base.localAvatar.getBackpack(), base.localAvatar.getShoes()]
 
@@ -570,7 +569,7 @@ class ToonTabPageBase(DirectFrame):
     def resetToon(self, choice = 0):
         global toonDNA, toonAcc
         if choice == 1:
-            toonDNA.makeFromNetString(base.localAvatar.style.makeNetString())
+            toonDNA = ToonDNA.ToonDNA(type='t', dna=base.localAvatar.style)
             toonAcc = [base.localAvatar.getHat(), base.localAvatar.getGlasses(),
                        base.localAvatar.getBackpack(), base.localAvatar.getShoes()]
             self.updateToon()
@@ -589,6 +588,8 @@ class BodyTabPage(ToonTabPageBase):
         self.torsoGui = []
         self.legGui = []
         self.colorGui = []
+        self.genderButtons = []
+        self.idLabels = []
 
         # Create other variables
         self.focusType = 0 # Determines which part is being focused: 0 = Head, 1 = Torso, 2 = Legs
@@ -612,9 +613,9 @@ class BodyTabPage(ToonTabPageBase):
             # Because the rabbit's laff meter model is called "bunnyhead", we change head to match that.
             if head == 'rabbit':
                 head = 'bunny'
-            button = DirectButton(parent=self, state=DGG.DISABLED, geom=laffMeterGui.find('**/' + head + 'head'),
+            button = DirectButton(parent=self, state=DGG.DISABLED, image=laffMeterGui.find('**/' + head + 'head'),
                                   relief=None, pos=(0.45 + (0.14 * x), 0, 0.6 - (0.125 * z)),
-                                  scale=0.04, command=self.changeSpecies, extraArgs=[species])
+                                  image_scale=0.04, image2_scale=0.044, command=self.changeSpecies, extraArgs=[species])
             self.speciesGui.append(button)
             # Start a new row if we're starting a row higher than 3.
             x += 1
@@ -627,27 +628,28 @@ class BodyTabPage(ToonTabPageBase):
         if x == 0:
             zDiff -= 0.0625
 
-        speciesLabel = DirectLabel(parent=self, relief=None, text="Species", text_scale=0.07, text_align=TextNode.ACenter,
+        speciesLabel = DirectLabel(parent=self, relief=None, text='Species', text_scale=0.07, text_align=TextNode.ACenter,
                                    pos=(0.2, 0, 0.6 - zDiff))
         self.speciesGui.append(speciesLabel)
 
         # -= Create Body Header =-
-        bodyLabel = DirectLabel(parent=self, relief=None, text="Head", text_scale=0.07, text_align=TextNode.ACenter,
-                                pos=(0.425, 0, 0.175))
+        bodyLabel = DirectLabel(parent=self, relief=None, text='Head', text_scale=0.07, text_align=TextNode.ACenter,
+                                pos=(0.45, 0, 0.1875))
         self.bodyGui.append(bodyLabel)
+
         arrowGui = loader.loadModel('phase_3/models/gui/create_a_toon_gui')
         leftArrow = DirectButton(parent=self, state=DGG.DISABLED, geom=(arrowGui.find('**/CrtATn_R_Arrow_UP'),
                                                                         arrowGui.find('**/CrtATn_R_Arrow_DN'),
                                                                         arrowGui.find('**/CrtATn_R_Arrow_RLVR'),
                                                                         arrowGui.find('**/CrtATn_R_Arrow_DN')),
-                                 scale=(0.5, 0.5, 0.5), relief=None, pos=(0.2, 0, 0.2), hpr=(180, 0, 0),
+                                 scale=(0.5, 0.5, 0.5), relief=None, pos=(0.225, 0, 0.2), hpr=(180, 0, 0),
                                  command=self.changeFocusType, extraArgs=[-1])
         self.bodyGui.append(leftArrow)
         rightArrow = DirectButton(parent=self, state=DGG.DISABLED, geom=(arrowGui.find('**/CrtATn_R_Arrow_UP'),
                                                                         arrowGui.find('**/CrtATn_R_Arrow_DN'),
                                                                         arrowGui.find('**/CrtATn_R_Arrow_RLVR'),
                                                                         arrowGui.find('**/CrtATn_R_Arrow_DN')),
-                                  scale=(-0.5, 0.5, 0.5), relief=None, pos=(0.65, 0, 0.2), hpr=(180, 0, 0),
+                                  scale=(-0.5, 0.5, 0.5), relief=None, pos=(0.675, 0, 0.2), hpr=(180, 0, 0),
                                   command=self.changeFocusType, extraArgs=[1])
         self.bodyGui.append(rightArrow)
 
@@ -658,11 +660,10 @@ class BodyTabPage(ToonTabPageBase):
 
         x = 0
         for headType in ['ls', 'ss', 'sl', 'll']:
-            # Use image of laff meter GUI in order to set a hitbox, pretty much.
-            headButton = DirectButton(parent=headFrame, state=DGG.DISABLED, image=laffMeterGui.find('**/doghead'),
-                                      image_pos=(0, 0, 0.4), image_scale=(0.45, 0.45, 0.6), image_color=(1, 1, 1, 0),
-                                      scale=0.1, relief=None, pos=(-0.2625 + x, 0, -0.035), hpr=(180, 0, 0),
-                                      command=self.changeHead, extraArgs=[headType])
+            # Specifying a frame size due to the fact that the geom is going to change as the species changes.
+            headButton = DirectButton(parent=headFrame, state=DGG.DISABLED, frameSize=(-0.0875, 0.0875, -0.1, 0.1),
+                                      relief=None, pos=(-0.2625 + x, 0, 0), hpr=(180, 0, 0), command=self.changeHead,
+                                      extraArgs=[headType])
 
             self.headGui.append(headButton)
 
@@ -679,37 +680,78 @@ class BodyTabPage(ToonTabPageBase):
 
         x = 0
         for torsoType in ['s', 'm', 'l']:
-            # Create torso model and button.  Torso won't have
+            # Create torso model and button. Torso won't have arms or neck, so it's kinda just a jellybean thing.
             size = torsoType.upper() + torsoType.upper()
             torsoModel = loader.loadModel('phase_3/models/char/dog%s_Naked-torso-1000' % size)
             torsoModel.find('**/arms').removeNode()
             torsoModel.find('**/hands').removeNode()
             torsoModel.find('**/neck').removeNode()
-            torsoButton = DirectButton(parent=torsoFrame, state=DGG.DISABLED, geom=torsoModel, scale=0.075, relief=None,
-                                       pos=(-0.2 + x, 0, -0.05), hpr=(180, 0, 0), command=self.changeTorso,
-                                       extraArgs=[torsoType])
+            torsoModel.setBin('unsorted', 0, 1)
+            torsoModel.setDepthTest(True)
+            torsoModel.setDepthWrite(True)
+
+            torsoButton = DirectButton(parent=torsoFrame, state=DGG.DISABLED, geom=torsoModel, geom_scale=0.075,
+                                       geom2_scale=0.0825, relief=None, pos=(-0.2 + x, 0, -0.05), hpr=(180, 0, 0),
+                                       command=self.changeTorso, extraArgs=[torsoType])
 
             self.torsoGui.append(torsoButton)
             x += 0.2
 
+        # -= Create Legs Section =-
+        legFrame = DirectFrame(parent=self, pos=(0.45, 0, 0), relief=DGG.SUNKEN, frameSize=(-0.355, 0.355, -0.1, 0.1),
+                               frameColor=(0.85, 0.95, 1, 1), borderWidth=(0.01, 0.01))
+        legFrame.hide()
+        self.legGui.append(legFrame)
+        x = 0
+        for legType in ['s', 'm', 'l']:
+            # Create leg model and button. Legs won't have shoes.
+            legModel = loader.loadModel('phase_3/models/char/tt_a_chr_dg%s_shorts_legs_1000' % legType)
+            legModel.find('**/shoes').removeNode()
+            legModel.find('**/boots_short').removeNode()
+            legModel.find('**/boots_long').removeNode()
+            legModel.setBin('unsorted', 0, 1)
+            legModel.setDepthTest(True)
+            legModel.setDepthWrite(True)
+            legButton = DirectButton(parent=legFrame, state=DGG.DISABLED, geom=legModel, geom_scale=0.065,
+                                     geom2_scale=0.0715, relief=None, pos=(-0.2 + x, 0, -0.09), hpr=(180, 0, 0),
+                                     command=self.changeLegs, extraArgs=[legType])
+            self.legGui.append(legButton)
+            x += 0.2
+
         # -= Create Color Section =-
-        # TODO: Add a button that updates self.colorTargetAll
-        colorLabel = DirectLabel(parent=self, relief=None, text="Color", text_scale=0.07, text_align=TextNode.ACenter,
-                                 pos=(0.425, 0, -0.1875))
+        colorLabel = DirectLabel(parent=self, relief=None, text='Color', text_scale=0.07, text_align=TextNode.ACenter,
+                                 pos=(0.45, 0, -0.1625))
         self.colorGui.append(colorLabel)
 
-        pickAToonGui = loader.loadModel('phase_3.5/models/gui/matching_game_gui')
+        normalButtonGui = loader.loadModel('phase_3/models/gui/pick_a_toon_gui')
+        colorTargetAllButton = DirectButton(parent=self, state=DGG.DISABLED,
+                                            image=(normalButtonGui.find('**/QuitBtn_UP'),
+                                                   normalButtonGui.find('**/QuitBtn_DN'),
+                                                   normalButtonGui.find('**/QuitBtn_RLVR')), relief=None,
+                                            text='Target All', text_scale=0.05, text_pos=(0, -0.0125), scale=0.8,
+                                            pos=(0.45, 0, -0.3 - (z * 0.07)), command=self.toggleColorTarget)
+        self.colorGui.append(colorTargetAllButton)
+
+        minnieButtonGui = loader.loadModel('phase_3.5/models/gui/matching_game_gui')
         i = 0
         x = 0
         z = 0
-        rowLimit = 8
+
+        # Ensure that there are 3 rows of color buttons.
+        rowNum = len(ToonDNA.allColorsList)
+        rowLimit = 0.0
+        while rowNum > 3:
+            rowLimit += 1.0
+            rowNum = len(ToonDNA.allColorsList) / rowLimit
+            print str(rowLimit) + " " + str(rowNum)
+
         for color in ToonDNA.allColorsList:
-            # FrameSize is still being set for hitbox.
+            # Frame size specified due to how bad of a hitbox the image is on it's own in this case.
             colorButton = DirectButton(parent=self, state=DGG.DISABLED, relief=None,
-                                       image=pickAToonGui.find('**/minnieCircle'), image_scale=0.4,
-                                       image_color=color, image_pos=(0.355 / rowLimit, 0, 0.04),
-                                       frameSize=(0, 0.71 / rowLimit, 0, 0.08),
-                                       pos=(0.095 + ((0.71 * x) / rowLimit), 0, -0.3 - (z * 0.08)),
+                                       image=minnieButtonGui.find('**/minnieCircle'), image_scale=0.35,
+                                       image2_scale=0.385, image_color=color, image_pos=(0.355 / rowLimit, 0, 0.035),
+                                       frameSize=(0, 0.71 / rowLimit, 0, 0.07),
+                                       pos=(0.095 + ((0.71 * x) / rowLimit), 0, -0.3 - (z * 0.07)),
                                        command=self.changeColors, extraArgs=[i])
             self.colorGui.append(colorButton)
 
@@ -718,29 +760,75 @@ class BodyTabPage(ToonTabPageBase):
             if x >= rowLimit:
                 x = 0
                 z += 1
-        pickAToonGui.removeNode()
 
+        colorTargetAllButton.setZ(-0.3 - (z * 0.07))
+        minnieButtonGui.removeNode()
+
+        # -= Create Gender Buttons =-
+        # Trans rights
+        makeAToonGui = loader.loadModel('phase_3/models/gui/tt_m_gui_mat_mainGui')
+
+        boyButton = DirectButton(parent=self, relief=None, image=(makeAToonGui.find('**/tt_t_gui_mat_boyUp'),
+                                                                  makeAToonGui.find('**/tt_t_gui_mat_boyDown'),
+                                                                  makeAToonGui.find('**/tt_t_gui_mat_boyUp')),
+                                 pos=(0.15, 0, -0.6), image_scale=0.35, image2_scale=0.385, command=self.transGender,
+                                 extraArgs=['m'])
+        self.genderButtons.append(boyButton)
+
+        girlButton = DirectButton(parent=self, relief=None, image=(makeAToonGui.find('**/tt_t_gui_mat_girlUp'),
+                                                                   makeAToonGui.find('**/tt_t_gui_mat_girlDown'),
+                                                                   makeAToonGui.find('**/tt_t_gui_mat_girlUp')),
+                                  pos=(0.75, 0, -0.6), image_scale=0.35, image2_scale=0.385, command=self.transGender,
+                                  extraArgs=['f'])
+        self.genderButtons.append(girlButton)
+
+        makeAToonGui.removeNode()
+
+        # -= Create ID Labels =-
+        # These will appear by the respective body parts with info about them.
+
+        bodyIDLabel = DirectLabel(parent=self, relief=None, text='', text_scale=0.05, text_align=TextNode.ACenter,
+                                  text_font=ToontownGlobals.getSignFont(), pos=(0.45, 0, 0.125))
+        self.idLabels.append(bodyIDLabel)
+
+        colorIDLabel = DirectLabel(parent=self, relief=None, text='', text_scale=0.05, text_align=TextNode.ACenter,
+                                   text_font=ToontownGlobals.getSignFont(), pos=(0.45, 0, -0.2125))
+        self.idLabels.append(colorIDLabel)
+
+        # Create 3 pairs of labels for size and color labeling.
+        ##for type in range(3):
+        #    sizeLabel = DirectLabel(parent=self, relief=None, text='', text_scale=0.06,
+        #                            text_font=ToontownGlobals.getSignFont(), text_align=TextNode.ARight,
+        #                            pos=(-0.6, 0, 0), text_mayChange=True)
+        #    self.idLabels.append(sizeLabel)
+        #
+        #    colorLabel = DirectLabel(parent=self, relief=None, text='', text_scale=0.06,
+        #                             text_font=ToontownGlobals.getSignFont(), text_align=TextNode.ALeft,
+        #                             pos=(-0.3, 0, 0), text_mayChange=True)
+        #    self.idLabels.append(colorLabel)
 
     def unload(self):
         ToonTabPageBase.unload(self)
         # Destroy all GUI
-        for list in [self.speciesGui, self.bodyGui, self.headGui, self.torsoGui, self.legGui, self.colorGui]:
+        for list in [self.speciesGui, self.bodyGui, self.headGui, self.torsoGui, self.legGui, self.colorGui,
+                     self.genderButtons, self.idLabels]:
             for button in list:
                 button.destroy()
             del list
 
     def enter(self):
         ToonTabPageBase.enter(self)
-        # Show GUI. If a button, allow it to be clickable.
-        for list in [self.speciesGui, self.bodyGui, self.colorGui]:
+        # Enable all general GUI, then enable the specific focus GUI.
+        for list in [self.speciesGui, self.bodyGui, self.colorGui, self.genderButtons]:
             for button in list:
                 button['state'] = DGG.NORMAL
         self.changeFocusType()
 
     def exit(self):
         ToonTabPageBase.exit(self)
-        # Hide GUI. If a button, disable it.
-        for list in [self.speciesGui, self.bodyGui, self.headGui, self.torsoGui, self.legGui, self.colorGui]:
+        # Disable all GUI.
+        for list in [self.speciesGui, self.bodyGui, self.headGui, self.torsoGui, self.legGui, self.colorGui,
+                     self.genderButtons]:
             for button in list:
                 button['state'] = DGG.DISABLED
 
@@ -752,7 +840,7 @@ class BodyTabPage(ToonTabPageBase):
         buttonToonDNA = ToonDNA.ToonDNA()
         # Update species buttons to match head color
         for button in self.speciesGui:
-            button['geom_color'] = toonDNA.getHeadColor()
+            button['image_color'] = toonDNA.getHeadColor()
 
         # Update head buttons to accommodate for species and head color.
         # This for loop is assuming that the buttons in self.headGui are in this order: ls, ss, sl, ll
@@ -777,24 +865,72 @@ class BodyTabPage(ToonTabPageBase):
                         button['geom'].removeNode()
                     # Set head as new button head.
                     button['geom'] = head
-                    button['geom_scale'] = ToontownGlobals.toonBodyScales[buttonToonDNA.getAnimal()] / 0.85
+                    button['geom_scale'] = ToontownGlobals.toonBodyScales[buttonToonDNA.getAnimal()] / 8.5
+                    button['geom2_scale'] = button['geom_scale'] * 1.1
+                    button['geom_pos'] = (0, 0, -0.035)
                     typeId += 1
                 else:
                     button.hide()
                     button['state'] = DGG.DISABLED
+        del buttonToonDNA
 
         # Update torso buttons to accomodate for torso color.
         for button in self.torsoGui:
             if isinstance(button, DirectButton):
                 button['geom_color'] = ToonDNA.allColorsList[toonDNA.armColor]
 
-        del buttonToonDNA
+        # Update leg buttons to accomodate for torso color.
+        for button in self.legGui:
+            if isinstance(button, DirectButton):
+                button['geom_color'] = ToonDNA.allColorsList[toonDNA.legColor]
+
+        # Update size and color labeling
+        self.updateIDLabels()
+
+        # Update size and color labeling (old version, kept in here as a memento. Feel free to discard)
+
+        #dataTypes = [toonDNA.head, toonDNA.headColor, toonDNA.torso, toonDNA.armColor, toonDNA.legs,
+        #             toonDNA.legColor]
+        #zPosList = [self.toon.getHeadParts()[0].getZ(self), self.toon.getTorsoParts()[0].getZ(self), -0.4]
+
+        ## 0-1 = Head, 2-3 = Torso, 4-5 = Legs. First is size, second is color.
+        #for type in range(6):
+        #    # If this is a color label, label it as such. Otherwise, label the size.
+        #    isColor = type % 2
+        #    if isColor:
+        #        self.idLabels[type]['text'] = '%s\n(%d)' % (TTLocalizer.NumToColor[dataTypes[type]], dataTypes[type])
+        #        self.idLabels[type]['text_fg'] = ToonDNA.allColorsList[dataTypes[type]]
+        #    else:
+        #        # If the type is for head size, print the species name instead of a size. Otherwise, print the size.
+        #        if type == 0:
+        #            self.idLabels[type]['text'] = '%s\n(%s)' % (TTLocalizer.AnimalToSpecies[ToonDNA.getSpeciesName(dataTypes[type])], dataTypes[type])
+        #        else:
+        #            sizeNames = {'s':'Short', 'm':'Medium', 'l':'Long'}
+        #            self.idLabels[type]['text'] = '%s\n(%s)' % (sizeNames[dataTypes[type][0]], dataTypes[type])
+        #        self.idLabels[type]['text_fg'] = ToonDNA.allColorsList[dataTypes[type + 1]]
+
+        #    # Position the Z pos to match that of the actual part positions.
+        #    categoryType = int(math.floor(type / 2))
+        #    print categoryType
+        #    zPos = zPosList[categoryType]
+
+        #    # Torso Adjustment
+        #    if categoryType == 1:
+        #        zPos += (0.2 if dataTypes[type - isColor][0] == 'l' else 0.1) * ToontownGlobals.toonBodyScales[toonDNA.getAnimal()]
+
+        #    # Leg Adjustment
+        #    if categoryType == 2:
+        #        legPos = [0.1, 0.15, 0.2]
+        #        zPos += legPos[ToonDNA.toonLegTypes.index(dataTypes[type - isColor])] * ToontownGlobals.toonBodyScales[toonDNA.getAnimal()]
+
+        #    self.idLabels[type].setZ(zPos)
 
     # Change focused body type. Enables the current body section and disables all other body sections.
     def changeFocusType(self, typeChange=0):
         global toonDNA
         self.focusType = (self.focusType + typeChange) % 3
         labelNames = ['Head', 'Torso', 'Legs']
+        # Change body section label
         self.bodyGui[0]['text'] = labelNames[self.focusType]
 
         i = 0
@@ -816,6 +952,9 @@ class BodyTabPage(ToonTabPageBase):
                     button.hide()
                     button['state'] = DGG.DISABLED
             i += 1
+
+        # Update size and color labeling
+        self.updateIDLabels()
 
     # Changes the species of the preview Toon.
     def changeSpecies(self, type):
@@ -842,10 +981,7 @@ class BodyTabPage(ToonTabPageBase):
     # Changes the torso of the preview Toon.
     def changeTorso(self, type):
         global toonDNA
-        if len(toonDNA.torso) == 1:
-            toonDNA.torso = type
-        else:
-            toonDNA.torso = type + toonDNA.torso[1]
+        toonDNA.torso = type if len(toonDNA.torso) == 1 else type + toonDNA.torso[1]
         self.updateToon()
 
     # Changes the legs of the preview Toon.
@@ -869,25 +1005,450 @@ class BodyTabPage(ToonTabPageBase):
 
         self.updateToon()
 
+    # Change the gender of the preview Toon.
+    def transGender(self, newGender):
+        global toonDNA
+        newMaximum = (len(ToonDNA.BoyShorts) - 1) if newGender == 'm' else (len(ToonDNA.GirlBottoms) - 1)
+        # Since we're still using separate bottoms lists, if the bottoms that the preview Toon has are of a higher id
+        # than the new gender's list, then reset the bottom to 0 and notify the player.
+        if (toonDNA.botTex > newMaximum):
+            base.localAvatar.setSystemMessage(0,
+                'Spellbook: The pants ID (%d) is higher than the maximum for %s (%d). Resetting to 0...' % (
+                toonDNA.botTex, 'boys' if newGender == 'm' else 'girls', newMaximum))
+            toonDNA.botTex = 0
+        toonDNA.gender = newGender
+
+        # Update Toon torso to match bottom.
+        if len(toonDNA.torso) > 1:
+            toonDNA.torso = toonDNA.torso[0] + 's'
+            if newGender == 'f' :
+                if ToonDNA.GirlBottoms[toonDNA.botTex][1] == 1:
+                    toonDNA.torso = toonDNA.torso[0] + 'd'
+        self.updateToon()
+
+    # Toggles the target of the color buttons.
+    def toggleColorTarget(self):
+        self.colorTargetAll = not self.colorTargetAll
+        self.colorGui[1]['text'] = 'Target All' if self.colorTargetAll else 'Target Selected'
+
+    # Update ID labels
+    def updateIDLabels(self):
+        dataTypes = [toonDNA.head, toonDNA.torso, toonDNA.legs]
+        dataTypeColors = [toonDNA.headColor, toonDNA.armColor, toonDNA.legColor]
+        sizeNames = {'s': 'Short', 'm': 'Medium', 'l': 'Long'}
+
+        # Size Label
+        sizeName = sizeNames.get(dataTypes[self.focusType][0])
+        if self.focusType == 0:
+            sizeName = TTLocalizer.AnimalToSpecies[ToonDNA.getSpeciesName(dataTypes[0])]
+
+        self.idLabels[0]['text'] = '%s (%s)' % (sizeName, dataTypes[self.focusType])
+        self.idLabels[0]['text_fg'] = ToonDNA.allColorsList[dataTypeColors[self.focusType]]
+
+        # Color Label
+        self.idLabels[1]['text'] = '%s (%d)' % (
+            TTLocalizer.NumToColor[dataTypeColors[self.focusType]], dataTypeColors[self.focusType])
+        self.idLabels[1]['text_fg'] = ToonDNA.allColorsList[dataTypeColors[self.focusType]]
+
 
 # TODO: Create different sections for shirts. Section 1: Combined TopTex and SleeveTex combos. Section 2: All TopTex. Section 3: All SleeveTex
 class ClothingTabPage(ToonTabPageBase):
     notify = DirectNotifyGlobal.directNotify.newCategory('ClothingTabPage')
 
     def __init__(self, parent = aspect2d):
+
+        # Create UI lists
+
+        self.mainGui = []
+        self.topFrame = None
+        self.botFrame = None
+        self.topButtons = []
+        self.botButtons = []
+        self.leftTopButton = None
+        self.rightTopButton = None
+        self.leftBotButton = None
+        self.rightBotButton = None
+        self.topColorGui = []
+        self.botColorGui = []
+        self.gloveButtons = []
+
+        # Other variables
+
+        # Top Tabs: 0 - Combined list, 1 - All TopTex, 2 - All SleeveTex
+
+        self.topTab = 0
+        self.topPage = 0
+        self.botPage = 0
+        self.maxTopPage = 0
+        self.maxBotPage = 0
+        self.topSpinIvals = []
+        self.botSpinIvals = []
+
+        # Generate a chronological combined shirt list
+
+        self.shirtStyles = []
+        self.createShirtStyleList()
+
+
         ToonTabPageBase.__init__(self, parent=parent)
+
+    # Generates a chronological combined shirt list
+    def createShirtStyleList(self):
+        for DNAShirtStyle in ToonDNA.ShirtStyles.values():
+            # If the list is empty, add the first shirt.  Otherwise, go through the new list
+            if len(self.shirtStyles) == 0:
+                self.shirtStyles.append((DNAShirtStyle[0], DNAShirtStyle[1]))
+            else:
+                for i in range(0, len(self.shirtStyles)):
+                    # If this DNA shirt ID matches with the current shirt ID, ditch this shirt
+                    if self.shirtStyles[i][0] == DNAShirtStyle[0]:
+                        break
+                    # If we've reached the end of the list, append new shirt
+                    elif i == len(self.shirtStyles):
+                        self.shirtStyles.append((DNAShirtStyle[0], DNAShirtStyle[1]))
+                        break
+                    # If the DNA Shirt ID is smaller than the current registered ID, insert shirt at this position.
+                    elif self.shirtStyles[i][0] > DNAShirtStyle[0]:
+                        self.shirtStyles.insert(i, (DNAShirtStyle[0], DNAShirtStyle[1]))
+                        break
 
     def load(self):
         ToonTabPageBase.load(self)
 
+        gui = loader.loadModel('phase_3.5/models/gui/friendslist_gui')
+
+        # -= Shirt Section =-
+        topLabel = DirectLabel(parent=self, relief=None, text='Tops', text_scale=0.07, text_align=TextNode.ACenter,
+                               pos=(0.45, 0, 0.625))
+        self.mainGui.append(topLabel)
+
+        self.topFrame = DirectFrame(parent=self, pos=(0.45, 0, 0.375), relief=DGG.SUNKEN, frameSize=(-0.3, 0.3, -0.175, 0.175),
+                                    frameColor=(0.85, 0.95, 1, 1), borderWidth=(0.01, 0.01))
+
+        # Shirt Page buttons
+        self.leftTopButton = DirectButton(parent=self.topFrame, state=DGG.DISABLED, pos=(-0.35, 0, 0), relief=None,
+                                     geom=(gui.find('**/FndsLst_ScrollUp'),
+                                            gui.find('**/FndsLst_ScrollDN'),
+                                            gui.find('**/FndsLst_ScrollUp_Rllvr'),
+                                            gui.find('**/FndsLst_ScrollUp')), scale=(1.3, 1.3, -1.3),
+                                     geom3_color=Vec4(1, 1, 1, 0.2), hpr=(0, 0, 90), command=self.setPage,
+                                     extraArgs=[-1, True])
+        self.rightTopButton = DirectButton(parent=self.topFrame, state=DGG.DISABLED, pos=(0.35, 0, 0), relief=None,
+                                      geom=(gui.find('**/FndsLst_ScrollUp'),
+                                            gui.find('**/FndsLst_ScrollDN'),
+                                            gui.find('**/FndsLst_ScrollUp_Rllvr'),
+                                            gui.find('**/FndsLst_ScrollUp')), scale=(1.3, 1.3, 1.3),
+                                      geom3_color=Vec4(1, 1, 1, 0.2), hpr=(0, 0, 90), command=self.setPage,
+                                      extraArgs=[1, True])
+        self.mainGui.append(self.leftTopButton)
+        self.mainGui.append(self.rightTopButton)
+
+        # -= Bottoms Section =-
+        botLabel = DirectLabel(parent=self, relief=None, text='Bottoms', text_scale=0.07, text_align=TextNode.ACenter,
+                               pos=(0.45, 0, 0.15))
+        self.mainGui.append(botLabel)
+
+        self.botFrame = DirectFrame(parent=self, pos=(0.45, 0, -0.1), relief=DGG.SUNKEN,
+                                    frameSize=(-0.3, 0.3, -0.175, 0.175),
+                                    frameColor=(0.85, 0.95, 1, 1), borderWidth=(0.01, 0.01))
+
+        # Bottom Page buttons
+        self.leftBotButton = DirectButton(parent=self.botFrame, state=DGG.DISABLED, pos=(-0.35, 0, 0), relief=None,
+                                          geom=(gui.find('**/FndsLst_ScrollUp'),
+                                                gui.find('**/FndsLst_ScrollDN'),
+                                                gui.find('**/FndsLst_ScrollUp_Rllvr'),
+                                                gui.find('**/FndsLst_ScrollUp')), scale=(1.3, 1.3, -1.3),
+                                          geom3_color=Vec4(1, 1, 1, 0.2), hpr=(0, 0, 90), command=self.setPage,
+                                          extraArgs=[-1, False])
+        self.rightBotButton = DirectButton(parent=self.botFrame, state=DGG.DISABLED, pos=(0.35, 0, 0), relief=None,
+                                           geom=(gui.find('**/FndsLst_ScrollUp'),
+                                                 gui.find('**/FndsLst_ScrollDN'),
+                                                 gui.find('**/FndsLst_ScrollUp_Rllvr'),
+                                                 gui.find('**/FndsLst_ScrollUp')), scale=(1.3, 1.3, 1.3),
+                                           geom3_color=Vec4(1, 1, 1, 0.2), hpr=(0, 0, 90), command=self.setPage,
+                                           extraArgs=[1, False])
+        self.mainGui.append(self.leftBotButton)
+        self.mainGui.append(self.rightBotButton)
+
+        # -= Create Buttons =-
+        self.generateButtonGeom()
+
+
     def unload(self):
         ToonTabPageBase.unload(self)
+        # Stop all spin intervals
+        for ival in self.spinIvals:
+            ival.finish()
+        # Destroy all GUI
+        for list in [self.mainGui, self.topButtons, self.botButtons, self.topColorGui, self.botColorGui,
+                     self.gloveButtons]:
+            for button in list:
+                button.destroy()
+            del list
+        self.topFrame.destroy()
+        del self.topFrame
+        self.botFrame.destroy()
+        del self.botFrame
 
     def enter(self):
         ToonTabPageBase.enter(self)
+        # Enable all GUI
+        for list in [self.mainGui, self.topButtons, self.botButtons, self.topColorGui, self.botColorGui,
+                     self.gloveButtons]:
+            for button in list:
+                button['state'] = DGG.NORMAL
+        self.generateButtonGeom()
 
     def exit(self):
         ToonTabPageBase.exit(self)
+        # Disable all GUI
+        for list in [self.mainGui, self.topButtons, self.botButtons, self.topColorGui, self.botColorGui,
+                     self.gloveButtons]:
+            for button in list:
+                button['state'] = DGG.DISABLED
+
+    # Generate all 3D button / preview geometry and make them SPIN.
+    def generateButtonGeom(self, doTops = True, doBots = True):
+        global toonDNA
+        # First, end every spin animation and reset the list
+        if doTops:
+            for ival in self.topSpinIvals:
+                ival.finish()
+                del ival
+            self.topSpinIvals = []
+        if doBots:
+            for ival in self.botSpinIvals:
+                ival.finish()
+                del ival
+            self.botSpinIvals = []
+
+        # Destroy all top and bot buttons and reset them to empty
+        if doTops:
+            for button in self.topButtons:
+                button.destroy()
+                del button
+            self.topButtons = []
+        if doBots:
+            for button in self.botButtons:
+                button.destroy()
+                del button
+            self.botButtons = []
+
+        # Set max shirt pages depending on what tab is open
+        topBase = len(ToonDNA.Shirts)
+        if self.topTab == 0 or self.topTab == 2:
+            topBase = len(self.shirtStyles) if self.topTab == 0 else len(ToonDNA.Sleeves)
+        self.maxTopPage = math.ceil(topBase / 6)
+
+        # Set max bottom pages
+        botBase = len(ToonDNA.GirlBottoms) if toonDNA.gender == 'f' else len(ToonDNA.BoyShorts)
+        self.maxBotPage = math.ceil(botBase / 6)
+
+        # If the pages go over the maximum page limit (likely from transing gender), fix it
+        if self.topPage > self.maxTopPage:
+            self.topPage = self.maxTopPage
+        if self.botPage > self.maxBotPage:
+            self.botPage = self.maxBotPage
+
+        # Enable/Disable page buttons according to the page
+        self.leftTopButton['state'] = DGG.NORMAL if self.topPage > 0 else DGG.DISABLED
+        self.rightTopButton['state'] = DGG.NORMAL if self.topPage < self.maxTopPage else DGG.DISABLED
+        self.leftBotButton['state'] = DGG.NORMAL if self.botPage > 0 else DGG.DISABLED
+        self.rightBotButton['state'] = DGG.NORMAL if self.botPage < self.maxBotPage else DGG.DISABLED
+
+        # Boolean that checks whether or not we're doing bottoms buttons
+        bottoms = False if doTops else True
+
+        # Do the following for both topButton and botButton lists...
+        buttonLists = []
+        if doTops:
+            buttonLists.append(self.topButtons)
+        if doBots:
+            buttonLists.append(self.botButtons)
+        for buttonList in buttonLists:
+            # Create 6 buttons for each list
+            for i in range(6):
+                # Create value for button
+                buttonID = int(((self.topPage * 6) + i) if not bottoms else ((self.botPage * 6) + i))
+
+                # If this button exceeds values in which exist in the game, skip this button.
+                if (not bottoms and self.topTab == 0 and buttonID >= len(self.shirtStyles)) or \
+                    (not bottoms and self.topTab == 1 and buttonID >= len(ToonDNA.Shirts)) or \
+                        (not bottoms and self.topTab == 2 and buttonID >= len(ToonDNA.Sleeves)) or \
+                        (bottoms and toonDNA.gender == 'f' and buttonID >= len(ToonDNA.GirlBottoms)) or \
+                        (bottoms and toonDNA.gender == 'm' and buttonID >= len(ToonDNA.BoyShorts)):
+                    continue
+
+                # If shirts, determine what pieces and values to use for it.
+                if not bottoms:
+                    if self.topTab == 0:
+                        pieceNames = ('**/torso-top', '**/sleeves')
+                    else:
+                        pieceNames = ('**/torso-top' if self.topTab == 1 else '**/sleeves',)
+                else:
+                    pieceNames = ('**/torso-bot',)
+
+                # Set up texture values
+                toptex = 0
+                sleevetex = 0
+                bottex = 0
+                bottomType = 'shorts'
+
+                # Set texture values
+                if bottoms:
+                    # Set the pant texture
+                    bottex = buttonID
+
+                    # If Toon is girl and the bottom is a skirt, make the pant a skirt.
+                    if toonDNA.gender == 'f':
+                        if ToonDNA.GirlBottoms[bottex][1] == 1:
+                            bottomType = 'skirt'
+                else:
+                    # Set the shirt texture if just the shirt, otherwise set it to the combined value.
+                    toptex = buttonID if (self.topTab == 1) else self.shirtStyles[buttonID][0]
+
+                    # Set the sleeve texture if combined or just the sleeve, otherwise leave alone.
+                    if self.topTab == 0 or self.topTab == 2:
+                        sleevetex = buttonID if self.topTab == 2 or self.topTab == 1 else self.shirtStyles[buttonID][1]
+
+                    # If the shirt tab is anything other than combined, change the other texture id to match the preview Toon.
+                    if self.topTab == 1:
+                        sleevetex = toonDNA.sleeveTex
+                    if self.topTab == 2:
+                        toptex = toonDNA.topTex
+
+                toon = loader.loadModel('phase_3/models/char/tt_a_chr_dg%s_%s_torso_1000' % (toonDNA.torso[0], bottomType))
+                nodeLabel = 'bot' if bottoms else 'top'
+                model = NodePath(nodeLabel + str(i))
+                for name in pieceNames:
+                    for piece in toon.findAllMatches(name):
+                        # Set textures
+                        if name == '**/torso-top':
+                            piece.setTexture(loader.loadTexture(ToonDNA.Shirts[toptex]), 1)
+                        elif name == '**/sleeves':
+                            piece.setTexture(loader.loadTexture(ToonDNA.Sleeves[sleevetex]), 1)
+                        elif name == '**/torso-bot':
+                            piece.setTexture(loader.loadTexture(ToonDNA.BoyShorts[bottex] if toonDNA.gender == 'm' else ToonDNA.GirlBottoms[bottex][0]), 1)
+                        piece.wrtReparentTo(model)
+
+
+                model.setH(180)
+                toon.removeNode()
+
+                # Create button and spin interval
+                button, spinIval = self.makeButtonModel(model, buttonID, 0 if not bottoms else 1)
+
+                # Create position values
+                x = i % 3
+                y = int(i / 3)
+
+                # Reparent the button with the corresponding frame
+                if bottoms:
+                    button.reparentTo(self.botFrame)
+                else:
+                    button.reparentTo(self.topFrame)
+                buttonList.append(button)
+
+                # Set button position
+                button.setPos(-0.2 + (0.2 * x), 0, 0.1 - (0.1625 * y))
+                button.setScale(0.06)
+
+                # Start interval and add to spin list
+                spinIval.loop()
+                if bottoms:
+                    self.botSpinIvals.append(spinIval)
+                else:
+                    self.topSpinIvals.append(spinIval)
+
+            bottoms = True
+
+
+    # Create a single button model.  Modified port of makeFrameModel from toontown.catalog.CatalogItem
+    def makeButtonModel(self, model, i, type):
+        frame = None
+        if type != 2:
+            frame = DirectButton(parent=hidden, frameSize=(-1.0, 1.0, -1.0, 1.0), relief=None,
+                                 command=self.updateClothes, extraArgs=[i, type, False])
+        else:
+            frame = DirectFrame(parent=hidden, frameSize=(-1.0, 1.0, -1.0, 1.0), relief=None)
+        model.setDepthTest(1)
+        model.setDepthWrite(1)
+        pitch = frame.attachNewNode('pitch')
+        rotate = pitch.attachNewNode('rotate')
+        scale = rotate.attachNewNode('scale')
+        model.reparentTo(scale)
+        bMin, bMax = model.getTightBounds()
+        center = (bMin + bMax) / 2.0
+        model.setPos(-center[0], -center[1], -center[2])
+        pitch.setP(20)
+        bMin, bMax = pitch.getTightBounds()
+        center = (bMin + bMax) / 2.0
+        corner = Vec3(bMax - center)
+        scale.setScale(1.0 / max(corner[0], corner[1], corner[2]))
+        pitch.setY(2)
+        ival = LerpHprInterval(rotate, 10, VBase3(-270, 0, 0), startHpr=VBase3(90, 0, 0))
+        return (frame, ival)
+
+    # Change the clothes of the preview Toon.
+    def updateClothes(self, i, type, isColor):
+        global toonDNA
+        # Shirt
+        if type == 0:
+            # If setting color, set the color. Otherwise, do textures.
+            if isColor:
+                if self.topTab == 0 or self.topTab == 1:
+                    toonDNA.topTexColor = i
+                if self.topTab == 0 or self.topTab == 2:
+                    toonDNA.sleeveTexColor = i
+            else:
+                # If combined, set both shirt and sleeve from the compiled list.
+                if self.topTab == 0:
+                    toonDNA.topTex = self.shirtStyles[i][0]
+                    toonDNA.sleeveTex = self.shirtStyles[i][1]
+                # If just the shirt, set the shirt.
+                elif self.topTab == 1:
+                    toonDNA.topTex = i
+                # If just the sleeves, set the sleeves.
+                elif self.topTab == 2:
+                    toonDNA.sleeveTex = i
+        # Pant
+        elif type == 1:
+            # If setting color, set the color. Otherwise, do texture.
+            if isColor:
+                toonDNA.botTexColor = i
+            else:
+                toonDNA.botTex = i
+                if toonDNA.gender == 'f':
+                    toonDNA.torso = toonDNA.torso[0] + ('d' if ToonDNA.GirlBottoms[i][1] == 1 else 's')
+                else:
+                    toonDNA.torso = toonDNA.torso[0] + 's'
+        # Glove
+        elif type == 2:
+            toonDNA.gloveColor = i
+        # Update Toon
+        self.updateToon()
+
+    # Change the page value.
+    def setPage(self, i, isShirt):
+        if isShirt:
+            self.topPage += i
+            # If the shirt page somehow ends up bigger than the max shirt page, set it to max shirt page.
+            if self.topPage > self.maxTopPage:
+                self.topPage = self.maxTopPage
+            # If the shirt page somehow ends up smaller than the last page, set it to the last page.
+            elif self.topPage < 0:
+                self.topPage = 0
+        else:
+            self.botPage += i
+            # If the pant page somehow ends up bigger than the max pant page, set it to max pant page.
+            if self.botPage > self.maxBotPage:
+                self.botPage = self.maxBotPage
+            # If the pant page somehow ends up smaller than the last page, set it to the last page.
+            elif self.botPage < 0:
+                self.botPage = 0
+        # Update button geom
+        self.generateButtonGeom(isShirt, not isShirt)
+
 
 # TODO: Merge accessory tabs into a single Accessory tab, where a button swaps which accessories are being modified.
 class AccTabPage1(ToonTabPageBase):
