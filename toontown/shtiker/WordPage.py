@@ -653,6 +653,8 @@ class BodyTabPage(ToonTabPageBase):
                                   command=self.changeFocusType, extraArgs=[1])
         self.bodyGui.append(rightArrow)
 
+        arrowGui.removeNode()
+
         # -= Create Head Section =-
         headFrame = DirectFrame(parent=self, pos=(0.45, 0, 0), relief=DGG.SUNKEN, frameSize=(-0.355, 0.355, -0.1, 0.1),
                                 frameColor=(0.85, 0.95, 1, 1), borderWidth=(0.01, 0.01))
@@ -1050,8 +1052,6 @@ class BodyTabPage(ToonTabPageBase):
             TTLocalizer.NumToColor[dataTypeColors[self.focusType]], dataTypeColors[self.focusType])
         self.idLabels[1]['text_fg'] = ToonDNA.allColorsList[dataTypeColors[self.focusType]]
 
-
-# TODO: Create different sections for shirts. Section 1: Combined TopTex and SleeveTex combos. Section 2: All TopTex. Section 3: All SleeveTex
 class ClothingTabPage(ToonTabPageBase):
     notify = DirectNotifyGlobal.directNotify.newCategory('ClothingTabPage')
 
@@ -1060,29 +1060,28 @@ class ClothingTabPage(ToonTabPageBase):
         # Create UI lists
 
         self.mainGui = []
-        self.topFrame = None
-        self.botFrame = None
-        self.topButtons = []
-        self.botButtons = []
-        self.leftTopButton = None
-        self.rightTopButton = None
-        self.leftBotButton = None
-        self.rightBotButton = None
-        self.topColorGui = []
-        self.botColorGui = []
+        self.clothFrame = None
+        self.clothButtons = []
+        self.clothPages = None
+        self.clothIDLabel = None
+        self.subclothIDLabel = None
+        self.leftPageButton = None
+        self.rightPageButton = None
+        self.colorGui = []
+        self.colorIDLabel = None
+        self.colorButtons = []
         self.gloveButtons = []
 
         # Other variables
 
-        # Top Tabs: 0 - Combined list, 1 - All TopTex, 2 - All SleeveTex
+        # Cloth Sections: 0 - Combined Shirts, 1 - TopTex, 2 - SleeveTex, 3 - Bottoms
+        # Color Sections: 0 - Clothing Color, 1 - Glove Color
 
-        self.topTab = 0
-        self.topPage = 0
-        self.botPage = 0
-        self.maxTopPage = 0
-        self.maxBotPage = 0
-        self.topSpinIvals = []
-        self.botSpinIvals = []
+        self.clothSection = 0
+        self.clothPage = 0
+        self.maxClothPage = 0
+        self.colorSection = 0
+        self.spinIvals = []
 
         # Generate a chronological combined shirt list
 
@@ -1115,60 +1114,154 @@ class ClothingTabPage(ToonTabPageBase):
     def load(self):
         ToonTabPageBase.load(self)
 
+        # -= Clothing Section =-
+        clothLabel = DirectLabel(parent=self, relief=None, text='Tops', text_scale=0.07, text_align=TextNode.ACenter,
+                               pos=(0.45, 0, 0.51))
+        self.mainGui.append(clothLabel)
+
+        # Page label
+        self.clothPages = DirectLabel(parent=self, relief=None, text='1/1', text_scale=0.045, text_align=TextNode.ACenter,
+                                      pos=(0.45, 0, 0.46))
+        self.mainGui.append(self.clothPages)
+
+        # Cloth ID Label
+        self.clothIDLabel = DirectLabel(parent=self, relief=None, text='Plain (0)', text_scale=0.045,
+                                        text_align=TextNode.ACenter, text_fg=ToonDNA.ClothesColors[27],
+                                        text_font=ToontownGlobals.getSignFont(), pos=(0.45, 0, -0.12))
+
+        # "Subcloth" is mostly for the sleeve ID when using the combined shirt section
+        self.subclothIDLabel = DirectLabel(parent=self, relief=None, text='Plain (0)', text_scale=0.035,
+                                           text_align=TextNode.ACenter, text_fg=ToonDNA.ClothesColors[27],
+                                           text_font=ToontownGlobals.getSignFont(), pos=(0.45, 0, -0.15))
+
+
+        self.clothFrame = DirectFrame(parent=self, pos=(0.45, 0, 0.275), relief=DGG.SUNKEN, frameSize=(-0.3, 0.3, -0.35, 0.175),
+                                      frameColor=(0.85, 0.95, 1, 1), borderWidth=(0.01, 0.01))
+
+        # Clothing Tab buttons
+        arrowGui = loader.loadModel('phase_3/models/gui/create_a_toon_gui')
+        leftArrow = DirectButton(parent=self, state=DGG.DISABLED, geom=(arrowGui.find('**/CrtATn_R_Arrow_UP'),
+                                                                        arrowGui.find('**/CrtATn_R_Arrow_DN'),
+                                                                        arrowGui.find('**/CrtATn_R_Arrow_RLVR'),
+                                                                        arrowGui.find('**/CrtATn_R_Arrow_DN')),
+                                 scale=(0.5, 0.5, 0.5), relief=None, pos=(0.225, 0, 0.51), hpr=(180, 0, 0),
+                                 command=self.changeFocusType, extraArgs=[-1])
+        self.mainGui.append(leftArrow)
+        rightArrow = DirectButton(parent=self, state=DGG.DISABLED, geom=(arrowGui.find('**/CrtATn_R_Arrow_UP'),
+                                                                         arrowGui.find('**/CrtATn_R_Arrow_DN'),
+                                                                         arrowGui.find('**/CrtATn_R_Arrow_RLVR'),
+                                                                         arrowGui.find('**/CrtATn_R_Arrow_DN')),
+                                  scale=(-0.5, 0.5, 0.5), relief=None, pos=(0.675, 0, 0.51), hpr=(180, 0, 0),
+                                  command=self.changeFocusType, extraArgs=[1])
+        self.mainGui.append(rightArrow)
+
+        # Clothing Page buttons
         gui = loader.loadModel('phase_3.5/models/gui/friendslist_gui')
-
-        # -= Shirt Section =-
-        topLabel = DirectLabel(parent=self, relief=None, text='Tops', text_scale=0.07, text_align=TextNode.ACenter,
-                               pos=(0.45, 0, 0.625))
-        self.mainGui.append(topLabel)
-
-        self.topFrame = DirectFrame(parent=self, pos=(0.45, 0, 0.375), relief=DGG.SUNKEN, frameSize=(-0.3, 0.3, -0.175, 0.175),
-                                    frameColor=(0.85, 0.95, 1, 1), borderWidth=(0.01, 0.01))
-
-        # Shirt Page buttons
-        self.leftTopButton = DirectButton(parent=self.topFrame, state=DGG.DISABLED, pos=(-0.35, 0, 0), relief=None,
-                                     geom=(gui.find('**/FndsLst_ScrollUp'),
+        self.leftPageButton = DirectButton(parent=self.clothFrame, state=DGG.DISABLED, pos=(-0.35, 0, -0.0875), relief=None,
+                                           geom=(gui.find('**/FndsLst_ScrollUp'),
                                             gui.find('**/FndsLst_ScrollDN'),
                                             gui.find('**/FndsLst_ScrollUp_Rllvr'),
                                             gui.find('**/FndsLst_ScrollUp')), scale=(1.3, 1.3, -1.3),
-                                     geom3_color=Vec4(1, 1, 1, 0.2), hpr=(0, 0, 90), command=self.setPage,
-                                     extraArgs=[-1, True])
-        self.rightTopButton = DirectButton(parent=self.topFrame, state=DGG.DISABLED, pos=(0.35, 0, 0), relief=None,
-                                      geom=(gui.find('**/FndsLst_ScrollUp'),
+                                           geom3_color=Vec4(1, 1, 1, 0.2), hpr=(0, 0, 90), command=self.setPage,
+                                           extraArgs=[-1])
+        self.rightPageButton = DirectButton(parent=self.clothFrame, state=DGG.DISABLED, pos=(0.35, 0, -0.0875), relief=None,
+                                            geom=(gui.find('**/FndsLst_ScrollUp'),
                                             gui.find('**/FndsLst_ScrollDN'),
                                             gui.find('**/FndsLst_ScrollUp_Rllvr'),
                                             gui.find('**/FndsLst_ScrollUp')), scale=(1.3, 1.3, 1.3),
-                                      geom3_color=Vec4(1, 1, 1, 0.2), hpr=(0, 0, 90), command=self.setPage,
-                                      extraArgs=[1, True])
-        self.mainGui.append(self.leftTopButton)
-        self.mainGui.append(self.rightTopButton)
+                                            geom3_color=Vec4(1, 1, 1, 0.2), hpr=(0, 0, 90), command=self.setPage,
+                                            extraArgs=[1])
+        self.mainGui.append(self.leftPageButton)
+        self.mainGui.append(self.rightPageButton)
+        gui.removeNode()
 
-        # -= Bottoms Section =-
-        botLabel = DirectLabel(parent=self, relief=None, text='Bottoms', text_scale=0.07, text_align=TextNode.ACenter,
-                               pos=(0.45, 0, 0.15))
-        self.mainGui.append(botLabel)
+        # -= Color Section =-
 
-        self.botFrame = DirectFrame(parent=self, pos=(0.45, 0, -0.1), relief=DGG.SUNKEN,
-                                    frameSize=(-0.3, 0.3, -0.175, 0.175),
-                                    frameColor=(0.85, 0.95, 1, 1), borderWidth=(0.01, 0.01))
+        colorLabel = DirectLabel(parent=self, relief=None, text='Color', text_scale=0.07, text_align=TextNode.ACenter,
+                                 pos=(0.45, 0, -0.25))
+        self.colorGui.append(colorLabel)
 
-        # Bottom Page buttons
-        self.leftBotButton = DirectButton(parent=self.botFrame, state=DGG.DISABLED, pos=(-0.35, 0, 0), relief=None,
-                                          geom=(gui.find('**/FndsLst_ScrollUp'),
-                                                gui.find('**/FndsLst_ScrollDN'),
-                                                gui.find('**/FndsLst_ScrollUp_Rllvr'),
-                                                gui.find('**/FndsLst_ScrollUp')), scale=(1.3, 1.3, -1.3),
-                                          geom3_color=Vec4(1, 1, 1, 0.2), hpr=(0, 0, 90), command=self.setPage,
-                                          extraArgs=[-1, False])
-        self.rightBotButton = DirectButton(parent=self.botFrame, state=DGG.DISABLED, pos=(0.35, 0, 0), relief=None,
-                                           geom=(gui.find('**/FndsLst_ScrollUp'),
-                                                 gui.find('**/FndsLst_ScrollDN'),
-                                                 gui.find('**/FndsLst_ScrollUp_Rllvr'),
-                                                 gui.find('**/FndsLst_ScrollUp')), scale=(1.3, 1.3, 1.3),
-                                           geom3_color=Vec4(1, 1, 1, 0.2), hpr=(0, 0, 90), command=self.setPage,
-                                           extraArgs=[1, False])
-        self.mainGui.append(self.leftBotButton)
-        self.mainGui.append(self.rightBotButton)
+        self.colorIDLabel = DirectLabel(parent=self, relief=None, text='White (27)', text_scale=0.05, text_align=TextNode.ACenter,
+                                   text_font=ToontownGlobals.getSignFont(), pos=(0.45, 0, -0.3))
+
+        # Color section arrow buttons
+
+        leftColorArrow = DirectButton(parent=self, state=DGG.DISABLED, geom=(arrowGui.find('**/CrtATn_R_Arrow_UP'),
+                                                                             arrowGui.find('**/CrtATn_R_Arrow_DN'),
+                                                                             arrowGui.find('**/CrtATn_R_Arrow_RLVR'),
+                                                                             arrowGui.find('**/CrtATn_R_Arrow_DN')),
+                                      scale=(0.5, 0.5, 0.5), relief=None, pos=(0.15, 0, -0.24), hpr=(180, 0, 0),
+                                      command=self.changeColorFocusType, extraArgs=[-1])
+        self.colorGui.append(leftColorArrow)
+        rightColorArrow = DirectButton(parent=self, state=DGG.DISABLED, geom=(arrowGui.find('**/CrtATn_R_Arrow_UP'),
+                                                                              arrowGui.find('**/CrtATn_R_Arrow_DN'),
+                                                                              arrowGui.find('**/CrtATn_R_Arrow_RLVR'),
+                                                                              arrowGui.find('**/CrtATn_R_Arrow_DN')),
+                                       scale=(-0.5, 0.5, 0.5), relief=None, pos=(0.75, 0, -0.24), hpr=(180, 0, 0),
+                                       command=self.changeColorFocusType, extraArgs=[1])
+        self.colorGui.append(rightColorArrow)
+
+        arrowGui.removeNode()
+
+        minnieButtonGui = loader.loadModel('phase_3.5/models/gui/matching_game_gui')
+
+        # -- First, do clothing color
+        i = 0
+        x = 0
+        z = 0
+
+        # Ensure that there are 3 rows of color buttons.
+        rowNum = len(ToonDNA.ClothesColors)
+        rowLimit = 0.0
+        while rowNum > 3:
+            rowLimit += 1.0
+            rowNum = len(ToonDNA.ClothesColors) / rowLimit
+
+        for color in ToonDNA.ClothesColors:
+            # Frame size specified due to how bad of a hitbox the image is on it's own in this case.
+            colorButton = DirectButton(parent=self, state=DGG.DISABLED, relief=None,
+                                       image=minnieButtonGui.find('**/minnieCircle'), image_scale=0.35,
+                                       image2_scale=0.385, image_color=color, image_pos=(0.355 / rowLimit, 0, 0.035),
+                                       frameSize=(0, 0.71 / rowLimit, 0, 0.07),
+                                       pos=(0.095 + ((0.71 * x) / rowLimit), 0, -0.3875 - (z * 0.07)),
+                                       command=self.updateClothes, extraArgs=[i, True])
+            self.colorButtons.append(colorButton)
+
+            i += 1
+            x += 1
+            if x >= rowLimit:
+                x = 0
+                z += 1
+
+        # -- Second, do glove color
+        i = 0
+        x = 0
+        z = 0
+
+        # Ensure that there are 3 rows of color buttons.
+        rowNum = len(ToonDNA.allColorsList)
+        rowLimit = 0.0
+        while rowNum > 3:
+            rowLimit += 1.0
+            rowNum = len(ToonDNA.allColorsList) / rowLimit
+
+        for color in ToonDNA.allColorsList:
+            # Frame size specified due to how bad of a hitbox the image is on it's own in this case.
+            colorButton = DirectButton(parent=self, state=DGG.DISABLED, relief=None,
+                                       image=minnieButtonGui.find('**/minnieCircle'), image_scale=0.35,
+                                       image2_scale=0.385, image_color=color, image_pos=(0.355 / rowLimit, 0, 0.035),
+                                       frameSize=(0, 0.71 / rowLimit, 0, 0.07),
+                                       pos=(0.095 + ((0.71 * x) / rowLimit), 0, -0.3875 - (z * 0.07)),
+                                       command=self.updateGloves, extraArgs=[i])
+            self.gloveButtons.append(colorButton)
+
+            i += 1
+            x += 1
+            if x >= rowLimit:
+                x = 0
+                z += 1
+
+        minnieButtonGui.removeNode()
 
         # -= Create Buttons =-
         self.generateButtonGeom()
@@ -1180,195 +1273,200 @@ class ClothingTabPage(ToonTabPageBase):
         for ival in self.spinIvals:
             ival.finish()
         # Destroy all GUI
-        for list in [self.mainGui, self.topButtons, self.botButtons, self.topColorGui, self.botColorGui,
-                     self.gloveButtons]:
+        for list in [self.mainGui, self.clothButtons, self.colorGui, self.colorButtons, self.gloveButtons]:
             for button in list:
                 button.destroy()
             del list
-        self.topFrame.destroy()
-        del self.topFrame
-        self.botFrame.destroy()
-        del self.botFrame
+        self.clothFrame.destroy()
+        del self.clothFrame
 
     def enter(self):
         ToonTabPageBase.enter(self)
         # Enable all GUI
-        for list in [self.mainGui, self.topButtons, self.botButtons, self.topColorGui, self.botColorGui,
-                     self.gloveButtons]:
+        for list in [self.mainGui, self.clothButtons, self.colorGui]:
             for button in list:
                 button['state'] = DGG.NORMAL
+
+        self.changeColorFocusType()
         self.generateButtonGeom()
 
     def exit(self):
         ToonTabPageBase.exit(self)
         # Disable all GUI
-        for list in [self.mainGui, self.topButtons, self.botButtons, self.topColorGui, self.botColorGui,
-                     self.gloveButtons]:
+        for list in [self.mainGui, self.clothButtons, self.colorGui, self.colorButtons, self.gloveButtons]:
             for button in list:
                 button['state'] = DGG.DISABLED
 
+    # Change focused clothing type.
+    def changeFocusType(self, typeChange=0):
+        global toonDNA
+        self.clothSection = (self.clothSection + typeChange) % 4
+        labelNames = ['Tops', 'Shirts', 'Sleeves', 'Bottoms']
+        # Change body section label
+        self.mainGui[0]['text'] = labelNames[self.clothSection]
+
+        # Update UI Elements
+        self.generateButtonGeom()
+        self.updateIDLabels()
+
+    # Change focused clothing type.
+    def changeColorFocusType(self, typeChange=0):
+        global toonDNA
+        self.colorSection = (self.colorSection + typeChange) % 2
+        # Change label
+        self.colorGui[0]['text'] = 'Clothing Color' if self.colorSection == 0 else 'Glove Color'
+
+        # Update UI Elements
+        for button in self.colorButtons:
+            button['state'] = DGG.NORMAL if self.colorSection == 0 else DGG.DISABLED
+            if self.colorSection == 1:
+                button.hide()
+            else:
+                button.show()
+
+        for button in self.gloveButtons:
+            button['state'] = DGG.NORMAL if self.colorSection == 1 else DGG.DISABLED
+            if self.colorSection == 0:
+                button.hide()
+            else:
+                button.show()
+
+        self.updateIDLabels()
+
     # Generate all 3D button / preview geometry and make them SPIN.
-    def generateButtonGeom(self, doTops = True, doBots = True):
+    def generateButtonGeom(self):
         global toonDNA
         # First, end every spin animation and reset the list
-        if doTops:
-            for ival in self.topSpinIvals:
-                ival.finish()
-                del ival
-            self.topSpinIvals = []
-        if doBots:
-            for ival in self.botSpinIvals:
-                ival.finish()
-                del ival
-            self.botSpinIvals = []
+        for ival in self.spinIvals:
+            ival.finish()
+            del ival
+        self.spinIvals = []
 
-        # Destroy all top and bot buttons and reset them to empty
-        if doTops:
-            for button in self.topButtons:
-                button.destroy()
-                del button
-            self.topButtons = []
-        if doBots:
-            for button in self.botButtons:
-                button.destroy()
-                del button
-            self.botButtons = []
+        # Destroy all clothing buttons and reset them to empty
+        for button in self.clothButtons:
+            button.destroy()
+            del button
+        self.clothButtons = []
 
-        # Set max shirt pages depending on what tab is open
+        # Set max pages depending on what section is open
         topBase = len(ToonDNA.Shirts)
-        if self.topTab == 0 or self.topTab == 2:
-            topBase = len(self.shirtStyles) if self.topTab == 0 else len(ToonDNA.Sleeves)
-        self.maxTopPage = math.ceil(topBase / 6)
-
-        # Set max bottom pages
-        botBase = len(ToonDNA.GirlBottoms) if toonDNA.gender == 'f' else len(ToonDNA.BoyShorts)
-        self.maxBotPage = math.ceil(botBase / 6)
+        if self.clothSection == 0 or self.clothSection == 2:
+            topBase = len(self.shirtStyles) if self.clothSection == 0 else len(ToonDNA.Sleeves)
+        if self.clothSection == 3:
+            topBase = len(ToonDNA.GirlBottoms) if toonDNA.gender == 'f' else len(ToonDNA.BoyShorts)
+        # If the pages divide evenly, create a difference of 1 to avoid a blank page.
+        dif = 0
+        if topBase % 9 == 0:
+            dif = 1
+        self.maxClothPage = math.ceil(topBase / 9) - dif
 
         # If the pages go over the maximum page limit (likely from transing gender), fix it
-        if self.topPage > self.maxTopPage:
-            self.topPage = self.maxTopPage
-        if self.botPage > self.maxBotPage:
-            self.botPage = self.maxBotPage
+        if self.clothPage > self.maxClothPage:
+            self.clothPage = self.maxClothPage
+
+        # Update text on page labels
+        self.clothPages['text'] = str(int(self.clothPage + 1)) + '/' + str(int(self.maxClothPage) + 1)
 
         # Enable/Disable page buttons according to the page
-        self.leftTopButton['state'] = DGG.NORMAL if self.topPage > 0 else DGG.DISABLED
-        self.rightTopButton['state'] = DGG.NORMAL if self.topPage < self.maxTopPage else DGG.DISABLED
-        self.leftBotButton['state'] = DGG.NORMAL if self.botPage > 0 else DGG.DISABLED
-        self.rightBotButton['state'] = DGG.NORMAL if self.botPage < self.maxBotPage else DGG.DISABLED
+        self.leftPageButton['state'] = DGG.NORMAL if self.clothPage > 0 else DGG.DISABLED
+        self.rightPageButton['state'] = DGG.NORMAL if self.clothPage < self.maxClothPage else DGG.DISABLED
 
         # Boolean that checks whether or not we're doing bottoms buttons
-        bottoms = False if doTops else True
+        bottoms = False if self.clothSection != 3 else True
 
-        # Do the following for both topButton and botButton lists...
-        buttonLists = []
-        if doTops:
-            buttonLists.append(self.topButtons)
-        if doBots:
-            buttonLists.append(self.botButtons)
-        for buttonList in buttonLists:
-            # Create 6 buttons for each list
-            for i in range(6):
-                # Create value for button
-                buttonID = int(((self.topPage * 6) + i) if not bottoms else ((self.botPage * 6) + i))
+        # Create 9 buttons
+        for i in range(9):
+            # Create value for button
+            buttonID = int((self.clothPage * 9) + i)
 
-                # If this button exceeds values in which exist in the game, skip this button.
-                if (not bottoms and self.topTab == 0 and buttonID >= len(self.shirtStyles)) or \
-                    (not bottoms and self.topTab == 1 and buttonID >= len(ToonDNA.Shirts)) or \
-                        (not bottoms and self.topTab == 2 and buttonID >= len(ToonDNA.Sleeves)) or \
-                        (bottoms and toonDNA.gender == 'f' and buttonID >= len(ToonDNA.GirlBottoms)) or \
-                        (bottoms and toonDNA.gender == 'm' and buttonID >= len(ToonDNA.BoyShorts)):
-                    continue
+            # If this button exceeds values in which exist in the game, skip this button.
+            if (not bottoms and self.clothSection == 0 and buttonID >= len(self.shirtStyles)) or \
+                (not bottoms and self.clothSection == 1 and buttonID >= len(ToonDNA.Shirts)) or \
+                    (not bottoms and self.clothSection == 2 and buttonID >= len(ToonDNA.Sleeves)) or \
+                    (bottoms and toonDNA.gender == 'f' and buttonID >= len(ToonDNA.GirlBottoms)) or \
+                    (bottoms and toonDNA.gender == 'm' and buttonID >= len(ToonDNA.BoyShorts)):
+                continue
 
-                # If shirts, determine what pieces and values to use for it.
-                if not bottoms:
-                    if self.topTab == 0:
-                        pieceNames = ('**/torso-top', '**/sleeves')
-                    else:
-                        pieceNames = ('**/torso-top' if self.topTab == 1 else '**/sleeves',)
+            # If shirts, determine what pieces and values to use for it.
+            if not bottoms:
+                if self.clothSection == 0:
+                    pieceNames = ('**/torso-top', '**/sleeves')
                 else:
-                    pieceNames = ('**/torso-bot',)
+                    pieceNames = ('**/torso-top' if self.clothSection == 1 else '**/sleeves',)
+            else:
+                pieceNames = ('**/torso-bot',)
 
-                # Set up texture values
-                toptex = 0
-                sleevetex = 0
-                bottex = 0
-                bottomType = 'shorts'
+            # Set up texture values
+            toptex = 0
+            sleevetex = 0
+            bottex = 0
+            bottomType = 'shorts'
 
-                # Set texture values
-                if bottoms:
-                    # Set the pant texture
-                    bottex = buttonID
+            # Set texture values
+            if bottoms:
+                # Set the pant texture
+                bottex = buttonID
+                # If Toon is girl and the bottom is a skirt, make the pant a skirt.
+                if toonDNA.gender == 'f':
+                    if ToonDNA.GirlBottoms[bottex][1] == 1:
+                        bottomType = 'skirt'
+            else:
+                # Set the shirt texture if just the shirt, otherwise set it to the combined value.
+                toptex = buttonID if (self.clothSection == 1) else self.shirtStyles[buttonID][0]
 
-                    # If Toon is girl and the bottom is a skirt, make the pant a skirt.
-                    if toonDNA.gender == 'f':
-                        if ToonDNA.GirlBottoms[bottex][1] == 1:
-                            bottomType = 'skirt'
-                else:
-                    # Set the shirt texture if just the shirt, otherwise set it to the combined value.
-                    toptex = buttonID if (self.topTab == 1) else self.shirtStyles[buttonID][0]
+                # Set the sleeve texture if combined or just the sleeve, otherwise leave alone.
+                if self.clothSection == 0 or self.clothSection == 2:
+                    sleevetex = buttonID if self.clothSection == 2 or self.clothSection == 1 else self.shirtStyles[buttonID][1]
+                # If the shirt tab is anything other than combined, change the other texture id to match the preview Toon.
+                if self.clothSection == 1:
+                    sleevetex = toonDNA.sleeveTex
+                if self.clothSection == 2:
+                    toptex = toonDNA.topTex
 
-                    # Set the sleeve texture if combined or just the sleeve, otherwise leave alone.
-                    if self.topTab == 0 or self.topTab == 2:
-                        sleevetex = buttonID if self.topTab == 2 or self.topTab == 1 else self.shirtStyles[buttonID][1]
+            toon = loader.loadModel('phase_3/models/char/tt_a_chr_dg%s_%s_torso_1000' % (toonDNA.torso[0], bottomType))
+            nodeLabel = 'bot' if bottoms else 'top'
+            model = NodePath(nodeLabel + str(i))
 
-                    # If the shirt tab is anything other than combined, change the other texture id to match the preview Toon.
-                    if self.topTab == 1:
-                        sleevetex = toonDNA.sleeveTex
-                    if self.topTab == 2:
-                        toptex = toonDNA.topTex
+            for name in pieceNames:
+                for piece in toon.findAllMatches(name):
+                    # Set textures
+                    if name == '**/torso-top':
+                        piece.setTexture(loader.loadTexture(ToonDNA.Shirts[toptex]), 1)
+                    elif name == '**/sleeves':
+                        piece.setTexture(loader.loadTexture(ToonDNA.Sleeves[sleevetex]), 1)
+                    elif name == '**/torso-bot':
+                        piece.setTexture(loader.loadTexture(ToonDNA.BoyShorts[bottex] if toonDNA.gender == 'm' else ToonDNA.GirlBottoms[bottex][0]), 1)
+                    piece.wrtReparentTo(model)
 
-                toon = loader.loadModel('phase_3/models/char/tt_a_chr_dg%s_%s_torso_1000' % (toonDNA.torso[0], bottomType))
-                nodeLabel = 'bot' if bottoms else 'top'
-                model = NodePath(nodeLabel + str(i))
-                for name in pieceNames:
-                    for piece in toon.findAllMatches(name):
-                        # Set textures
-                        if name == '**/torso-top':
-                            piece.setTexture(loader.loadTexture(ToonDNA.Shirts[toptex]), 1)
-                        elif name == '**/sleeves':
-                            piece.setTexture(loader.loadTexture(ToonDNA.Sleeves[sleevetex]), 1)
-                        elif name == '**/torso-bot':
-                            piece.setTexture(loader.loadTexture(ToonDNA.BoyShorts[bottex] if toonDNA.gender == 'm' else ToonDNA.GirlBottoms[bottex][0]), 1)
-                        piece.wrtReparentTo(model)
+            model.setH(180)
+            toon.removeNode()
 
+            # Create button and spin interval
+            button, spinIval = self.makeButtonModel(model, buttonID)
 
-                model.setH(180)
-                toon.removeNode()
+            # Create position values
+            x = i % 3
+            y = int(i / 3)
 
-                # Create button and spin interval
-                button, spinIval = self.makeButtonModel(model, buttonID, 0 if not bottoms else 1)
+            # Reparent the button with the corresponding frame
+            button.reparentTo(self.clothFrame)
+            self.clothButtons.append(button)
 
-                # Create position values
-                x = i % 3
-                y = int(i / 3)
+            # Set button position
+            button.setPos(-0.2 + (0.2 * x), 0, 0.075 - (0.1625 * y))
+            button.setScale(0.06)
 
-                # Reparent the button with the corresponding frame
-                if bottoms:
-                    button.reparentTo(self.botFrame)
-                else:
-                    button.reparentTo(self.topFrame)
-                buttonList.append(button)
-
-                # Set button position
-                button.setPos(-0.2 + (0.2 * x), 0, 0.1 - (0.1625 * y))
-                button.setScale(0.06)
-
-                # Start interval and add to spin list
-                spinIval.loop()
-                if bottoms:
-                    self.botSpinIvals.append(spinIval)
-                else:
-                    self.topSpinIvals.append(spinIval)
-
-            bottoms = True
+            # Start interval and add to spin list
+            spinIval.loop()
+            self.spinIvals.append(spinIval)
 
 
     # Create a single button model.  Modified port of makeFrameModel from toontown.catalog.CatalogItem
-    def makeButtonModel(self, model, i, type):
+    def makeButtonModel(self, model, i):
         frame = None
         if type != 2:
             frame = DirectButton(parent=hidden, frameSize=(-1.0, 1.0, -1.0, 1.0), relief=None,
-                                 command=self.updateClothes, extraArgs=[i, type, False])
+                                 command=self.updateClothes, extraArgs=[i, False])
         else:
             frame = DirectFrame(parent=hidden, frameSize=(-1.0, 1.0, -1.0, 1.0), relief=None)
         model.setDepthTest(1)
@@ -1390,29 +1488,29 @@ class ClothingTabPage(ToonTabPageBase):
         return (frame, ival)
 
     # Change the clothes of the preview Toon.
-    def updateClothes(self, i, type, isColor):
+    def updateClothes(self, i, isColor):
         global toonDNA
         # Shirt
-        if type == 0:
+        if self.clothSection != 3:
             # If setting color, set the color. Otherwise, do textures.
             if isColor:
-                if self.topTab == 0 or self.topTab == 1:
+                if self.clothSection == 0 or self.clothSection == 1:
                     toonDNA.topTexColor = i
-                if self.topTab == 0 or self.topTab == 2:
+                if self.clothSection == 0 or self.clothSection == 2:
                     toonDNA.sleeveTexColor = i
             else:
                 # If combined, set both shirt and sleeve from the compiled list.
-                if self.topTab == 0:
+                if self.clothSection == 0:
                     toonDNA.topTex = self.shirtStyles[i][0]
                     toonDNA.sleeveTex = self.shirtStyles[i][1]
                 # If just the shirt, set the shirt.
-                elif self.topTab == 1:
+                elif self.clothSection == 1:
                     toonDNA.topTex = i
                 # If just the sleeves, set the sleeves.
-                elif self.topTab == 2:
+                elif self.clothSection == 2:
                     toonDNA.sleeveTex = i
         # Pant
-        elif type == 1:
+        elif self.clothSection == 3:
             # If setting color, set the color. Otherwise, do texture.
             if isColor:
                 toonDNA.botTexColor = i
@@ -1422,32 +1520,283 @@ class ClothingTabPage(ToonTabPageBase):
                     toonDNA.torso = toonDNA.torso[0] + ('d' if ToonDNA.GirlBottoms[i][1] == 1 else 's')
                 else:
                     toonDNA.torso = toonDNA.torso[0] + 's'
-        # Glove
-        elif type == 2:
-            toonDNA.gloveColor = i
         # Update Toon
         self.updateToon()
 
-    # Change the page value.
-    def setPage(self, i, isShirt):
-        if isShirt:
-            self.topPage += i
-            # If the shirt page somehow ends up bigger than the max shirt page, set it to max shirt page.
-            if self.topPage > self.maxTopPage:
-                self.topPage = self.maxTopPage
-            # If the shirt page somehow ends up smaller than the last page, set it to the last page.
-            elif self.topPage < 0:
-                self.topPage = 0
+    # Change glove color.
+    def updateGloves(self, i):
+        toonDNA.gloveColor = i
+        self.updateToon()
+
+    def updateToon(self):
+        ToonTabPageBase.updateToon(self)
+        self.updateIDLabels()
+
+    # Update Labels
+    def updateIDLabels(self):
+        # TODO: Move these long ass lists to TTLocalizer
+        # TODO: Make two bottoms lists
+        ShirtToString = ['Plain',
+                         'Single Stripe',
+                         'Buttoned Collar',
+                         'Double Stripe',
+                         'Striped',
+                         'Collar w/ Pocket',
+                         'Flower Print',
+                         'Flower Trim',
+                         'Hawaiian',
+                         'Collar w/ 2 Pockets',
+                         'Bowling Shirt',
+                         'Purple Vest',
+                         'Denim Vest',
+                         'Peasant',
+                         'Ruffles',
+                         'Peasant w/ Mid Stripe',
+                         'Soccer Jersey',
+                         'Lightning Bolt',
+                         'No. 19',
+                         'Guayabera',
+                         'Hearts',
+                         'Stars',
+                         'Flower',
+                         'Blue w/ Gold Wavy Stripes',
+                         'Pink & Beige w/ Flower',
+                         'Orange Hoodie',
+                         'Blue Stripes',
+                         'Palm Tree',
+                         'Orange No. 1',
+                         'Ghost',
+                         'Pumpkin',
+                         'Snowman',
+                         'Snowflakes',
+                         'Candy Cane Hearts',
+                         'Scarf',
+                         'Blue w/ Gold Wavy Stripes',
+                         'Blue w/ Pink Ribbon',
+                         'Lime Green w/ Stripe',
+                         'Purple Stars',
+                         'Red Kimono',
+                         'Aqua Kimono',
+                         'Pink w/ Red Heart',
+                         'Red Hearts',
+                         'Winged Heart',
+                         'Flaming Heart',
+                         'Tie Dye',
+                         'Blue Stripes',
+                         'Four Leaf Clover',
+                         "Pot O' Gold",
+                         'Fishing Vest',
+                         'Fish Tank',
+                         'Paw Print',
+                         'Cowboy 1',
+                         'Cowboy 2',
+                         'Cowboy 3',
+                         'Cowboy 4',
+                         'Cowboy 5',
+                         'Cowboy 6',
+                         'USA Flag',
+                         'Fireworks',
+                         'Green',
+                         'Pink Flower',
+                         'Multicolor w/ Backpack',
+                         'Lederhosen',
+                         'Watermelon',
+                         'Race Flag Shirt',
+                         'Blue Banana Pajama',
+                         'Red Bike Horn Pajama',
+                         'Purple Hypno Pajama',
+                         'Cupid',
+                         'Patched Hearts',
+                         'HD Double Stripe',
+                         'Clown Fish',
+                         'Old Boot',
+                         'Mole',
+                         'Farmer',
+                         'Cupcake',
+                         'Party Hat',
+                         'Racer Goofy',
+                         'Roadster',
+                         'Cool Sun',
+                         'Beach Ball',
+                         'Golf 1',
+                         'Golf 2',
+                         'Bee',
+                         'Supertoon',
+                         'Marathon Winner',
+                         'Anti-Cog Building',
+                         'Building Lifesaver',
+                         'HQ Completionist',
+                         'Task Completionist',
+                         'Dreamy Trolley',
+                         'Cheery Trolley',
+                         'Wintery Gift',
+                         'Skeletoon',
+                         'Webs',
+                         'Red Bowed Angel',
+                         'Prepostera',
+                         'Surlee',
+                         'Dimm',
+                         'Silly Mailbox',
+                         'Silly Trashcan',
+                         'Loony Labs',
+                         'Silly Fire Hydrant',
+                         'Silly Meter',
+                         'Cogbuster',
+                         'Cog Destroyer',
+                         'Anti-Cheese',
+                         'Victory Party',
+                         'Sellbot Icon',
+                         'Anti-V.P.',
+                         'Sellbot Crusher',
+                         'Jellybean Jar',
+                         'Doodle',
+                         'Vampire',
+                         'Turtle',
+                         'Green Toon',
+                         'Get Connected!',
+                         'Grand Prix Suit',
+                         'Lawbot Icon',
+                         'Anti-C.J.',
+                         'Lawbot Crusher',
+                         'Bee',
+                         'Pirate',
+                         'Supertoon',
+                         'Vampire',
+                         'Dinosaur',
+                         'Fisher',
+                         'Golf 3',
+                         'Cog Destroyer 2',
+                         'Toontown Racing Suit',
+                         'Anti-Cog Building 2',
+                         'Trolley Rider',
+                         'Old Boot 2',
+                         'Golf 4',
+                         'Witch',
+                         'Sled',
+                         'Flying Bats',
+                         'Mittens',
+                         'Pool Shark',
+                         'Piano Fish',
+                         'Golf 5',
+                         'Toontown Racing Suit 2',
+                         'Toontown Racing Suit 3',
+                         'Cog Dummy',
+                         'Cog Destroyer 3',
+                         'Trolley Rider 2',
+                         'Trolley Rider 3',
+                         'Anti-Cog Building 3',
+                         'Anti-Cog Building 4',
+                         'Anniversary']
+        BoyBotToString = []
+        GirlBotToString = []
+        NumToClothColor = ['Bright Red',
+                           'Red',
+                           'Maroon',
+                           'Orange',
+                           'Yellow',
+                           'Lime',
+                           'Sea Green',
+                           'Teal',
+                           'Aqua',
+                           'Blue',
+                           'Royal Blue',
+                           'Slate Blue',
+                           'Purple',
+                           'Sienna',
+                           'Brown',
+                           'Tan',
+                           'Coral',
+                           'Orange',
+                           'Lime',
+                           'Teal',
+                           'Aqua',
+                           'Peach',
+                           'Cream',
+                           'Citrine',
+                           'Periwinkle',
+                           'Lavender',
+                           'Pink',
+                           'White',
+                           'Solid Blue',
+                           'Beet Red',
+                           'Royal Purple']
+
+        # Values
+        id = 0
+        sleeveID = 0
+        colorID = 27
+        colorSleeveID = 27
+        clothName = None
+        sleeveName = None
+
+        # If shirt sections, set it to do shirt label
+        if self.clothSection == 0 or self.clothSection == 1:
+            # Try to do a custom label. If it doesn't exist, set it to the filename.
+            try:
+                clothName = ShirtToString[toonDNA.topTex]
+            except:
+                clothName = ToonDNA.Shirts[toonDNA.topTex]
+            id = toonDNA.topTex
+            colorID = toonDNA.topTexColor
+
+        # If bottoms section, set it to do bottoms label
+        if self.clothSection == 3:
+            # Try to do a custom label. If it doesn't exist, set it to the filename.
+            try:
+                clothName = BoyBotToString[toonDNA.botTex] if toonDNA.gender == 'm' else GirlBotToString[toonDNA.botTex]
+            except:
+                clothName = ToonDNA.BoyShorts[toonDNA.botTex] if toonDNA.gender == 'm' else ToonDNA.GirlBottoms[toonDNA.botTex][0]
+            id = toonDNA.botTex
+            colorID = toonDNA.botTexColor
+
+        # Figure out the sleeve name via the shirt list.
+        sleeveID = toonDNA.sleeveTex
+        colorSleeveID = toonDNA.sleeveTexColor
+        for shirtStyle in self.shirtStyles:
+            if toonDNA.sleeveTex == shirtStyle[1]:
+                # Try to do a custom label. If it doesn't exist, set it to the filename.
+                try:
+                    sleeveName = ShirtToString[shirtStyle[0]]
+                except:
+                    sleeveName = ToonDNA.Sleeves[toonDNA.sleeveTex]
+                break
+
+        # If it's a sleeve that doesn't pair with a shirt, set it to the filename.
+        if sleeveName == None:
+            sleeveName = ToonDNA.Sleeves[toonDNA.sleeveTex]
+
+        # If sleeve section, set the sleeve values to the normal values.
+        if self.clothSection == 2:
+            clothName = sleeveName
+            id = sleeveID
+            colorID = colorSleeveID
+
+        # Set labels
+        self.clothIDLabel['text'] = clothName + ' (' + str(id) + ')'
+        self.clothIDLabel['text_fg'] = ToonDNA.ClothesColors[colorID]
+
+        # If combined, show sleeve as well. If not, hide it.
+        if self.clothSection == 0:
+            self.subclothIDLabel['text'] = sleeveName + ' (' + str(sleeveID) + ')'
+            self.subclothIDLabel['text_fg'] = ToonDNA.ClothesColors[colorSleeveID]
+            self.subclothIDLabel.show()
         else:
-            self.botPage += i
-            # If the pant page somehow ends up bigger than the max pant page, set it to max pant page.
-            if self.botPage > self.maxBotPage:
-                self.botPage = self.maxBotPage
-            # If the pant page somehow ends up smaller than the last page, set it to the last page.
-            elif self.botPage < 0:
-                self.botPage = 0
+            self.subclothIDLabel.hide()
+
+        # Set color labels
+        colorLabel, colorLabelID = (NumToClothColor[colorID], colorID) if self.colorSection == 0 else (TTLocalizer.NumToColor[toonDNA.gloveColor], toonDNA.gloveColor)
+
+        self.colorIDLabel['text'] = '%s (%d)' % (colorLabel, colorLabelID)
+        self.colorIDLabel['text_fg'] = ToonDNA.ClothesColors[colorID] if self.colorSection == 0 else ToonDNA.allColorsList[toonDNA.gloveColor]
+
+    # Change the page value.
+    def setPage(self, i):
+        self.clothPage += i
+        # If the page somehow ends up bigger than the max shirt page, set it to max shirt page.
+        if self.clothPage > self.maxClothPage:
+            self.clothPage = self.maxClothPage
         # Update button geom
-        self.generateButtonGeom(isShirt, not isShirt)
+        self.generateButtonGeom()
 
 
 # TODO: Merge accessory tabs into a single Accessory tab, where a button swaps which accessories are being modified.
