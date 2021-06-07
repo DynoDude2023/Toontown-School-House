@@ -1071,6 +1071,7 @@ class ClothingTabPage(ToonTabPageBase):
         self.colorIDLabel = None
         self.colorButtons = []
         self.gloveButtons = []
+        self.glovePreview = None
 
         # Other variables
 
@@ -1082,6 +1083,7 @@ class ClothingTabPage(ToonTabPageBase):
         self.maxClothPage = 0
         self.colorSection = 0
         self.spinIvals = []
+        self.gloveSpinIval = None
 
         # Generate a chronological combined shirt list
 
@@ -1178,11 +1180,11 @@ class ClothingTabPage(ToonTabPageBase):
         # -= Color Section =-
 
         colorLabel = DirectLabel(parent=self, relief=None, text='Color', text_scale=0.07, text_align=TextNode.ACenter,
-                                 pos=(0.45, 0, -0.25))
+                                 pos=(0.45, 0, -0.21))
         self.colorGui.append(colorLabel)
 
         self.colorIDLabel = DirectLabel(parent=self, relief=None, text='White (27)', text_scale=0.05, text_align=TextNode.ACenter,
-                                   text_font=ToontownGlobals.getSignFont(), pos=(0.45, 0, -0.3))
+                                   text_font=ToontownGlobals.getSignFont(), pos=(0.45, 0, -0.265))
 
         # Color section arrow buttons
 
@@ -1190,14 +1192,14 @@ class ClothingTabPage(ToonTabPageBase):
                                                                              arrowGui.find('**/CrtATn_R_Arrow_DN'),
                                                                              arrowGui.find('**/CrtATn_R_Arrow_RLVR'),
                                                                              arrowGui.find('**/CrtATn_R_Arrow_DN')),
-                                      scale=(0.5, 0.5, 0.5), relief=None, pos=(0.15, 0, -0.24), hpr=(180, 0, 0),
+                                      scale=(0.5, 0.5, 0.5), relief=None, pos=(0.15, 0, -0.2), hpr=(180, 0, 0),
                                       command=self.changeColorFocusType, extraArgs=[-1])
         self.colorGui.append(leftColorArrow)
         rightColorArrow = DirectButton(parent=self, state=DGG.DISABLED, geom=(arrowGui.find('**/CrtATn_R_Arrow_UP'),
                                                                               arrowGui.find('**/CrtATn_R_Arrow_DN'),
                                                                               arrowGui.find('**/CrtATn_R_Arrow_RLVR'),
                                                                               arrowGui.find('**/CrtATn_R_Arrow_DN')),
-                                       scale=(-0.5, 0.5, 0.5), relief=None, pos=(0.75, 0, -0.24), hpr=(180, 0, 0),
+                                       scale=(-0.5, 0.5, 0.5), relief=None, pos=(0.75, 0, -0.2), hpr=(180, 0, 0),
                                        command=self.changeColorFocusType, extraArgs=[1])
         self.colorGui.append(rightColorArrow)
 
@@ -1223,7 +1225,7 @@ class ClothingTabPage(ToonTabPageBase):
                                        image=minnieButtonGui.find('**/minnieCircle'), image_scale=0.35,
                                        image2_scale=0.385, image_color=color, image_pos=(0.355 / rowLimit, 0, 0.035),
                                        frameSize=(0, 0.71 / rowLimit, 0, 0.07),
-                                       pos=(0.095 + ((0.71 * x) / rowLimit), 0, -0.3875 - (z * 0.07)),
+                                       pos=(0.095 + ((0.71 * x) / rowLimit), 0, -0.3475 - (z * 0.07)),
                                        command=self.updateClothes, extraArgs=[i, True])
             self.colorButtons.append(colorButton)
 
@@ -1251,7 +1253,7 @@ class ClothingTabPage(ToonTabPageBase):
                                        image=minnieButtonGui.find('**/minnieCircle'), image_scale=0.35,
                                        image2_scale=0.385, image_color=color, image_pos=(0.355 / rowLimit, 0, 0.035),
                                        frameSize=(0, 0.71 / rowLimit, 0, 0.07),
-                                       pos=(0.095 + ((0.71 * x) / rowLimit), 0, -0.3875 - (z * 0.07)),
+                                       pos=(0.095 + ((0.71 * x) / rowLimit), 0, -0.3475 - (z * 0.07)),
                                        command=self.updateGloves, extraArgs=[i])
             self.gloveButtons.append(colorButton)
 
@@ -1263,6 +1265,14 @@ class ClothingTabPage(ToonTabPageBase):
 
         minnieButtonGui.removeNode()
 
+        gloveModel = loader.loadModel('phase_3.5/models/gui/ttoff_m_gui_wdp_glovePreview')
+        self.glovePreview, self.gloveSpinIval = self.makeButtonModel(gloveModel, 69, False)
+        self.glovePreview.reparentTo(self)
+        self.glovePreview.setPos(0.45, 0, -0.6)
+        self.glovePreview.setScale(0.1)
+        self.gloveSpinIval.loop()
+
+
         # -= Create Buttons =-
         self.generateButtonGeom()
 
@@ -1272,6 +1282,7 @@ class ClothingTabPage(ToonTabPageBase):
         # Stop all spin intervals
         for ival in self.spinIvals:
             ival.finish()
+        self.gloveSpinIval.finish()
         # Destroy all GUI
         for list in [self.mainGui, self.clothButtons, self.colorGui, self.colorButtons, self.gloveButtons]:
             for button in list:
@@ -1462,9 +1473,9 @@ class ClothingTabPage(ToonTabPageBase):
 
 
     # Create a single button model.  Modified port of makeFrameModel from toontown.catalog.CatalogItem
-    def makeButtonModel(self, model, i):
+    def makeButtonModel(self, model, i, isButton=True):
         frame = None
-        if type != 2:
+        if isButton:
             frame = DirectButton(parent=hidden, frameSize=(-1.0, 1.0, -1.0, 1.0), relief=None,
                                  command=self.updateClothes, extraArgs=[i, False])
         else:
@@ -1530,6 +1541,7 @@ class ClothingTabPage(ToonTabPageBase):
 
     def updateToon(self):
         ToonTabPageBase.updateToon(self)
+        self.glovePreview.setColor(ToonDNA.allColorsList[toonDNA.gloveColor])
         self.updateIDLabels()
 
     # Update Labels
@@ -1611,7 +1623,7 @@ class ClothingTabPage(ToonTabPageBase):
                          'Clown Fish',
                          'Old Boot',
                          'Mole',
-                         'Farmer',
+                         'Gardener',
                          'Cupcake',
                          'Party Hat',
                          'Racer Goofy',
@@ -1633,9 +1645,9 @@ class ClothingTabPage(ToonTabPageBase):
                          'Skeletoon',
                          'Webs',
                          'Red Bowed Angel',
-                         'Prepostera',
-                         'Surlee',
-                         'Dimm',
+                         'Prepostera Coat',
+                         'Surlee Shirt',
+                         'Dimm Drip',
                          'Silly Mailbox',
                          'Silly Trashcan',
                          'Loony Labs',
@@ -1655,9 +1667,9 @@ class ClothingTabPage(ToonTabPageBase):
                          'Green Toon',
                          'Get Connected!',
                          'Grand Prix Suit',
-                         'Lawbot Icon',
-                         'Anti-C.J.',
-                         'Lawbot Crusher',
+                         'Lawbot Icon',    # Remove this specifically when porting since it was removed in TTOff's shirt list
+                         'Anti-C.J.',      # Remove this specifically when porting since it was removed in TTOff's shirt list
+                         'Lawbot Crusher', # Remove this specifically when porting since it was removed in TTOff's shirt list
                          'Bee',
                          'Pirate',
                          'Supertoon',
@@ -1687,8 +1699,127 @@ class ClothingTabPage(ToonTabPageBase):
                          'Anti-Cog Building 3',
                          'Anti-Cog Building 4',
                          'Anniversary']
-        BoyBotToString = []
-        GirlBotToString = []
+        BoyBotToString = ['Plain',
+                          'Belt',
+                          'Cargo',
+                          'Hawaiian',
+                          'Side Stripes',
+                          'Soccer Shorts',
+                          'Flame Stripes',
+                          'Denim',
+                          'Valentines',
+                          'Orange & Blue Stripes',
+                          'Light Blue',
+                          'Leprechaun',
+                          'Cowboy 1',
+                          'Cowboy 2',
+                          'Stars & Stripes',
+                          'Green & Beige',
+                          'Blue Banana Pajama',
+                          'Red Bike Horn Pajama',
+                          'Purple Hypno Pajama',
+                          'Snowmen',
+                          'Snowflakes',
+                          'Peppermints',
+                          'Holiday Pattern',
+                          'Lovestruck',
+                          'Patched Heart',
+                          'Fish',
+                          'Gardener',
+                          'Party Pants',
+                          'Red Racer',
+                          'Fishies',
+                          'Golf 1',
+                          'Bee',
+                          'Supertoon',
+                          'Marathon Winner',
+                          'Jellybeans',
+                          'Webs',
+                          'Skeletoon',
+                          'Prepostera Pants',
+                          'Surlee Shorts',
+                          'Dimm Drip',
+                          'Cogbuster',
+                          'Sellbot Crusher',
+                          'Vampire',
+                          'Turtle',
+                          'Green Toon',
+                          'Grand Prix Suit',
+                          'Lawbot Crusher', # Remove this specifically when porting since it was removed in TTOff's pants list
+                          'Bee',
+                          'Pirate',
+                          'Supertoon',
+                          'Vampire',
+                          'Dinosaur',
+                          'Golf 2',
+                          'Toontown Racing Suit',
+                          'Golf 3',
+                          'Golf 4',
+                          'Toontown Racing Suit 2',
+                          'Toontown Racing Suit 3']
+        GirlBotToString = ['Plain Skirt',
+                           'Polka Dots',
+                           'Horizontal Stripes',
+                           'Vertical Stripes',
+                           'Flower Skirt',
+                           'Plain Shorts',
+                           'Flower Shorts',
+                           '2 Pocket',
+                           'Denim Skirt',
+                           'Denim Shorts',
+                           'Blue & Gold',
+                           'Purple & Pink',
+                           'Green & Yellow',
+                           'Hearts',
+                           'Rainbow',
+                           'Leprechaun',
+                           'Cowgirl 1',
+                           'Cowgirl 2',
+                           'Stars & Stripes',
+                           'Blue Flowers',
+                           'Blue Banana Pajama',
+                           'Red Bike Horn Pajama',
+                           'Purple Hypno Pajama',
+                           'Snowmen',
+                           'Snowflakes',
+                           'Peppermints',
+                           'Holiday Pattern',
+                           'Pink Hearts',
+                           'Patched Heart',
+                           'Fishing Lines',
+                           'Gardener',
+                           'Cupcakes',
+                           'Red Racer',
+                           'Grass',
+                           'Golf 1',
+                           'Bee Skirt',
+                           'Wondertoon',
+                           'Marathon Winner',
+                           'Jellybeans',
+                           'Skeletoon',
+                           'Webs',
+                           'Prepostera Pants',
+                           'Surlee Shorts',
+                           'Dimm Drip',
+                           'Cogbuster',
+                           'Sellbot Crusher',
+                           'Vampire',
+                           'Turtle',
+                           'Green Toon',
+                           'Grand Prix Suit',
+                           'Lawbot Crusher',
+                           'Bee Shorts',
+                           'Pirate Shorts',
+                           'Pirate Skirt',
+                           'Supertoon',
+                           'Vampire',
+                           'Dinosaur',
+                           'Golf 2',
+                           'Toontown Racing Suit',
+                           'Golf 3',
+                           'Golf 4',
+                           'Toontown Racing Suit 2',
+                           'Toontown Racing Suit 3']
         NumToClothColor = ['Bright Red',
                            'Red',
                            'Maroon',
@@ -1719,7 +1850,8 @@ class ClothingTabPage(ToonTabPageBase):
                            'White',
                            'Solid Blue',
                            'Beet Red',
-                           'Royal Purple']
+                           'Royal Purple',
+                           'Black'] # Please add black back into offline :pleading_face:
 
         # Values
         id = 0
@@ -1796,6 +1928,10 @@ class ClothingTabPage(ToonTabPageBase):
         if self.clothPage > self.maxClothPage:
             self.clothPage = self.maxClothPage
         # Update button geom
+        self.generateButtonGeom()
+
+    def resetToon(self, choice = 0):
+        ToonTabPageBase.resetToon(self, choice)
         self.generateButtonGeom()
 
 
