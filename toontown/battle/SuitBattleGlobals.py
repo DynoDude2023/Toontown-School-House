@@ -109,6 +109,8 @@ def getSuitAttack(suitName, suitLevel, attackNum = -1):
     adict['group'] = SuitAttacks[name][1]
     return adict
 
+MAX_SUIT_LEVEL = 15
+MAX_SUIT_EXTRA_LEVELS = 3
 
 # Formatted by Jake S. - You're welcome!
 SuitAttributes = {'f': {'name': TTLocalizer.SuitFlunky, # cog name 
@@ -870,7 +872,7 @@ SuitAttributes = {'f': {'name': TTLocalizer.SuitFlunky, # cog name
                     (10,11,13,15,16,17,19,21),
                     (60,75,80,85,90,90,90,90),
                     (20,20,20,20,20,20,20,20)),
-                ('ParadigmShift',
+                ('RazzleDazzle',
                     (12,15,18,21,24,27,30,33),
                     (60,70,75,80,90,90,90,90),
                     (25,25,25,25,25,25,25,25)),
@@ -881,7 +883,11 @@ SuitAttributes = {'f': {'name': TTLocalizer.SuitFlunky, # cog name
                 ('Schmooze',
                     (7,8,12,15,16,20,23,24),
                     (55,65,75,85,95,95,95,95),
-                    (30,30,30,30,30,30,30,30)),
+                    (15,15,15,15,15,15,15,15)),
+                ('ParadigmShift',
+                    (7,8,12,15,16,20,23,24),
+                    (55,65,75,85,95,95,95,95),
+                    (15,15,15,15,15,15,15,15)),
                 ('TeeOff',
                     (8,9,10,11,12,13,14,15),
                     (70,75,80,85,95,95,95,95),

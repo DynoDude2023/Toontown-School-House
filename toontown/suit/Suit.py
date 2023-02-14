@@ -98,6 +98,7 @@ tf = (('phone', 'phone', 5),
  ('glower', 'glower', 5))
 m = (('speak', 'speak', 5),
  ('magic2', 'magic2', 5),
+ ('smile', 'smile', 5),
  ('magic1', 'magic1', 5),
  ('golf-club-swing', 'golf-club-swing', 5))
 mh = (('magic1', 'magic1', 5),
