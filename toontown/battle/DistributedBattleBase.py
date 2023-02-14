@@ -531,6 +531,8 @@ class DistributedBattleBase(DistributedNode.DistributedNode, BattleBase):
                     self.unlockLevelViz()
             if currStateName != 'NoLocalToon':
                 self.localToonFsm.request('NoLocalToon')
+        for luredSuit in self.luredSuits:
+            luredSuit.loop('lured')
         return oldtoons
 
     def adjust(self, timestamp):
