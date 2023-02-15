@@ -31,7 +31,6 @@ class BattleAvatarAI(DistributedObjectAI):
             effect.calculateDuration()
             print('Suit has status effect: ' + effect.getStatusEffectName())
 
-
             if effect.getStatusEffectDuration() <= 0:
                 print('Suit status effect has worn off')
                 effect.reset()
