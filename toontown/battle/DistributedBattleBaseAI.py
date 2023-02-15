@@ -1802,6 +1802,7 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
         for s in self.adjustingSuits:
             self.pendingSuits.remove(s)
             self.activeSuits.append(s)
+            s.battle = self
 
         self.adjustingSuits = []
         for toon in self.adjustingToons:
@@ -1813,6 +1814,8 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
                 self.activeToons.append(toon)
                 self.ignoreResponses = 0
                 self.sendEarnedExperience(toon)
+                rToon = self.getToon(toon)
+                rToon.battle = self
             else:
                 self.notify.warning('adjustDone() - toon: %d already active!' % toon.doId)
 

@@ -68,6 +68,7 @@ from toontown.suit import DistributedCashbotBossGoon/AI
 from toontown.battle import DistributedBattleBase/AI
 from toontown.battle import DistributedBattle/AI
 from toontown.battle import DistributedBattleBldg/AI
+from toontown.battle import BattleAvatar/AI
 from toontown.tutorial import DistributedBattleTutorial/AI
 from toontown.coghq import DistributedBattleFactory/AI
 from toontown.battle import DistributedBattleFinal/AI
@@ -1499,6 +1500,9 @@ dclass DistributedBattleBase : DistributedObject {
   joinDone(uint32) airecv clsend;
   requestAttack(int8, int8, int32) airecv clsend;
   requestPetProxy(uint32) airecv clsend;
+};
+
+dclass BattleAvatar : DistributedObject {
 };
 
 dclass DistributedBattle : DistributedBattleBase {

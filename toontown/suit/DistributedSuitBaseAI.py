@@ -3,13 +3,15 @@ from otp.avatar import DistributedAvatarAI
 import SuitPlannerBase, SuitBase, SuitDNA
 from direct.directnotify import DirectNotifyGlobal
 from toontown.battle import SuitBattleGlobals
+from toontown.battle import BattleAvatarAI
 
-class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.SuitBase):
+class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.SuitBase, BattleAvatarAI.BattleAvatarAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedSuitBaseAI')
 
     def __init__(self, air, suitPlanner):
         DistributedAvatarAI.DistributedAvatarAI.__init__(self, air)
         SuitBase.SuitBase.__init__(self)
+        BattleAvatarAI.BattleAvatarAI.__init__(self, air, self)
         self.sp = suitPlanner
         self.maxHP = 10
         self.currHP = 10

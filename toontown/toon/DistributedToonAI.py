@@ -46,6 +46,7 @@ from toontown.toonbase import TTLocalizer
 from toontown.catalog import CatalogAccessoryItem
 from toontown.minigame import MinigameCreatorAI
 import ModuleListAI
+from toontown.battle import BattleAvatarAI
 if simbase.wantPets:
     from toontown.pets import PetLookerAI, PetObserve
 else:
@@ -56,7 +57,7 @@ else:
 if simbase.wantKarts:
     from toontown.racing.KartDNA import *
 
-class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoothNodeAI.DistributedSmoothNodeAI, PetLookerAI.PetLookerAI):
+class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoothNodeAI.DistributedSmoothNodeAI, PetLookerAI.PetLookerAI, BattleAvatarAI.BattleAvatarAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedToonAI')
     maxCallsPerNPC = 100
     partTypeIds = {ToontownGlobals.FT_FullSuit: (CogDisguiseGlobals.leftLegIndex,
@@ -75,6 +76,7 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
     def __init__(self, air):
         DistributedPlayerAI.DistributedPlayerAI.__init__(self, air)
         DistributedSmoothNodeAI.DistributedSmoothNodeAI.__init__(self, air)
+        BattleAvatarAI.BattleAvatarAI.__init__(self, air, self)
         if simbase.wantPets:
             PetLookerAI.PetLookerAI.__init__(self)
         self.air = air

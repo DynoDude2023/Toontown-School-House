@@ -575,6 +575,16 @@ class BattleCalculatorAI:
                             self.notify.debug('Giving lure EXP to toon ' + str(currInfo[0]))
                             self.__addAttackExp(attack, track=attackTrack, level=currInfo[1], attackerId=currInfo[0])
                         self.__clearLurer(currInfo[0], lureId=currInfo[2])
+            if atkTrack == SQUIRT:
+                suit = self.battle.findSuit(targetId)
+                if suit:
+                    suit.appendStatusEffect('soaked')
+
+        for toonId in self.battle.activeToons:
+            toon = self.battle.getToon(toonId)
+            toonIndex = self.battle.activeToons.index(toonId)
+            attack[TOON_HP_COL][toonIndex] == (attack[TOON_HP_COL][toonIndex] * toon.damageMultiplier)
+
 
         if lureDidDamage:
             if self.itemIsCredit(atkTrack, atkLevel):
@@ -1177,7 +1187,7 @@ class BattleCalculatorAI:
                 atkType = attack[SUIT_ATK_COL]
                 theSuit = self.battle.findSuit(attack[SUIT_ID_COL])
                 atkInfo = SuitBattleGlobals.getSuitAttack(theSuit.dna.name, theSuit.getLevel(), atkType)
-                result = atkInfo['hp']
+                result = (atkInfo['hp'] * theSuit.damageMultiplier)
             targetIndex = self.battle.activeToons.index(toonId)
             attack[SUIT_HP_COL][targetIndex] = result
 
@@ -1358,6 +1368,16 @@ class BattleCalculatorAI:
         return (
          toonsHit, cogsMiss)
 
+    def handleStatusEffects(self, isSuit):
+        if isSuit:
+            for suit in self.battle.activeSuits:
+                suit.calculateRound()
+        else:
+            for toonId in self.battle.activeToons:
+                toon = self.battle.getToon(toonId)
+                if toon:
+                    toon.calculateRound()
+
     def calculateRound(self):
         longest = max(len(self.battle.activeToons), len(self.battle.activeSuits))
         for t in self.battle.activeToons:
@@ -1369,6 +1389,7 @@ class BattleCalculatorAI:
             for j in xrange(len(self.battle.activeToons)):
                 self.battle.suitAttacks[i][SUIT_HP_COL].append(-1)
 
+
         toonsHit, cogsMiss = self.__initRound()
         for suit in self.battle.activeSuits:
             if suit.isGenerated():
@@ -1379,7 +1400,9 @@ class BattleCalculatorAI:
                 self.notify.warning('a removed suit is in this battle!')
                 return None
 
+        self.handleStatusEffects(0)
         self.__calculateToonAttacks()
+        self.handleStatusEffects(1)
         self.__updateLureTimeouts()
         self.__calculateSuitAttacks()
         if toonsHit == 1:
