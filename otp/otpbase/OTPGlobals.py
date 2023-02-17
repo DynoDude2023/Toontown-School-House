@@ -189,14 +189,19 @@ STRAFE_LEFT_INDEX = 4
 STRAFE_RIGHT_INDEX = 5
 ToonStandableGround = 0.707
 ToonSpeedFactor = 1.25
-ToonForwardSpeed = 16.0 * ToonSpeedFactor
+ToonForwardSpeed = 16.8 * ToonSpeedFactor
 ToonJumpForce = 24.0
-ToonReverseSpeed = 8.0 * ToonSpeedFactor
-ToonRotateSpeed = 80.0 * ToonSpeedFactor
+ToonReverseSpeed = 8.4 * ToonSpeedFactor
+ToonRotateSpeed = 74.75 * ToonSpeedFactor
+ToonRotateSprintingSpeed = 60 * ToonSpeedFactor
 ToonForwardSlowSpeed = 6.0
 ToonJumpSlowForce = 4.0
 ToonReverseSlowSpeed = 2.5
 ToonRotateSlowSpeed = 33.0
+ToonDoubleTapSprintWindow = 0.40  # Time in seconds you have to register a double tap to turn on sprint mode
+ToonSprintFovIncrease = 5  # How big should the fov increase when sprinting?
+ToonForwardSprintSpeed = 20.16 * ToonSpeedFactor
+ToonReverseSprintSpeed = 15 * ToonSpeedFactor
 MickeySpeed = 5.0
 MinnieSpeed = 3.2
 DonaldSpeed = 3.68
@@ -228,6 +233,7 @@ DefaultBackgroundColor = (0.3,
 toonBodyScales = {'mouse': 0.6,
  'cat': 0.73,
  'duck': 0.66,
+ 'chicken': 0.66,
  'rabbit': 0.74,
  'horse': 0.85,
  'dog': 0.85,
@@ -237,6 +243,7 @@ toonBodyScales = {'mouse': 0.6,
 toonHeadScales = {'mouse': Point3(1.0),
  'cat': Point3(1.0),
  'duck': Point3(1.0),
+ 'chicken': Point3(1.0),
  'rabbit': Point3(1.0),
  'horse': Point3(1.0),
  'dog': Point3(1.0),
@@ -277,6 +284,10 @@ headHeightDict = {'dls': 0.75,
  'fss': 0.5,
  'fsl': 0.5,
  'fll': 0.75,
+ 'kss': 0.5,
+ 'ksl': 0.5,
+ 'kls': 0.5,
+ 'kll': 0.75,
  'pls': 0.75,
  'pss': 0.5,
  'psl': 0.5,
@@ -301,7 +312,7 @@ NameShopPlay = 'Free Trial'
 NameShopOnlyPaid = 'Only paid users\nmay name their Toons.\nUntil you subscribe\nyour name will be\n'
 NameShopContinueSubmission = 'Continue Submission'
 NameShopChooseAnother = 'Choose Another Name'
-NameShopToonCouncil = 'The Toon Council\nwill review your\nname.  ' + 'Review may\ntake a few days.\nWhile you wait\nyour name will be\n '
+NameShopToonCouncil = 'Your name\nwill be accepted\non next login.  \n' + 'Please re-log to\nget access to\nyour new name\nafter toon creation.'
 PleaseTypeName = 'Please type your name:'
 AllNewNames = 'All new names\nmust be approved\nby the Toon Council.'
 NameShopNameRejected = 'The name you\nsubmitted has\nbeen rejected.'

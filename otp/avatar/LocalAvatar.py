@@ -24,6 +24,12 @@ from direct.controls.ObserverWalker import ObserverWalker
 from direct.controls.PhysicsWalker import PhysicsWalker
 from direct.controls.SwimWalker import SwimWalker
 from direct.controls.TwoDWalker import TwoDWalker
+from otp.avatar import ToontownControlManager
+
+import time
+
+from toontown.toonbase import ToontownGlobals
+
 
 class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.DistributedSmoothNode):
     notify = DirectNotifyGlobal.directNotify.newCategory('LocalAvatar')
@@ -49,7 +55,7 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
         base.pushCTrav(self.cTrav)
         self.cTrav.setRespectPrevTransform(1)
         self.avatarControlsEnabled = 0
-        self.controlManager = ControlManager.ControlManager(True, passMessagesThrough)
+        self.controlManager = ToontownControlManager.ToontownControlManager(True)
         self.initializeCollisions()
         self.initializeSmartCamera()
         self.cameraPositions = []
@@ -80,12 +86,54 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
         self.accept('wakeup', self.wakeUp)
         self.jumpLandAnimFixTask = None
         self.fov = OTPGlobals.DefaultCameraFov
+        self.fallbackFov = self.fov
         self.accept('avatarMoving', self.clearPageUpDown)
         self.nametag2dNormalContents = Nametag.CSpeech
         self.showNametag2d()
         self.setPickable(0)
         self.cameraLerp = None
+        self.lastForwardPress = 0
+        self.accept(base.MOVE_UP, self.__handleForwardPress)
+        self.accept(base.MOVE_UP + '-up', self.__handleForwardRelease)
+        self.isSprinting = 0
         return
+
+    def __handleForwardPress(self):
+
+        # See the time difference from when we last hit forward key
+        timeDif = time.time() - self.lastForwardPress
+        # If we hit the forward key a second or less ago set state to sprinting
+        if timeDif <= OTPGlobals.ToonDoubleTapSprintWindow:
+            self.setSprinting()
+
+        # Otherwise update last time we pressed sprint key
+        self.lastForwardPress = time.time()
+
+    def __handleForwardRelease(self):
+        self.exitSprinting()
+
+    def __setFov(self, fov):
+        localAvatar.setCameraFov(fov, updateFallback=False)
+
+    def lerpFov(self, start, target):
+        LerpFunc(
+            self.__setFov, fromData=start, toData=target, duration=.3, blendType='easeInOut'
+        ).start()
+
+    def setSprinting(self):
+        self.currentSpeed = OTPGlobals.ToonForwardSprintSpeed
+        self.currentReverseSpeed = OTPGlobals.ToonReverseSprintSpeed
+        self.controlManager.setSpeeds(OTPGlobals.ToonForwardSprintSpeed, OTPGlobals.ToonJumpForce, OTPGlobals.ToonReverseSprintSpeed, OTPGlobals.ToonRotateSprintingSpeed)
+        self.isSprinting = 1
+        self.lerpFov(self.fov, self.fallbackFov+OTPGlobals.ToonSprintFovIncrease)
+
+    def exitSprinting(self):
+        self.currentSpeed = OTPGlobals.ToonForwardSpeed
+        self.currentReverseSpeed = OTPGlobals.ToonReverseSpeed
+        self.controlManager.setSpeeds(OTPGlobals.ToonForwardSpeed, OTPGlobals.ToonJumpForce, OTPGlobals.ToonReverseSpeed, OTPGlobals.ToonRotateSpeed)
+        if self.isSprinting:
+            self.lerpFov(self.fov, self.fallbackFov)
+        self.isSprinting = 0
 
     def useSwimControls(self):
         self.controlManager.use('swim', self)
@@ -852,7 +900,9 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
             self.camLerpInterval = LerpFunctionInterval(setCamFov, fromData=oldFov, toData=fov, duration=time, name='cam-fov-lerp')
             self.camLerpInterval.start()
 
-    def setCameraFov(self, fov):
+    def setCameraFov(self, fov, updateFallback=True):
+        if updateFallback:
+            self.fallbackFov = fov
         self.fov = fov
         if not (self.isPageDown or self.isPageUp):
             base.camLens.setMinFov(self.fov / (4. / 3.))
@@ -937,24 +987,24 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
         return self.animMultiplier
 
     def enableRun(self):
-        self.accept('arrow_up', self.startRunWatch)
-        self.accept('arrow_up-up', self.stopRunWatch)
-        self.accept('control-arrow_up', self.startRunWatch)
-        self.accept('control-arrow_up-up', self.stopRunWatch)
-        self.accept('alt-arrow_up', self.startRunWatch)
-        self.accept('alt-arrow_up-up', self.stopRunWatch)
-        self.accept('shift-arrow_up', self.startRunWatch)
-        self.accept('shift-arrow_up-up', self.stopRunWatch)
+        self.accept(base.MOVE_UP, self.startRunWatch)
+        self.accept(base.MOVE_UP + '-up', self.stopRunWatch)
+        self.accept('control-'+ base.MOVE_UP, self.startRunWatch)
+        self.accept('control-'+ base.MOVE_UP + '-up', self.stopRunWatch)
+        self.accept('alt-'+ base.MOVE_UP, self.startRunWatch)
+        self.accept('alt-'+ base.MOVE_UP + '-up', self.stopRunWatch)
+        self.accept('shift-' + base.MOVE_UP, self.startRunWatch)
+        self.accept('shift-' + base.MOVE_UP + '-up', self.stopRunWatch)
 
     def disableRun(self):
-        self.ignore('arrow_up')
-        self.ignore('arrow_up-up')
-        self.ignore('control-arrow_up')
-        self.ignore('control-arrow_up-up')
-        self.ignore('alt-arrow_up')
-        self.ignore('alt-arrow_up-up')
-        self.ignore('shift-arrow_up')
-        self.ignore('shift-arrow_up-up')
+        self.ignore(base.MOVE_UP)
+        self.ignore(base.MOVE_UP + '-up')
+        self.ignore('control-'+ base.MOVE_UP)
+        self.ignore('control-' + base.MOVE_UP + '-up')
+        self.ignore('alt-' + base.MOVE_UP)
+        self.ignore('alt-' + base.MOVE_UP + '-up')
+        self.ignore('shift-' + base.MOVE_UP)
+        self.ignore('shift-' + base.MOVE_UP + '-up')
 
     def startRunWatch(self):
 
