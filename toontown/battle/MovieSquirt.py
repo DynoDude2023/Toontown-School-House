@@ -353,9 +353,9 @@ def __doWaterGlass(squirt, delay, fShowStun):
             if not lod0.find('**/def_head').isEmpty():
                 joint = lod0.find('**/def_head')
             else:
-                joint = lod0.find('**/joint_head')
+                joint = lod0.find('**/def_head')
         else:
-            joint = lod0.find('**/joint_head')
+            joint = lod0.find('**/def_head')
         n = hidden.attachNewNode('pointInFrontOfHead')
         n.reparentTo(toon)
         n.setPos(joint.getPos(toon) + Point3(0, 0.3, -0.2))

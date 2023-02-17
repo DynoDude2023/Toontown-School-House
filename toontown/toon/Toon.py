@@ -2757,7 +2757,7 @@ class Toon(Avatar.Avatar, ToonHead):
         for part in suit.getHeadParts():
             part.hide()
 
-        suitHeadNull = suit.find('**/joint_head')
+        suitHeadNull = suit.find('**/def_head')
         toonHead = self.getPart('head', '1000')
         Emote.globalEmote.disableAll(self)
         toonGeom = self.getGeomNode()
