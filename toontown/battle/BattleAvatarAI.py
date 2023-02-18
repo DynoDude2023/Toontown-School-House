@@ -23,6 +23,7 @@ class BattleAvatarAI(DistributedObjectAI):
             effect.setStatusEffectTargetId(self.av)
             self.statusEffectNames.append(effectName)
             self.statusEffects.append(effect)
+            self.av.sendUpdate('addStatusEffectVisual', [effectName])
 
     def calculateRound(self):
         for effect in self.statusEffects:
@@ -35,3 +36,5 @@ class BattleAvatarAI(DistributedObjectAI):
                 print('Suit status effect has worn off')
                 effect.reset()
                 self.statusEffects.remove(effect)
+                self.statusEffectNames.remove(effect.getStatusEffectName())
+                self.av.sendUpdate('removeStatusEffectVisual', [effect.getStatusEffectName()])

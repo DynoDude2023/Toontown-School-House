@@ -973,6 +973,8 @@ dclass DistributedAnimatedProp : DistributedObject {
 typedef int16 pair16[2];
 
 dclass DistributedToon : DistributedPlayer {
+  addStatusEffectVisual(string) broadcast ram;
+  removeStatusEffectVisual(string) broadcast ram;
   setDNAString(blob) required broadcast ownrecv db;
   setGM(uint8 = 0) required broadcast ownrecv db;
   setMaxBankMoney(int16 = 12000) required broadcast ownrecv db;
@@ -1268,6 +1270,8 @@ dclass DistributedSuitBase : DistributedObject {
   setSkelecog(uint8) required broadcast ram;
   setSkeleRevives(uint8) required broadcast ram;
   setHP(int16) required broadcast ram;
+  addStatusEffectVisual(string) broadcast ram;
+  removeStatusEffectVisual(string) broadcast ram;
 };
 
 dclass DistributedSuit : DistributedSuitBase {

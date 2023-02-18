@@ -698,14 +698,8 @@ class Suit(Avatar.Avatar):
 
         def __doItTheOldWay__():
             torsoTex=loader.loadTexture('phase_%s/maps/%s_blazer.jpg' % (phase, dept))
-            torsoTex.setMinfilter(Texture.FTNearestMipmapLinear)
-            torsoTex.setMagfilter(Texture.FTNearest)
             legTex=loader.loadTexture('phase_%s/maps/%s_leg.jpg' % (phase, dept))
-            legTex.setMinfilter(Texture.FTNearestMipmapLinear)
-            legTex.setMagfilter(Texture.FTNearest)
             armTex=loader.loadTexture('phase_%s/maps/%s_sleeve.jpg' % (phase, dept))
-            armTex.setMinfilter(Texture.FTNearestMipmapLinear)
-            armTex.setMagfilter(Texture.FTNearest)
             modelRoot.find('**/torso').setTexture(torsoTex, 1)
             modelRoot.find('**/arms').setTexture(armTex, 1)
             modelRoot.find('**/legs').setTexture(legTex, 1)

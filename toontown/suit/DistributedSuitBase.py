@@ -24,6 +24,34 @@ from toontown.battle import BattleProps
 import math
 import copy
 
+from direct.directnotify import DirectNotifyGlobal
+from toontown.battle.statusEffect.BattleStatusEffectGlobals import *
+from direct.interval.IntervalGlobal import *
+from panda3d.core import *
+from toontown.battle import BattleParticles
+
+
+class StatusEffectVisual:
+
+    def __init__(self, effectName, suit, visualType=STATUS_VISUAL_PIXIE_WALL):
+        self.effectName = effectName
+        self.visualType = visualType
+
+        if self.visualType == STATUS_VISUAL_PIXIE_WALL:
+            self.visualWall = BattleParticles.createParticleEffect(file='pixieDrop', color=STATUS_EFFECT2VISUAL_COLOR[self.effectName])
+            self.visualInterval = ParticleInterval(self.visualWall, suit, False, duration=60, cleanup=False)
+            self.visualParticals = self.visualWall.getParticlesNamed('particles-1')
+            self.visualParticals.renderer.setCenterColor(STATUS_EFFECT2VISUAL_COLOR[self.effectName])
+            self.visualParticals.renderer.setEdgeColor(STATUS_EFFECT2VISUAL_COLOR[self.effectName])
+
+    def startVisualInterval(self):
+        self.visualWall.show()
+        self.visualInterval.loop()
+
+    def stopVisualInterval(self):
+        self.visualWall.hide()
+        self.visualInterval.finish()
+
 class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBase.SuitBase):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedSuitBase')
 
@@ -57,6 +85,7 @@ class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBa
         self.maxSkeleRevives = 0
         self.sillySurgeText = False
         self.interactivePropTrackBonus = -1
+        self.statusEffectVisuals={}
         return
 
     def setVirtual(self, virtual):
@@ -65,6 +94,22 @@ class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBa
     def getVirtual(self):
         return 0
 
+    def addStatusEffectVisual(self, effectName, visualType=STATUS_VISUAL_PIXIE_WALL):
+        if effectName in self.statusEffectVisuals:
+            self.notify.warning('Suit already has status effect %s' % effectName)
+            return
+        self.statusEffectVisuals[effectName] = StatusEffectVisual(effectName, self, visualType)
+        self.statusEffectVisuals[effectName].startVisualInterval()
+        print('added status effect visual')
+
+    def removeStatusEffectVisual(self, effectName):
+        if effectName not in self.statusEffectVisuals:
+            self.notify.warning('Suit does not have status effect %s' % effectName)
+            return
+        self.statusEffectVisuals[effectName].stopVisualInterval()
+        del self.statusEffectVisuals[effectName]
+        print('removed status effect visual')
+    
     def setSkeleRevives(self, num):
         if num == None:
             num = 0
