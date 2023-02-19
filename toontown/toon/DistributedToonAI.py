@@ -211,6 +211,7 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         self.unlimitedGags = False
         self.instaKill = False
         self.alwaysHitSuits = False
+        self.gagLevelDebuff = 0
         return
 
     def generate(self):
@@ -275,6 +276,10 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
                     self.cleanupEstateData()
         DistributedAvatarAI.DistributedAvatarAI.sendDeleteEvent(self)
 
+    def setGagLevelCap(self, gagLevelCap):
+        self.gagLevelDebuff = gagLevelCap
+        self.sendUpdate('setGagLevelCap', [gagLevelCap])
+    
     def delete(self):
         self.notify.debug('----Deleting DistributedToonAI %d ' % self.doId)
         if self.isPlayerControlled():

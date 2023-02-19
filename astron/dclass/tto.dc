@@ -973,6 +973,7 @@ dclass DistributedAnimatedProp : DistributedObject {
 typedef int16 pair16[2];
 
 dclass DistributedToon : DistributedPlayer {
+  setGagLevelCap(int64) broadcast ram;
   addStatusEffectVisual(string) broadcast ram;
   removeStatusEffectVisual(string) broadcast ram;
   setDNAString(blob) required broadcast ownrecv db;

@@ -44,6 +44,11 @@ class DistributedStageAI(DistributedObjectAI.DistributedObjectAI):
         description = '%s|%s|%s' % (self.stageId, self.floorNum, self.avIds)
         for avId in self.avIds:
             self.air.writeServerEvent('stageEntered', avId, description)
+        
+        for avId in self.avIds:
+            toon = simbase.air.doId2do.get(avId)
+            if toon:
+                toon.setGagLevelCap(5)
 
         return
 

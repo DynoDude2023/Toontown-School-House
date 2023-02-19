@@ -235,7 +235,7 @@ class InventoryNew(InventoryBase.InventoryBase, DirectFrame):
              TrackColors[track][2] * 0.9,
              1), text='0 / 0', text_scale=0.16, text_fg=(0, 0, 0, 0.8), text_align=TextNode.ACenter, text_pos=(0, -0.05)))
             self.buttons.append([])
-            for item in xrange(0, len(Levels[track])):
+            for item in xrange(0, (len(Levels[track]) - localAvatar.gagLevelCap)):
                 button = DirectButton(parent=self.trackRows[track], image=(self.upButton,
                  self.downButton,
                  self.rolloverButton,
@@ -514,6 +514,16 @@ class InventoryNew(InventoryBase.InventoryBase, DirectFrame):
         self.deleteHelpText.hide()
         self.deleteDeactivateButtons()
 
+    def gagDebuff(self, gagDeBuff):
+        for track in xrange(len(Tracks)):
+            if self.toon.hasTrackAccess(track):
+                self.showTrack(track)
+                for level in xrange(len(Levels[track])):
+                    button = self.buttons[track][level]
+                    if level > gagDeBuff:
+                        self.makeUnpressable(button, track, level)
+                        
+    
     def purchaseDeleteActivateButtons(self):
         self.reparentTo(aspect2d)
         self.setPos(0.2, 0, -0.04)
@@ -932,6 +942,9 @@ class InventoryNew(InventoryBase.InventoryBase, DirectFrame):
 
             else:
                 self.hideTrack(track)
+        
+        if localAvatar.gagLevelCap:
+            self.gagDebuff(localAvatar.gagLevelCap)
 
         self.propBonusIval.loop()
         return

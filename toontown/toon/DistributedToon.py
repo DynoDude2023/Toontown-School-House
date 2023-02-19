@@ -220,6 +220,7 @@ class DistributedToon(DistributedPlayer.DistributedPlayer, Toon.Toon, Distribute
         self.immortalMode = False
         self.unlimitedGags = False
         self.instaKill = False
+        self.gagLevelCap = 0
         self.statusEffectVisuals={}
         self.accept('f10', self.openTeleportGUI)
         return
@@ -302,6 +303,12 @@ class DistributedToon(DistributedPlayer.DistributedPlayer, Toon.Toon, Distribute
         self.statusEffectVisuals[effectName].stopVisualInterval()
         del self.statusEffectVisuals[effectName]
         print('removed status effect visual')
+    
+    def setGagLevelCap(self, gagLevelCap):
+        self.gagLevelCap = gagLevelCap
+    
+    def getGagLevelCap(self):
+        return self.gagLevelCap
 
     def announceGenerate(self):
         DistributedPlayer.DistributedPlayer.announceGenerate(self)

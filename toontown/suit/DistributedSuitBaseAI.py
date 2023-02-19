@@ -22,6 +22,7 @@ class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.Su
         self.maxSkeleRevives = 0
         self.reviveFlag = 0
         self.buildingHeight = None
+        self.KBBonus = 0
         return
 
     def generate(self):
@@ -52,6 +53,7 @@ class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.Su
         hp = attributes['hp'][self.level]
         self.maxHP = hp
         self.currHP = hp
+        self.KBBonus = (lvl * 5)
 
     def getLevelDist(self):
         return self.getLevel()
