@@ -281,13 +281,12 @@ class ToontownAIRepository(ToontownInternalRepository):
 
     def createHood(self, hoodCtr, zoneId):
         # Bossbot HQ doesn't use DNA, so we skip over that.
-        if zoneId != ToontownGlobals.BossbotHQ:
-            self.dnaStoreMap[zoneId] = DNAStorage()
-            self.dnaDataMap[zoneId] = loadDNAFileAI(self.dnaStoreMap[zoneId], self.genDNAFileName(zoneId))
-            if zoneId in ToontownGlobals.HoodHierarchy:
-                for streetId in ToontownGlobals.HoodHierarchy[zoneId]:
-                    self.dnaStoreMap[streetId] = DNAStorage()
-                    self.dnaDataMap[streetId] = loadDNAFileAI(self.dnaStoreMap[streetId], self.genDNAFileName(streetId))
+        self.dnaStoreMap[zoneId] = DNAStorage()
+        self.dnaDataMap[zoneId] = loadDNAFileAI(self.dnaStoreMap[zoneId], self.genDNAFileName(zoneId))
+        if zoneId in ToontownGlobals.HoodHierarchy:
+            for streetId in ToontownGlobals.HoodHierarchy[zoneId]:
+                self.dnaStoreMap[streetId] = DNAStorage()
+                self.dnaDataMap[streetId] = loadDNAFileAI(self.dnaStoreMap[streetId], self.genDNAFileName(streetId))
 
         hood = hoodCtr(self, zoneId)
         hood.startup()
@@ -360,7 +359,7 @@ class ToontownAIRepository(ToontownInternalRepository):
 
         # Bossbot HQ
         self.zoneTable[ToontownGlobals.BossbotHQ] = (
-            (ToontownGlobals.BossbotHQ, 0, 0),
+            (ToontownGlobals.BossbotHQ, 0, 1),
         )
         self.createHood(BossbotHQDataAI, ToontownGlobals.BossbotHQ)
 

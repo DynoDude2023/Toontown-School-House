@@ -1619,6 +1619,19 @@ class DistributedToon(DistributedPlayer.DistributedPlayer, Toon.Toon, Distribute
     def announceBingo(self):
         self.setChatAbsolute(TTLocalizer.FishBingoBingo, CFSpeech | CFTimeout)
 
+    def stun(self, damage):
+        if self == base.localAvatar:
+            self.stunToon()
+
+    def d_stun(self, damage):
+        self.sendUpdate('squish', [damage])
+
+    def b_stun(self, damage):
+        if not self.isStunned and self.hp > 0:
+            self.stun(damage)
+            self.d_stun(damage)
+            self.playDialogueForString('!')
+    
     def squish(self, damage):
         if self == base.localAvatar:
             base.cr.playGame.getPlace().fsm.request('squished')

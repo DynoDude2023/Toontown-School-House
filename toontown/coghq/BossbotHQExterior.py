@@ -23,6 +23,18 @@ class BossbotHQExterior(CogHQExterior.CogHQExterior):
         state.addTransition('elevator')
         return
 
+    def enter(self, requestStatus):
+        CogHQExterior.CogHQExterior.enter(self, requestStatus)
+        self.loader.hood.startSky()
+        self.loader.hood.setWhiteFog()
+        self.loader.startCollisionDetection()
+
+    def exit(self):
+        self.loader.hood.setNoFog()
+        self.loader.hood.stopSky()
+        self.loader.stopCollisionDetection()
+        CogHQExterior.CogHQExterior.exit(self)
+
     def enterElevator(self, distElevator, skipDFABoard = 0):
         self.accept(self.elevatorDoneEvent, self.handleElevatorDone)
         self.elevator = Elevator.Elevator(self.fsm.getStateNamed('elevator'), self.elevatorDoneEvent, distElevator)
