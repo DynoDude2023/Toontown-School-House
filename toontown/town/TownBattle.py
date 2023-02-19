@@ -10,6 +10,7 @@ import TownBattleSOSPanel
 import TownBattleSOSPetSearchPanel
 import TownBattleSOSPetInfoPanel
 import TownBattleToonPanel
+import TownBattleCogPanel
 from toontown.toontowngui import TTDialog
 from direct.directnotify import DirectNotifyGlobal
 from toontown.battle import BattleBase
@@ -129,6 +130,10 @@ class TownBattle(StateData.StateData):
          TownBattleToonPanel.TownBattleToonPanel(1),
          TownBattleToonPanel.TownBattleToonPanel(2),
          TownBattleToonPanel.TownBattleToonPanel(3))
+        self.cogPanels = (TownBattleCogPanel.TownBattleCogPanel(0),
+         TownBattleCogPanel.TownBattleCogPanel(1),
+         TownBattleCogPanel.TownBattleCogPanel(2),
+         TownBattleCogPanel.TownBattleCogPanel(3))
         self.timer = ToontownTimer.ToontownTimer()
         self.timer.reparentTo(base.a2dTopRight)
         self.timer.setPos(-0.151, 0, -0.158)
@@ -154,6 +159,10 @@ class TownBattle(StateData.StateData):
             toonPanel.cleanup()
 
         del self.toonPanels
+        for cogPanel in self.cogPanels:
+            cogPanel.cleanup()
+
+        del self.cogPanels
         self.timer.destroy()
         del self.timer
         del self.toons
@@ -163,7 +172,7 @@ class TownBattle(StateData.StateData):
         self.parentFSMState.addChild(self.fsm)
         if not self.isLoaded:
             self.load()
-        print 'Battle Event %s' % event
+        print('Battle Event %s' % event)
         self.battleEvent = event
         self.fsm.enterInitialState()
         base.localAvatar.laffMeter.start()
@@ -194,8 +203,9 @@ class TownBattle(StateData.StateData):
         self.chooseCogPanel.load()
         self.chooseToonPanel.load()
         self.SOSPanel.load()
-        self.SOSPetSearchPanel.load()
-        self.SOSPetInfoPanel.load()
+        if hasattr(base, 'wantPets') and base.wantPets:
+            self.SOSPetSearchPanel.load()
+            self.SOSPetInfoPanel.load()
         self.isLoaded = 1
 
     def unload(self):
@@ -207,8 +217,9 @@ class TownBattle(StateData.StateData):
         self.chooseToonPanel.unload()
         self.FireCogPanel.unload()
         self.SOSPanel.unload()
-        self.SOSPetSearchPanel.unload()
-        self.SOSPetInfoPanel.unload()
+        if hasattr(base, 'wantPets') and base.wantPets:
+            self.SOSPetSearchPanel.unload()
+            self.SOSPetInfoPanel.unload()
         self.isLoaded = 0
 
     def setState(self, state):
@@ -219,6 +230,29 @@ class TownBattle(StateData.StateData):
         self.time = time
         self.timer.setTime(time)
         return None
+
+    def __cogPanels(self, num):
+        for panel in self.cogPanels:
+            panel.hide()
+            panel.setPos(0, 0, 0.7)
+
+        if num == 1:
+            self.cogPanels[0].setX(self.oddPos[1])
+            self.cogPanels[0].show()
+        elif num == 2:
+            for i in range(2):
+                self.cogPanels[i].setX(self.evenPos[i + 1])
+                self.cogPanels[i].show()
+
+        elif num == 3:
+            for i in range(3):
+                self.cogPanels[i].setX(self.oddPos[i])
+                self.cogPanels[i].show()
+
+        elif num == 4:
+            for i in range(4):
+                self.cogPanels[i].setX(self.evenPos[i])
+                self.cogPanels[i].show()
 
     def __enterPanels(self, num, localNum):
         self.notify.debug('enterPanels() num: %d localNum: %d' % (num, localNum))
@@ -259,7 +293,7 @@ class TownBattle(StateData.StateData):
          tracks,
          levels,
          targets))
-        for i in xrange(4):
+        for i in range(4):
             if battleIndices[i] == -1:
                 pass
             else:
@@ -309,6 +343,9 @@ class TownBattle(StateData.StateData):
             for toonPanel in self.toonPanels:
                 toonPanel.hide()
 
+            for cogPanel in self.cogPanels:
+                cogPanel.hide()
+
         self.toonAttacks = [(-1, 0, 0),
          (-1, 0, 0),
          (-1, 0, 0),
@@ -321,6 +358,7 @@ class TownBattle(StateData.StateData):
     def exitOff(self):
         if self.isLoaded:
             self.__enterPanels(self.numToons, self.localNum)
+            self.__cogPanels(self.numCogs)
         self.timer.show()
         self.track = -1
         self.level = -1
@@ -431,7 +469,7 @@ class TownBattle(StateData.StateData):
         self.notify.debug('adjustCogsAndToons() numCogs: %s self.numCogs: %s' % (numCogs, self.numCogs))
         self.notify.debug('adjustCogsAndToons() luredIndices: %s self.luredIndices: %s' % (luredIndices, self.luredIndices))
         self.notify.debug('adjustCogsAndToons() trappedIndices: %s self.trappedIndices: %s' % (trappedIndices, self.trappedIndices))
-        toonIds = map(lambda toon: toon.doId, toons)
+        toonIds = [toon.doId for toon in toons]
         self.notify.debug('adjustCogsAndToons() toonIds: %s self.toons: %s' % (toonIds, self.toons))
         maxSuitLevel = 0
         cogFireCostIndex = 0
@@ -456,8 +494,12 @@ class TownBattle(StateData.StateData):
         currStateName = self.fsm.getCurrentState().getName()
         if resetActivateMode:
             self.__enterPanels(self.numToons, self.localNum)
-            for i in xrange(len(toons)):
+            self.__cogPanels(self.numCogs)
+            for i in range(len(toons)):
                 self.toonPanels[i].setLaffMeter(toons[i])
+
+            for i in range(len(cogs)):
+                self.cogPanels[i].setCogInformation(cogs[i])
 
             if currStateName == 'ChooseCog':
                 self.chooseCogPanel.adjustCogs(self.numCogs, self.luredIndices, self.trappedIndices, self.track)
