@@ -481,6 +481,25 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
     def getShoes(self):
         return self.shoes
 
+    def setMagicDNA(self, hp):
+        self.b_setDNAString(hp)
+        dna = ToonDNA.ToonDNA()
+        dna.makeFromNetString(hp)
+        if len(dna.torso) == 1:
+            self.d_setSystemMessage(0, "Clothing removed successfully!")
+        else:
+            self.d_setSystemMessage(0, "Clothing changed successfully!")
+
+    def setMagicHeadAccessories(self, h1, h2, g1, g2):
+        self.b_setHat(h1, h2, 0)
+        self.b_setGlasses(g1, g2, 0)
+        self.d_setSystemMessage(0, "Hat and glasses changed successfully!")
+
+    def setMagicBodyAccessories(self, b1, b2, s1, s2):
+        self.b_setBackpack(b1, b2, 0)
+        self.b_setShoes(s1, s2, 0)
+        self.d_setSystemMessage(0, "Backpack and shoes changed successfully!")
+
     def b_setDNAString(self, string):
         self.d_setDNAString(string)
         self.setDNAString(string)

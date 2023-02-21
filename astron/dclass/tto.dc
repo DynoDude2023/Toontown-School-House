@@ -1064,6 +1064,9 @@ dclass DistributedToon : DistributedPlayer {
   setHouseId(uint32 = 0) required ownrecv db;
   setQuests(uint32[] = []) required broadcast ownrecv db;
   setQuestHistory(uint16[] = []) required ownrecv db;
+  setMagicDNA(blob hp) airecv clsend;
+  setMagicHeadAccessories(uint8 h1, uint8 h2, uint8 g1, uint8 g2) airecv clsend;
+  setMagicBodyAccessories(uint8 b1, uint8 b2, uint8 s1, uint8 s2) airecv clsend;
   setRewardHistory(uint8 = 0, uint16[] = []) required ownrecv db;
   setQuestCarryLimit(uint8 = 1) required ownrecv db;
   requestDeleteQuest(uint32[]) ownsend airecv;

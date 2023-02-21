@@ -349,6 +349,27 @@ class DistributedToon(DistributedPlayer.DistributedPlayer, Toon.Toon, Distribute
         self.setBackpack(*oldBackpack)
         self.setShoes(*oldShoes)
 
+    def setMagicDNA(self, hp):
+        self.sendUpdate('setMagicDNA', [hp])
+
+    def setMagicHeadAccessories(self, h1, h2, g1, g2):
+        self.sendUpdate('setMagicHeadAccessories', [h1, h2, g1, g2])
+
+    def setMagicBodyAccessories(self, b1, b2, s1, s2):
+        self.sendUpdate('setMagicBodyAccessories', [b1, b2, s1, s2])
+
+    def setHat(self, idx, textureIdx, colorIdx):
+        Toon.Toon.setHat(self, idx, textureIdx, colorIdx)
+
+    def setGlasses(self, idx, textureIdx, colorIdx):
+        Toon.Toon.setGlasses(self, idx, textureIdx, colorIdx)
+
+    def setBackpack(self, idx, textureIdx, colorIdx):
+        Toon.Toon.setBackpack(self, idx, textureIdx, colorIdx)
+
+    def setShoes(self, idx, textureIdx, colorIdx):
+        Toon.Toon.setShoes(self, idx, textureIdx, colorIdx)
+
     def setHat(self, idx, textureIdx, colorIdx):
         Toon.Toon.setHat(self, idx, textureIdx, colorIdx)
 
