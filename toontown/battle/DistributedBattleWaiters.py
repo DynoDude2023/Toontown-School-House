@@ -61,12 +61,8 @@ class DistributedBattleWaiters(DistributedBattleFinal.DistributedBattleFinal):
             if suit.dna.dept == 'l':
                 suit.reparentTo(self.bossCog)
                 suit.setPos(0, 0, 0)
-            if suit in self.joiningSuits:
-                i = len(self.pendingSuits) + self.joiningSuits.index(suit)
-                destPos, h = self.suitPendingPoints[i]
-                destHpr = VBase3(h, 0, 0)
-            else:
-                destPos, destHpr = self.getActorPosHpr(suit, self.suits)
+            destPos, destHpr = self.getActorPosHpr(suit, self.suits)
+            destPos[1] += 3
             startPos = destPos + Point3(0, 0, SuitTimings.fromSky * ToontownGlobals.SuitWalkSpeed)
             self.notify.debug('startPos for %s = %s' % (suit, startPos))
             suit.reparentTo(self)

@@ -106,12 +106,8 @@ class DistributedBattleFinal(DistributedBattleBase.DistributedBattleBase):
             suit.setPos(self.bossCog, 0, 0, 0)
             suit.headsUp(self)
             suit.setScale(3.8 / suit.height)
-            if suit in self.joiningSuits:
-                i = len(self.pendingSuits) + self.joiningSuits.index(suit)
-                destPos, h = self.suitPendingPoints[i]
-                destHpr = VBase3(h, 0, 0)
-            else:
-                destPos, destHpr = self.getActorPosHpr(suit, self.suits)
+            destPos, destHpr = self.getActorPosHpr(suit, self.suits)
+            destPos[1] += 3
             suitTrack.append(Track((delay, self.createAdjustInterval(suit, destPos, destHpr)), (delay + 1.5, suit.scaleInterval(1.5, 1))))
             delay += 1
 
