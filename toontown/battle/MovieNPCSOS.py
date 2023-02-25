@@ -142,7 +142,7 @@ def __doSprinkle(attack, recipients, hp = 0):
         toon.headsUp(battle, targetPoint)
 
     delay = 2.5
-    effectTrack = Sequence()
+    effectTrack = Parallel()
     for target in targets:
         sprayEffect = BattleParticles.createParticleEffect(file='pixieSpray')
         dropEffect = BattleParticles.createParticleEffect(file='pixieDrop')
