@@ -53,7 +53,12 @@ class DistributedFactoryAI(DistributedLevelAI.DistributedLevelAI, FactoryBase.Fa
          scenario,
          self.avIdList)
         for avId in self.avIdList:
-            self.air.writeServerEvent('factoryEntered', avId, description)
+            self.air.writeServerEvent('factoryEntered', avId, description)\
+        
+        for avId in self.avIdList:
+            toon = simbase.air.doId2do.get(avId)
+            if toon:
+                toon.setGagLevelCap(4)
 
         self.notify.info('finish factory %s %s creation' % (self.factoryId, self.doId))
 

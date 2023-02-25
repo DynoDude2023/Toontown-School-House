@@ -139,10 +139,17 @@ class DistributedLevelBattle(DistributedBattle.DistributedBattle):
                     taunt = SuitBattleGlobals.getFaceoffTaunt(suit.getStyleName(), suit.doId)
                 oneSuitTrack.append(Func(suit.setChatAbsolute, taunt, CFSpeech | CFTimeout))
             destPos, destHpr = self.getActorPosHpr(suit, self.suits)
-            oneSuitTrack.append(Wait(delay))
+            if self.suits.index(suit) == leaderIndex:
+                oneSuitTrack.append(Wait(delay))
             if suitIsLeader == 1:
                 oneSuitTrack.append(Func(suit.clearChat))
-            oneSuitTrack.append(self.createAdjustInterval(suit, destPos, destHpr))
+            oneSuitTrack.append(Func(suit.reparentTo, self))
+            oneSuitTrack.append(Func(suit.headsUp, self, destPos))
+            oneSuitTrack.append(Func(suit.loop, 'walk'))
+            suitPosInterval = LerpPosInterval(suit, duration=0.5, pos=destPos, fluid=1)
+            oneSuitTrack.append(suitPosInterval)
+            oneSuitTrack.append(Func(suit.loop, 'neutral'))
+            oneSuitTrack.append(Func(suit.setHpr, destHpr))
             suitTrack.append(oneSuitTrack)
 
         suitHeight = suitLeader.getHeight()
@@ -178,7 +185,7 @@ class DistributedLevelBattle(DistributedBattle.DistributedBattle):
             NametagGlobals.setMasterArrowsOn(0)
             mtrack = Parallel(mtrack, camTrack)
         done = Func(callback)
-        track = Sequence(mtrack, done, name=name)
+        track = Sequence(mtrack, name=name)
         track.start(ts)
         self.storeInterval(track, name)
         return
