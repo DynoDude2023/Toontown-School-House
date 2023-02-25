@@ -2,6 +2,7 @@ from direct.interval.IntervalGlobal import *
 from BattleProps import *
 from BattleSounds import *
 from BattleBase import *
+from libotp import *
 from direct.directnotify import DirectNotifyGlobal
 import MovieCamera
 import random
@@ -58,7 +59,7 @@ def __runToHealSpot(heal):
     battle = heal['battle']
     level = heal['level']
     origPos, origHpr = battle.getActorPosHpr(toon)
-    runAnimI = ActorInterval(toon, 'run', duration=runHealTime)
+    runAnimI = Func(toon.loop, 'run')
     a = Func(toon.headsUp, battle, healPos)
     b = Parallel(runAnimI, LerpPosInterval(toon, runHealTime, healPos, other=battle))
     if levelAffectsGroup(HEAL, level):
@@ -74,7 +75,7 @@ def __returnToBase(heal):
     toon = heal['toon']
     battle = heal['battle']
     origPos, origHpr = battle.getActorPosHpr(toon)
-    runAnimI = ActorInterval(toon, 'run', duration=runHealTime)
+    runAnimI = Func(toon.loop, 'run')
     a = Func(toon.headsUp, battle, origPos)
     b = Parallel(runAnimI, LerpPosInterval(toon, runHealTime, origPos, other=battle))
     c = Func(toon.setHpr, battle, origHpr)

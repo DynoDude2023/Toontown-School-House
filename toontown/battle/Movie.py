@@ -428,30 +428,42 @@ class Movie(DirectObject.DirectObject):
             if ival:
                 track.append(ival)
                 camTrack.append(camIval)
+            lureTrapPair = Parallel()
+            lureTrapPairCam = Parallel()
             ival, camIval = MovieTrap.doTraps(self.__findToonAttack(TRAP))
             if ival:
-                track.append(ival)
-                camTrack.append(camIval)
+                lureTrapPair.append(ival)
+                lureTrapPairCam.append(camIval)
             ival, camIval = MovieLure.doLures(self.__findToonAttack(LURE))
             if ival:
-                track.append(ival)
-                camTrack.append(camIval)
-            ival, camIval = MovieSound.doSounds(self.__findToonAttack(SOUND))
-            if ival:
-                track.append(ival)
-                camTrack.append(camIval)
+                lureTrapPair.append(ival)
+                lureTrapPairCam.append(camIval)
+            track.append(lureTrapPair)
+            camTrack.append(lureTrapPairCam)
+            squirtThrowPair = Parallel()
+            squirtThrowPairCam = Parallel()
             ival, camIval = MovieThrow.doThrows(self.__findToonAttack(THROW))
             if ival:
-                track.append(ival)
-                camTrack.append(camIval)
+                squirtThrowPair.append(ival)
+                squirtThrowPairCam.append(camIval)
             ival, camIval = MovieSquirt.doSquirts(self.__findToonAttack(SQUIRT))
             if ival:
-                track.append(ival)
-                camTrack.append(camIval)
+                squirtThrowPair.append(ival)
+                squirtThrowPairCam.append(camIval)
+            track.append(squirtThrowPair)
+            camTrack.append(squirtThrowPairCam)
+            soundDropPair = Parallel()
+            soundDropPairCam = Parallel()
+            ival, camIval = MovieSound.doSounds(self.__findToonAttack(SOUND))
+            if ival:
+                soundDropPair.append(ival)
+                soundDropPairCam.append(camIval)
             ival, camIval = MovieDrop.doDrops(self.__findToonAttack(DROP))
             if ival:
-                track.append(ival)
-                camTrack.append(camIval)
+                soundDropPair.append(ival)
+                soundDropPairCam.append(camIval)
+            track.append(soundDropPair)
+            camTrack.append(soundDropPairCam)
             if len(track) == 0:
                 return (None, None)
             else:
