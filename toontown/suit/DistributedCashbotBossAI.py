@@ -158,7 +158,10 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
                 toonId = self.toonsToAttack.pop(0)
 
             self.toonsToAttack.append(toonId)
-            self.b_setAttackCode(ToontownGlobals.BossCogSlowDirectedAttack, toonId)
+            if random.choice([0, 0, 0, 1]) == 1:
+                self.b_setAttackCode(ToontownGlobals.BossCogAreaAttack)
+            else:
+                self.b_setAttackCode(ToontownGlobals.BossCogSlowDirectedAttack, toonId)
 
     def reprieveToon(self, avId):
         if avId in self.toonsToAttack:

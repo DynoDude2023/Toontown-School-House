@@ -218,6 +218,8 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
         planeNode.setCollideMask(ToontownGlobals.PieBitmask)
         self.geom.attachNewNode(planeNode)
         self.geom.reparentTo(render)
+        self.battleThreeMusic = base.loader.loadMusic('phase_10/audio/bgm/ttr_s_ara_chq_crane.ogg')
+        self.battleThreeTutorialMusic = base.loader.loadMusic('phase_10/audio/bgm/ttr_s_ara_chq_cranetutorial.ogg')
 
     def unloadEnvironment(self):
         DistributedBossCog.DistributedBossCog.unloadEnvironment(self)
@@ -725,6 +727,7 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
         self.endVault.unstash()
         self.evWalls.stash()
         self.midVault.unstash()
+        base.playMusic(self.battleThreeTutorialMusic, looping=0, volume=0.9)
         self.__showResistanceToon(False)
         taskMgr.add(self.__doPhysics, self.uniqueName('physics'), priority=25)
 
@@ -738,6 +741,7 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
         self.clearInterval(intervalName)
         self.unstickToons()
         self.releaseToons()
+        self.battleThreeTutorialMusic.stop()
         if self.newState == 'BattleThree':
             self.movieCrane.request('Free')
             self.movieSafe.request('Initial')
