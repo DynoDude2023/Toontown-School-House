@@ -138,6 +138,9 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
         self.timer.resume()
         self.adjustingTimer.resume()
 
+    def sendBossRewardMovie(toonId, targetId, damage, healing, npcId, SOS_ID):
+        self.sendUpdate('addBossRewardMovie', [toonId, targetId, damage, healing, npcId, SOS_ID])
+    
     def abortBattle(self):
         self.notify.debug('%s.abortBattle() called.' % self.doId)
         toonsCopy = self.toons[:]

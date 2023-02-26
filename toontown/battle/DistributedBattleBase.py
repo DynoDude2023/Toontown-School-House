@@ -549,6 +549,12 @@ class DistributedBattleBase(DistributedNode.DistributedNode, BattleBase):
 
         if movieHasBeenMade:
             self.movie.genAttackDicts(activeToons, activeSuits, toonAttacks, suitAttacks, gradualDamages)
+    
+    def addBossRewardMovie(self, bossRewardMovie):
+        if self.__battleCleanedUp:
+            return
+        toonId, targetId, damage, healing, npcId, SOS_ID = bossRewardMovie
+        #TODO: add boss reward movie to movie.py
 
     def setChosenToonAttacks(self, ids, tracks, levels, targets):
         if self.__battleCleanedUp:

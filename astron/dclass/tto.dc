@@ -1498,6 +1498,16 @@ struct BattleMovie {
   GradualDamage[] gradualDamages;
 };
 
+
+struct BossRewardMovie {
+  uint64 toonId;
+  uint64 targetId;
+  uint64 damage;
+  uint64 healing;
+  uint64 npcId;
+  uint64 sos_id;
+};
+
 dclass DistributedBattleBase : DistributedObject {
   setLevelDoId(uint32) required broadcast ram;
   setBattleCellId(uint32) required broadcast ram;
@@ -1508,6 +1518,7 @@ dclass DistributedBattleBase : DistributedObject {
   setMembers(uint32[], string, string, string, string, string, uint32[], string, string, string, string, int16) required broadcast ram;
   adjust(int16) broadcast;
   setMovie(BattleMovie movie) required broadcast ram;
+  addBossRewardMovie(BossRewardMovie movie) required broadcast ram;
   setChosenToonAttacks(uint32[], int16[], int16[], int32[]) broadcast ram;
   setBattleExperience(int32, int16[], int16[], uint32[], int16[], int16[], int16[], int16[], uint32[], int32, int16[], int16[], uint32[], int16[], int16[], int16[], int16[], uint32[], int32, int16[], int16[], uint32[], int16[], int16[], int16[], int16[], uint32[], int32, int16[], int16[], uint32[], int16[], int16[], int16[], int16[], uint32[], uint8[], int16[], uint32[]) required broadcast ram;
   denyLocalToonJoin();
