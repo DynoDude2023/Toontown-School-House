@@ -24,25 +24,23 @@ class TownBattleCogPanel(DirectFrame):
      Vec4(0.3, 0.3, 0.3, 0))
 
     def __init__(self, id):
-        gui = loader.loadModel('phase_3.5/models/gui/battle_gui')
-        DirectFrame.__init__(self, relief=None, image=gui.find('**/ToonBtl_Status_BG'), image_color=Vec4(0.7, 0.7, 0.7, 0.8))
-        self.setScale(0.8)
+        gui = loader.loadModel('phase_3.5/models/gui/ttr_m_gui_bat_cogGUI')
+        DirectFrame.__init__(self, relief=None, image=gui, image_color=Vec4(1, 1, 1, 0.95))
+        self.setScale(0.05)
         self.initialiseoptions(TownBattleCogPanel)
         self.hidden = False
         self.cog = None
-        self.healthText = DirectLabel(parent=self, text='', pos=(0, 0, -0.075), text_scale=0.055)
-        healthGui = loader.loadModel('phase_3.5/models/gui/matching_game_gui')
-        button = healthGui.find('**/minnieCircle')
+        self.healthText = DirectLabel(parent=self, text='', pos=(1.03302, 0, -1.88994), text_scale=0.055)
+        button = gui.find('**/ttr_t_gui_bat_cogGUI_health_light_card')
         button.setScale(0.5)
         button.setH(180)
-        button.setColor(Vec4(0, 1, 0, 1))
+        button.setColor(Vec4(1, 0, 0, 1))
         self.accept('inventory-levels', self.__handleToggle)
         self.healthNode = self.attachNewNode('health')
         self.healthNode.setPos(-0.06, 0, 0.05)
-        button.reparentTo(self.healthNode)
         glow = BattleProps.globalPropPool.getProp('glow')
         glow.reparentTo(button)
-        glow.setScale(0.28)
+        glow.setScale(0.0)
         glow.setPos(-0.005, 0.01, 0.015)
         glow.setColor(Vec4(0.25, 1, 0.25, 0.5))
         self.button = button
@@ -50,7 +48,6 @@ class TownBattleCogPanel(DirectFrame):
         self.head = None
         self.blinkTask = None
         self.hide()
-        healthGui.removeNode()
         gui.removeNode()
 
     def setCogInformation(self, cog):
@@ -69,7 +66,8 @@ class TownBattleCogPanel(DirectFrame):
         d = p2 - p1
         biggest = max(d[0], d[1], d[2])
         s = 0.1 / biggest
-        self.head.setPosHprScale(0.1, 0, 0.01, 180, 0, 0, s, s, s)
+        self.head.setPosHprScale(-1.58605, -0.1, -0.747626, 180, 0, 0, s, s, s)
+        self.head.setScale(1.2)
         self.setLevelText(cog.getActualLevel(), cog.getSkeleRevives())
 
     def setLevelText(self, hp, revives = 0):

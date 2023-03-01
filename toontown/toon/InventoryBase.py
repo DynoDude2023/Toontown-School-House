@@ -293,7 +293,7 @@ class InventoryBase(DirectObject.DirectObject):
 
     def NPCMaxOutInv(self, targetTrack = -1):
         result = 0
-        for level in xrange(5, -1, -1):
+        for level in xrange(7, -1, -1):
             anySpotsAvailable = 1
             while anySpotsAvailable == 1:
                 anySpotsAvailable = 0
