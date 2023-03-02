@@ -17,11 +17,15 @@ class TownBattleToonPanel(DirectFrame):
         self.setScale(0.8)
         self.initialiseoptions(TownBattleToonPanel)
         self.avatar = None
-        self.sosText = DirectLabel(parent=self, relief=None, pos=(0.1, 0, 0.015), text=TTLocalizer.TownBattleToonSOS, text_scale=0.06)
+        self.mickeyFont = loader.loadFont('phase_3/fonts/MickeyFontMaximum.bam')
+        self.sosText = DirectLabel(parent=self, relief=None, pos=(0.1, 0, 0.015), text=TTLocalizer.TownBattleToonSOS, text_scale=0.06, text_font=self.mickeyFont)
         self.sosText.hide()
-        self.fireText = DirectLabel(parent=self, relief=None, pos=(0.1, 0, 0.015), text=TTLocalizer.TownBattleToonFire, text_scale=0.06)
+        self.gagHPText = DirectLabel(parent=self, relief=None, pos=(0.1, 0, 0.125), text='',
+                                   text_scale=0.06, text_font=self.mickeyFont)
+        self.gagHPText.hide()
+        self.fireText = DirectLabel(parent=self, relief=None, pos=(0.1, 0, 0.015), text=TTLocalizer.TownBattleToonFire, text_scale=0.06, text_font=self.mickeyFont)
         self.fireText.hide()
-        self.undecidedText = DirectLabel(parent=self, relief=None, pos=(0.1, 0, 0.015), text=TTLocalizer.TownBattleUndecided, text_scale=0.1)
+        self.undecidedText = DirectLabel(parent=self, relief=None, pos=(0.1, 0, 0.015), text=TTLocalizer.TownBattleUndecided, text_scale=0.1, text_font=self.mickeyFont)
         self.healthText = DirectLabel(parent=self, text='', pos=(-0.06, 0, -0.075), text_scale=0.055)
         self.hpChangeEvent = None
         self.gagNode = self.attachNewNode('gag')
@@ -92,24 +96,36 @@ class TownBattleToonPanel(DirectFrame):
         self.gagNode.hide()
         self.whichText.hide()
         self.passNode.hide()
+        self.gagHPText.hide()
         if self.hasGag:
             self.gag.removeNode()
             self.hasGag = 0
         if track == BattleBase.NO_ATTACK or track == BattleBase.UN_ATTACK:
+            self.undecidedText['text_fg'] = (Vec4(1, 0.5, 0, 1))
             self.undecidedText.show()
         elif track == BattleBase.PASS_ATTACK:
             self.passNode.show()
         elif track == BattleBase.FIRE:
             self.fireText.show()
+            self.fireText['text_fg'] = (Vec4(1, 0.5, 0, 1))
             self.whichText.show()
             self.whichText['text'] = self.determineWhichText(numTargets, targetIndex, localNum, index)
         elif track == BattleBase.SOS or track == BattleBase.NPCSOS or track == BattleBase.PETSOS:
             self.sosText.show()
+            self.sosText['text_fg'] = (Vec4(0, 1, 0, 1))
         elif track >= MIN_TRACK_INDEX and track <= MAX_TRACK_INDEX:
             self.undecidedText.hide()
             self.passNode.hide()
             self.gagNode.show()
             invButton = base.localAvatar.inventory.buttonLookup(track, level)
+            gagDamage = getAvPropDamage(track, level, base.localAvatar.experience.getExp(track))
+            self.gagHPText.show()
+            if track == 0:
+                self.gagHPText['text'] = '+' + str(gagDamage)
+                self.gagHPText['text_fg'] = (Vec4(0, 1, 0, 1))
+            else:
+                self.gagHPText['text'] = '-' + str(gagDamage)
+                self.gagHPText['text_fg'] = (Vec4(1, 0, 0, 1))
             self.gag = invButton.instanceUnderNode(self.gagNode, 'gag')
             self.gag.setScale(0.8)
             self.gag.setPos(0, 0, 0.02)

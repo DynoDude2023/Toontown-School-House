@@ -109,6 +109,11 @@ class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBa
         self.statusEffectVisuals[effectName].stopVisualInterval()
         del self.statusEffectVisuals[effectName]
         print('removed status effect visual')
+
+    def hasStatusEffectVisual(self, effectName):
+        if effectName in self.statusEffectVisuals:
+            return True
+        return False
     
     def setSkeleRevives(self, num):
         if num == None:
