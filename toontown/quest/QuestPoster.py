@@ -369,8 +369,8 @@ class QuestPoster(DirectFrame):
                 holder = quest.getHolder()
                 holderType = quest.getHolderType()
                 if holder == Quests.Any:
-                    cogIcons = loader.loadModel('phase_3/models/gui/cog_icons')
-                    rIconGeom = cogIcons.find('**/cog')
+                    cogIcons = loader.loadModel('phase_3.5/models/gui/ttr_m_gui_qst_toontask_icons')
+                    rIconGeom = cogIcons.find('**/ttr_t_gui_qst_cogGears')
                     cogIcons.removeNode()
                     lPos.setX(-0.18)
                     auxText = TTLocalizer.QuestPosterAuxFrom
@@ -381,7 +381,7 @@ class QuestPoster(DirectFrame):
                     captions = captions[:1]
                 else:
                     if holderType == 'track':
-                        cogIcons = loader.loadModel('phase_3/models/gui/cog_icons')
+                        cogIcons = loader.loadModel('phase_3/models/gui/ttr_m_gui_gen_cogIcons')
                         if holder == 'c':
                             icon = cogIcons.find('**/CorpIcon')
                         elif holder == 's':
@@ -395,8 +395,8 @@ class QuestPoster(DirectFrame):
                         rIconGeomScale = 0.12
                         cogIcons.removeNode()
                     elif holderType == 'level':
-                        cogIcons = loader.loadModel('phase_3/models/gui/cog_icons')
-                        rIconGeom = cogIcons.find('**/cog')
+                        cogIcons = loader.loadModel('phase_3.5/models/gui/ttr_m_gui_qst_toontask_icons')
+                        rIconGeom = cogIcons.find('**/ttr_t_gui_qst_cogGears')
                         rIconGeomScale = IMAGE_SCALE_SMALL
                         cogIcons.removeNode()
                     else:
@@ -799,13 +799,13 @@ class QuestPoster(DirectFrame):
                     lIconGeom = self.createSuitHead(quest.getCogType())
                     lIconGeomScale = IMAGE_SCALE_SMALL
                 else:
-                    cogIcons = loader.loadModel('phase_3/models/gui/cog_icons')
-                    lIconGeom = cogIcons.find('**/cog')
+                    cogIcons = loader.loadModel('phase_3.5/models/gui/ttr_m_gui_qst_toontask_icons')
+                    lIconGeom = cogIcons.find('**/ttr_t_gui_qst_cogGears')
                     lIconGeomScale = IMAGE_SCALE_SMALL
                     cogIcons.removeNode()
             elif quest.getType() == Quests.CogLevelQuest:
-                cogIcons = loader.loadModel('phase_3/models/gui/cog_icons')
-                lIconGeom = cogIcons.find('**/cog')
+                cogIcons = loader.loadModel('phase_3.5/models/gui/ttr_m_gui_qst_toontask_icons')
+                lIconGeom = cogIcons.find('**/ttr_t_gui_qst_cogGears')
                 lIconGeomScale = IMAGE_SCALE_SMALL
                 cogIcons.removeNode()
             elif quest.getType() == Quests.CogNewbieQuest:
@@ -813,8 +813,8 @@ class QuestPoster(DirectFrame):
                     rIconGeom = self.createSuitHead(quest.getCogType())
                     rIconGeomScale = IMAGE_SCALE_SMALL
                 else:
-                    cogIcons = loader.loadModel('phase_3/models/gui/cog_icons')
-                    rIconGeom = cogIcons.find('**/cog')
+                    cogIcons = loader.loadModel('phase_3/models/gui/ttr_m_gui_qst_toontask_icons')
+                    rIconGeom = cogIcons.find('**/ttr_t_gui_qst_cogGears')
                     rIconGeomScale = IMAGE_SCALE_SMALL
                     cogIcons.removeNode()
                 if not fComplete:
@@ -833,7 +833,7 @@ class QuestPoster(DirectFrame):
                     rIconGeomScale = 1
             elif quest.getType() == Quests.SkelecogTrackQuest:
                 dept = quest.getCogTrack()
-                cogIcons = loader.loadModel('phase_3/models/gui/cog_icons')
+                cogIcons = loader.loadModel('phase_3/models/gui/ttr_m_gui_gen_cogIcons')
                 lIconGeomScale = 0.13
                 if dept == 'c':
                     icon = cogIcons.find('**/CorpIcon')
