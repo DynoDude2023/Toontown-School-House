@@ -136,13 +136,10 @@ class DistributedBossCog(DistributedAvatar.DistributedAvatar, BossCog.BossCog):
         return
 
     def delete(self):
-        try:
-            self.DistributedBossCog_deleted
-        except:
-            self.DistributedBossCog_deleted = 1
-            self.ignoreAll()
-            DistributedAvatar.DistributedAvatar.delete(self)
-            BossCog.BossCog.delete(self)
+        self.DistributedBossCog_deleted = 1
+        self.ignoreAll()
+        DistributedAvatar.DistributedAvatar.delete(self)
+        BossCog.BossCog.delete(self)
 
     def setDNAString(self, dnaString):
         BossCog.BossCog.setDNAString(self, dnaString)

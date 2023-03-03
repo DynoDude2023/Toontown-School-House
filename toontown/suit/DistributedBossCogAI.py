@@ -232,25 +232,17 @@ class DistributedBossCogAI(DistributedAvatarAI.DistributedAvatarAI):
         return 'unspecified'
 
     def formatLaffLevels(self):
-        try:
-            return map(lambda id: simbase.air.doId2do.get(id).getMaxHp(), self.involvedToons)
-        except Exception, e:
-            self.notify.warning(e)
-            return []
+        return map(lambda id: simbase.air.doId2do.get(id).getMaxHp(), self.involvedToons)
 
     def formatSuitType(self):
-        try:
+        def hasSuit(id):
+            if not self.isToonWearingRentalSuit(id):
+                return 1
+            else:
+                return 0
 
-            def hasSuit(id):
-                if not self.isToonWearingRentalSuit(id):
-                    return 1
-                else:
-                    return 0
+        return map(hasSuit, self.involvedToons)
 
-            return map(hasSuit, self.involvedToons)
-        except Exception, e:
-            self.notify.warning(e)
-            return []
 
     def enterOff(self):
         self.resetBattles()

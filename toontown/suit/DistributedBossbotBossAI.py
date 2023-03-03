@@ -336,23 +336,17 @@ class DistributedBossbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
     def generateDinerSuits(self):
         diners = []
         for i in xrange(len(self.notDeadList)):
-            if simbase.config.GetBool('bossbot-boss-cheat', 0):
-                suit = self.__genSuitObject(self.zoneId, 2, 'c', 2, 0)
-            else:
-                info = self.notDeadList[i]
-                suitType = info[2] - 4
-                suitLevel = info[2]
-                suit = self.__genSuitObject(self.zoneId, suitType, 'c', suitLevel, 1)
+            info = self.notDeadList[i]
+            suitType = info[2] - 4
+            suitLevel = info[2]
+            suit = self.__genSuitObject(self.zoneId, suitType, 'c', suitLevel, 1)
             diners.append((suit, 100))
 
         active = []
         for i in xrange(2):
-            if simbase.config.GetBool('bossbot-boss-cheat', 0):
-                suit = self.__genSuitObject(self.zoneId, 2, 'c', 2, 0)
-            else:
-                suitType = 8
-                suitLevel = 12
-                suit = self.__genSuitObject(self.zoneId, suitType, 'c', suitLevel, 1)
+            suitType = 8
+            suitLevel = 12
+            suit = self.__genSuitObject(self.zoneId, suitType, 'c', suitLevel, 1)
             active.append(suit)
 
         return {'activeSuits': active,
@@ -361,11 +355,11 @@ class DistributedBossbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
     def __genSuitObject(self, suitZone, suitType, bldgTrack, suitLevel, revives = 0):
         newSuit = DistributedSuitAI.DistributedSuitAI(simbase.air, None)
         skel = self.__setupSuitInfo(newSuit, bldgTrack, suitLevel, suitType)
-        if skel:
-            newSuit.setSkelecog(1)
-        newSuit.setSkeleRevives(revives)
         newSuit.generateWithRequired(suitZone)
         newSuit.node().setName('suit-%s' % newSuit.doId)
+        if skel:
+            newSuit.b_setSkelecog(1)
+        newSuit.b_setSkeleRevives(revives)
         return newSuit
 
     def __setupSuitInfo(self, suit, bldgTrack, suitLevel, suitType):
