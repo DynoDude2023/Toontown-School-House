@@ -396,7 +396,7 @@ class DistributedLawbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
         self.toonsDiscovered = base.loader.loadMusic('phase_9/audio/bgm/encntr_sting_announce.ogg')
         self.betweenBattleMusic = base.loader.loadMusic('phase_9/audio/bgm/encntr_toon_winning.ogg')
         self.battleTwoMusic = base.loader.loadMusic('phase_7/audio/bgm/encntr_suit_winning_indoor.ogg')
-        self.battleThreeMusic = base.loader.loadMusic('phase_11/audio/bgm/LB_juryBG.ogg')
+        self.battleThreeMusic = base.loader.loadMusic('phase_11/audio/bgm/ttr_s_ara_lhq_jury.ogg')
         self.epilogueMusic = base.loader.loadMusic('phase_9/audio/bgm/CogHQ_finale.ogg')
         floor = self.geom.find('**/MidVaultFloor1')
         if floor.isEmpty():

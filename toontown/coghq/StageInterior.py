@@ -69,7 +69,8 @@ class StageInterior(BattlePlace.BattlePlace):
     def load(self):
         self.parentFSM.getStateNamed('stageInterior').addChild(self.fsm)
         BattlePlace.BattlePlace.load(self)
-        self.music = base.loader.loadMusic('phase_11/audio/bgm/LB_office.ogg')
+        self.music = base.loader.loadMusic('phase_11/audio/bgm/ttr_s_ara_lhq_facility.ogg')
+        self.battleMusic=base.loader.loadMusic('phase_11/audio/bgm/ttr_s_ara_lhq_facilityBattle.ogg')
 
     def unload(self):
         self.parentFSM.getStateNamed('stageInterior').removeChild(self.fsm)
@@ -140,9 +141,15 @@ class StageInterior(BattlePlace.BattlePlace):
         BattlePlace.BattlePlace.exitWaitForBattle(self)
 
     def enterBattle(self, event):
-        StageInterior.notify.debug('enterBattle')
+        if base.config.GetBool('want-qa-regression', 0):
+            self.notify.info('QA-REGRESSION: COGBATTLE: Enter Battle')
+        self.loader.music.stop()
         self.music.stop()
-        BattlePlace.BattlePlace.enterBattle(self, event)
+        base.playMusic(self.battleMusic, looping=1, volume=0.9)
+        self.enterTownBattle(event)
+        base.localAvatar.cantLeaveGame = 1
+        StageInterior.notify.debug('enterBattle')
+
         self.ignore('teleportQuery')
         base.localAvatar.setTeleportAvailable(0)
 
@@ -155,6 +162,7 @@ class StageInterior(BattlePlace.BattlePlace):
         StageInterior.notify.debug('exitBattle')
         BattlePlace.BattlePlace.exitBattle(self)
         self.loader.music.stop()
+        self.battleMusic.stop()
         base.playMusic(self.music, looping=1, volume=0.8)
 
     def enterStickerBook(self, page = None):
