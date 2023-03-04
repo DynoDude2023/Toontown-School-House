@@ -761,7 +761,7 @@ class Movie(DirectObject.DirectObject):
                 suit = self.battle.findSuit(suitId)
                 if suit == None:
                     self.notify.error('suit: %d not in battle!' % suitId)
-                adict = getSuitAttack(suit.getStyleName(), suit.getLevel(), attack)
+                adict = getSuitAttack(suit.dna.dept, suit.getStyleName(), suit.getLevel(), attack)
                 adict['suit'] = suit
                 adict['battle'] = self.battle
                 adict['playByPlayText'] = self.playByPlayText

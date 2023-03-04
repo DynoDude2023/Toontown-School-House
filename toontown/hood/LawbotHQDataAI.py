@@ -61,7 +61,7 @@ class LawbotHQDataAI(HoodDataAI.HoodDataAI):
             extDoor.sendUpdate('setDoorIndex', [extDoor.getDoorIndex()])
             self.addDistObj(extDoor)
 
-        makeDoor(ToontownGlobals.LawbotLobby, 0, 1, FADoorCodes.ttr_s_ara_lhq_DISGUISE_INCOMPLETE)
+        makeDoor(ToontownGlobals.LawbotLobby, 0, 1, FADoorCodes.LB_DISGUISE_INCOMPLETE)
         makeDoor(ToontownGlobals.LawbotOfficeExt, 0, 0)
         officeIdList = [
          officeId0, officeId1, officeId2, officeId3]

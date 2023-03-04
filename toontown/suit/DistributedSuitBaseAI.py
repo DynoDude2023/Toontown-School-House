@@ -45,7 +45,7 @@ class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.Su
         if newDNA:
             attributes =  SuitBattleGlobals.SuitAttributes[newDNA]
         else:
-            attributes = SuitBattleGlobals.SuitAttributes[self.dna.name]
+            attributes = SuitBattleGlobals.SuitAttributes[self.dna.dept][self.dna.name]
         if lvl:
             self.level = lvl - attributes['level'] - 1
         else:

@@ -49,7 +49,7 @@ class SuitBase:
          'dept': self.getStyleDept(),
          'level': self.getActualLevel()}
         self.setDisplayName(nameWLevel)
-        attributes = SuitBattleGlobals.SuitAttributes[self.dna.name]
+        attributes = SuitBattleGlobals.SuitAttributes[self.dna.dept][self.dna.name]
         try:
             self.maxHP = attributes['hp'][self.level]
         except:
@@ -67,7 +67,7 @@ class SuitBase:
 
     def getActualLevel(self):
         if hasattr(self, 'dna'):
-            return SuitBattleGlobals.getActualFromRelativeLevel(self.getStyleName(), self.level) + 1
+            return SuitBattleGlobals.getActualFromRelativeLevel(self.dna.dept, self.getStyleName(), self.level) + 1
         else:
             self.notify.warning('called getActualLevel with no DNA, returning 1 for level')
             return 1

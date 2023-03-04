@@ -212,7 +212,7 @@ class BattleCalculatorAI:
         if atkTrack == HEAL:
             return 0
         try:
-            suitDef = SuitBattleGlobals.SuitAttributes[suit.dna.name]['def'][suit.getLevel()]
+            suitDef = SuitBattleGlobals.SuitAttributes[suit.dna.dept][suit.dna.name]['def'][suit.getLevel()]
         except:
             suitDef = 45
         return -suitDef
@@ -1051,7 +1051,7 @@ class BattleCalculatorAI:
 
     def __calcSuitAtkType(self, attackIndex):
         theSuit = self.battle.activeSuits[attackIndex]
-        attacks = SuitBattleGlobals.SuitAttributes[theSuit.dna.name]['attacks']
+        attacks = SuitBattleGlobals.SuitAttributes[theSuit.dna.dept][theSuit.dna.name]['attacks']
         atk = SuitBattleGlobals.pickSuitAttack(attacks, theSuit.getLevel())
         return atk
 
@@ -1101,10 +1101,10 @@ class BattleCalculatorAI:
                 return 0
         theSuit = self.battle.activeSuits[attackIndex]
         atkType = self.battle.suitAttacks[attackIndex][SUIT_ATK_COL]
-        atkInfo = SuitBattleGlobals.getSuitAttack(theSuit.dna.name, theSuit.getLevel(), atkType)
+        atkInfo = SuitBattleGlobals.getSuitAttack(theSuit.dna.dept, theSuit.dna.name, theSuit.getLevel(), atkType)
         atkAcc = atkInfo['acc']
         try:
-            suitAcc = SuitBattleGlobals.SuitAttributes[theSuit.dna.name]['acc'][theSuit.getLevel()]
+            suitAcc = SuitBattleGlobals.SuitAttributes[theSuit.dna.dept][theSuit.dna.name]['acc'][theSuit.getLevel()]
         except:
             suitAcc = 85
         acc = suitAcc
@@ -1118,7 +1118,7 @@ class BattleCalculatorAI:
     def __suitAtkAffectsGroup(self, attack):
         atkType = attack[SUIT_ATK_COL]
         theSuit = self.battle.findSuit(attack[SUIT_ID_COL])
-        atkInfo = SuitBattleGlobals.getSuitAttack(theSuit.dna.name, theSuit.getLevel(), atkType)
+        atkInfo = SuitBattleGlobals.getSuitAttack(theSuit.dna.dept, theSuit.dna.name, theSuit.getLevel(), atkType)
         return atkInfo['group'] != SuitBattleGlobals.ATK_TGT_SINGLE
 
     def __createSuitTargetList(self, attackIndex):
@@ -1156,7 +1156,7 @@ class BattleCalculatorAI:
             elif self.__suitAtkHit(attackIndex):
                 atkType = attack[SUIT_ATK_COL]
                 theSuit = self.battle.findSuit(attack[SUIT_ID_COL])
-                atkInfo = SuitBattleGlobals.getSuitAttack(theSuit.dna.name, theSuit.getLevel(), atkType)
+                atkInfo = SuitBattleGlobals.getSuitAttack(theSuit.dna.dept, theSuit.dna.name, theSuit.getLevel(), atkType)
                 result = (atkInfo['hp'] * theSuit.damageMultiplier)
             targetIndex = self.battle.activeToons.index(toonId)
             attack[SUIT_HP_COL][targetIndex] = result
