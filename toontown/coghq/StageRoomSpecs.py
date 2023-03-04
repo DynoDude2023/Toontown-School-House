@@ -46,7 +46,7 @@ CashbotStageRoomName2RoomId = invertDict(CashbotStageRoomId2RoomName)
 CashbotStageEntranceIDs = (0,)
 CashbotStageMiddleRoomIDs = (1,)
 CashbotStageFinalRoomIDs = (2,)
-CashbotStageConnectorRooms = ('phase_11/models/lawbotHQ/LB_connector_7cubeL2', 'phase_11/models/lawbotHQ/LB_connector_7cubeLR')
+CashbotStageConnectorRooms = ('phase_11/models/lawbotHQ/ttr_s_ara_lhq_connector_7cubeL2', 'phase_11/models/lawbotHQ/ttr_s_ara_lhq_connector_7cubeLR')
 CashbotStageSpecModules = {}
 if config.GetBool('isclient-check', False):
     if not isClient():

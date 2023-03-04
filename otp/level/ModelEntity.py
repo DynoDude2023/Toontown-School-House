@@ -42,7 +42,7 @@ class ModelEntity(BasicEntities.NodePathEntity):
                     self.model.hide()
             else:
                 self.model.show()
-            if self.modelPath in ('phase_9/models/cogHQ/woodCrateB.bam', 'phase_9/models/cogHQ/metal_crateB.bam', 'phase_10/models/cashbotHQ/CBMetalCrate.bam', 'phase_10/models/cogHQ/CBMetalCrate2.bam', 'phase_10/models/cashbotHQ/CBWoodCrate.bam', 'phase_11/models/lawbotHQ/LB_metal_crate.bam', 'phase_11/models/lawbotHQ/LB_metal_crate2.bam'):
+            if self.modelPath in ('phase_9/models/cogHQ/woodCrateB.bam', 'phase_9/models/cogHQ/metal_crateB.bam', 'phase_10/models/cashbotHQ/CBMetalCrate.bam', 'phase_10/models/cogHQ/CBMetalCrate2.bam', 'phase_10/models/cashbotHQ/CBWoodCrate.bam', 'phase_11/models/lawbotHQ/ttr_s_ara_lhq_metal_crate.bam', 'phase_11/models/lawbotHQ/ttr_s_ara_lhq_metal_crate2.bam'):
                 cNode = self.find('**/wall')
                 cNode.setZ(cNode, -.75)
                 colNode = self.find('**/collision')

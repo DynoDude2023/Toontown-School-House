@@ -739,7 +739,7 @@ class DistributedGolfSpot(DistributedObject.DistributedObject, FSM.FSM):
         if flyBallCode == ToontownGlobals.PieCodeBossCog:
             self.notify.debug('changing color to %s' % self.ballColor)
             splat.setColor(self.ballColor)
-        sound = loader.loadSfx('phase_11/audio/sfx/LB_evidence_miss.ogg')
+        sound = loader.loadSfx('phase_11/audio/sfx/ttr_s_ara_lhq_evidence_miss.ogg')
         vol = 1.0
         if flyBallCode == ToontownGlobals.PieCodeBossCog:
             sound = loader.loadSfx('phase_4/audio/sfx/Golf_Hit_Barrier_1.ogg')

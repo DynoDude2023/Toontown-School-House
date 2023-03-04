@@ -97,7 +97,7 @@ class DistributedLawbotChair(DistributedObject.DistributedObject, FSM.FSM):
         if self.propOutSound == None:
             self.propOutSound = base.loader.loadSfx('phase_5/audio/sfx/ENC_propeller_out.ogg')
         if self.cogJurorSound == None:
-            self.cogJurorSound = base.loader.loadSfx('phase_11/audio/sfx/LB_cog_jury.ogg')
+            self.cogJurorSound = base.loader.loadSfx('phase_11/audio/sfx/ttr_s_ara_lhq_cog_jury.ogg')
         return
 
     def unloadSounds(self):

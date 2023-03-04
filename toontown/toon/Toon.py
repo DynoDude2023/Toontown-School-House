@@ -2925,7 +2925,7 @@ class Toon(Avatar.Avatar, ToonHead):
             splat.setColor(*color)
         vol = 1.0
         if pieName == 'lawbook':
-            sound = loader.loadSfx('phase_11/audio/sfx/LB_evidence_miss.ogg')
+            sound = loader.loadSfx('phase_11/audio/sfx/ttr_s_ara_lhq_evidence_miss.ogg')
             vol = 0.25
         else:
             sound = loader.loadSfx('phase_4/audio/sfx/AA_wholepie_only.ogg')

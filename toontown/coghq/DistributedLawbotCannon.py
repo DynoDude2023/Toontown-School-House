@@ -131,7 +131,7 @@ class DistributedLawbotCannon(DistributedObject.DistributedObject):
         self.sndCannonMove = base.loader.loadSfx('phase_4/audio/sfx/MG_cannon_adjust.ogg')
         self.sndCannonFire = base.loader.loadSfx('phase_4/audio/sfx/MG_cannon_fire_alt.ogg')
         self.sndHitGround = base.loader.loadSfx('phase_4/audio/sfx/MG_cannon_hit_dirt.ogg')
-        self.sndHitChair = base.loader.loadSfx('phase_11/audio/sfx/LB_toon_jury.ogg')
+        self.sndHitChair = base.loader.loadSfx('phase_11/audio/sfx/ttr_s_ara_lhq_toon_jury.ogg')
         self.cannon.hide()
         self.flashingLabel = None
         return

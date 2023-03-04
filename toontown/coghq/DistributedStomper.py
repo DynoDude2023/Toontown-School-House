@@ -77,7 +77,7 @@ class DistributedStomper(DistributedCrusherEntity.DistributedCrusherEntity):
         self.loaded = 1
         self.stomperModels = ['phase_9/models/cogHQ/square_stomper']
         if self.cogStyle == 1:
-            self.stomperModels = ['phase_11/models/lawbotHQ/LB_square_stomper']
+            self.stomperModels = ['phase_11/models/lawbotHQ/ttr_s_ara_lhq_square_stomper']
         self.notify.debug('loadModel')
         shadow = None
         self.sound = self.sounds[self.soundPath]

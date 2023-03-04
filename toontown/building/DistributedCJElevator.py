@@ -12,7 +12,7 @@ class DistributedCJElevator(DistributedBossElevator.DistributedBossElevator):
         self.countdownTime = ElevatorData[self.type]['countdown']
 
     def setupElevator(self):
-        self.elevatorModel = loader.loadModel('phase_11/models/lawbotHQ/LB_Elevator')
+        self.elevatorModel = loader.loadModel('phase_11/models/lawbotHQ/ttr_s_ara_lhq_Elevator')
         self.leftDoor = self.elevatorModel.find('**/left-door')
         if self.leftDoor.isEmpty():
             self.leftDoor = self.elevatorModel.find('**/left_door')

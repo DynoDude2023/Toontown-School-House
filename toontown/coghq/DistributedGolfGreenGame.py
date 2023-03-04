@@ -279,7 +279,7 @@ class DistributedGolfGreenGame(BattleBlocker.BattleBlocker):
         self.soundLand = base.loader.loadSfx('phase_4/audio/sfx/MG_maze_pickup.ogg')
         self.soundBurst = base.loader.loadSfx('phase_5/audio/sfx/Toon_bodyfall_synergy.ogg')
         self.soundBomb = base.loader.loadSfx('phase_4/audio/sfx/MG_cannon_fire_alt.ogg')
-        self.soundLose = base.loader.loadSfx('phase_11/audio/sfx/LB_capacitor_discharge_3.ogg')
+        self.soundLose = base.loader.loadSfx('phase_11/audio/sfx/ttr_s_ara_lhq_capacitor_discharge_3.ogg')
         self.soundWin = base.loader.loadSfx('phase_4/audio/sfx/MG_pairing_match_bonus_both.ogg')
         self.soundDone = base.loader.loadSfx('phase_3/audio/sfx/GUI_create_toon_back.ogg')
         self.soundMove = base.loader.loadSfx('phase_3.5/audio/sfx/SA_shred.ogg')

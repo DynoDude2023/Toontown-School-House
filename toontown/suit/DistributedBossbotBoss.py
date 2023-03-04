@@ -113,7 +113,7 @@ class DistributedBossbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
         self.rightHandJoint = self.find('**/joint17')
         self.setPosHpr(*ToontownGlobals.BossbotBossBattleOnePosHpr)
         self.reparentTo(render)
-        self.toonUpSfx = loader.loadSfx('phase_11/audio/sfx/LB_toonup.ogg')
+        self.toonUpSfx = loader.loadSfx('phase_11/audio/sfx/ttr_s_ara_lhq_toonup.ogg')
         self.warningSfx = loader.loadSfx('phase_5/audio/sfx/Skel_COG_VO_grunt.ogg')
         self.swingClubSfx = loader.loadSfx('phase_5/audio/sfx/SA_hardball.ogg')
         self.moveBossTaskName = 'CEOMoveTask'
