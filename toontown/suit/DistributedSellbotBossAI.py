@@ -414,7 +414,7 @@ class DistributedSellbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             level = random.randrange(len(SuitDNA.suitsPerLevel))
             suit.dna = SuitDNA.SuitDNA()
             suit.dna.newSuitRandom(level=level, dept=self.dna.dept)
-            suit.setLevel(random.randInt(level, level+4))
+            suit.setLevel(random.randint(level, level+4))
             suit.generateWithRequired(self.zoneId)
             suit.b_setSkelecog(random.choice([0, 0, 1]))
             self.doobers.append(suit)
