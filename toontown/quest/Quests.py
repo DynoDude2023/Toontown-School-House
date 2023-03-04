@@ -68,6 +68,7 @@ LAWBOT_HQ_TIER = 18
 BOSSBOT_HQ_TIER = 32
 ELDER_TIER = 49
 LOOPING_FINAL_TIER = ELDER_TIER
+MAGIC_QUESTS = 100
 VISIT_QUEST_ID = 1000
 TROLLEY_QUEST_ID = 110
 FIRST_COG_QUEST_ID = 145
@@ -17667,7 +17668,18 @@ QuestDict = {
          2001,
          4216,
          NA,
-         TTLocalizer.QuestDialogDict[12032])}
+         TTLocalizer.QuestDialogDict[12032]),
+ 20000: (MAGIC_QUESTS,
+       Start,
+       (CogQuest,
+        Anywhere,
+        25,
+        'ms'),
+       2001,
+       2001,
+       NA,
+       NA,
+       DefaultDialog),}
 
 Tier2QuestsDict = {}
 for questId, questDesc in QuestDict.items():

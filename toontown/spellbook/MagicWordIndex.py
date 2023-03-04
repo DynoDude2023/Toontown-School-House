@@ -235,6 +235,17 @@ class SetSpeed(MagicWord):
                                                       OTPGlobals.ToonRotateSpeed)
             return "Your speed has been set to {}.".format(speed)
 
+class addQuest(MagicWord):
+    aliases = ["toontask"]
+    desc = "Adds a Quest from a Quest ID."
+    execLocation = MagicWordConfig.EXEC_LOC_SERVER
+    arguments = [("questId", int, True)]
+
+    def handleWord(self, invoker, avId, toon, *args):
+        questId = args[0]
+        
+        toon.addQuest((questId, Quests.getQuestFromNpcId(questId), Quests.getQuestToNpcId(questId), Quests.getQuestReward(questId, toon), 0), 0)
+        return "Quest added."
 
 class MaxToon(MagicWord):
     aliases = ["max", "idkfa"]
