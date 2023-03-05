@@ -380,8 +380,8 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
                 if cogdoTakeover and suitTrack == None:
                     suitTrack = random.choice(['s', 'l'])
         if suitName == None:
-            if not cogdoTakeover:
-                suitName, skelecog = self.air.suitInvasionManager.getInvadingCog()
+            if not cogdoTakeover and self.air.invasionObj.isActive:
+                suitName, skelecog = self.air.invasionObj.cogName, self.air.invasionObj.skelecog
             if suitName == None:
                 suitName = self.defaultSuitName
         if suitType == None and suitName != None:

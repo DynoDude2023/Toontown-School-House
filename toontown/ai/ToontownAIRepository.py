@@ -60,6 +60,7 @@ from toontown.toonbase import ToontownGlobals, TTLocalizer
 from toontown.tutorial.TutorialManagerAI import TutorialManagerAI
 from toontown.uberdog.DistributedInGameNewsMgrAI import DistributedInGameNewsMgrAI
 from toontown.uberdog.DistributedPartyManagerAI import DistributedPartyManagerAI
+from toontown.events.DistributedInvasionAI import DistributedInvasionAI
 
 
 class ToontownAIRepository(ToontownInternalRepository):
@@ -278,6 +279,11 @@ class ToontownAIRepository(ToontownInternalRepository):
         # Generate our delivery manager...
         self.deliveryManager = self.generateGlobalObject(OTP_DO_ID_TOONTOWN_DELIVERY_MANAGER,
                                                          'DistributedDeliveryManager')
+        
+        # invasions
+        self.invasionObj = DistributedInvasionAI(self)
+        self.invasionObj.generateWithRequired(OTP_ZONE_ID_MANAGEMENT)
+        self.invasionObj.cogName = 'bc'
 
     def createHood(self, hoodCtr, zoneId):
         # Bossbot HQ doesn't use DNA, so we skip over that.

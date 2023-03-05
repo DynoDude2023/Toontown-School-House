@@ -346,6 +346,8 @@ from toontown.cogdominium import DistCogdoCrane/AI
 from toontown.cogdominium import DistCogdoCraneMoneyBag/AI
 from toontown.cogdominium import DistCogdoCraneCog/AI
 from toontown.spellbook import TTOffMagicWordManager/AI
+from toontown.events import DistributedEvent/AI
+from toontown.events import DistributedInvasion/AI
 
 typedef uint8 bool;
 
@@ -1762,6 +1764,12 @@ dclass DistributedDivingGame : DistributedMinigame {
   setCrabMoving(uint32, int16, int8, int8, int16, int8) broadcast;
   treasureRecovered() airecv clsend;
   incrementScore(uint32, uint32, int16) broadcast;
+};
+
+dclass DistributedEvent : DistributedObject {
+};
+
+dclass DistributedInvasion : DistributedEvent {
 };
 
 dclass DistributedTargetGame : DistributedMinigame {
