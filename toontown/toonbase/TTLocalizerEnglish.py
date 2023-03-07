@@ -115,7 +115,7 @@ GlobalStreetNames = {20000: ('to', 'on', 'Tutorial Terrace'),
  10700: ('to the', 'in the', 'The Back Nine'),
  11000: ('to the', 'in the', 'Sellbot HQ Courtyard'),
  11100: ('to the', 'in the', 'Sellbot HQ Lobby'),
- 11200: ('to the', 'in the', 'Sellbot Factory'),
+ 11200: ('to the', '', 'Sellbot Factory Exterior'),
  11500: ('to the', 'in the', 'Sellbot Factory'),
  12000: ('to', 'in', 'Cashbot Train Yard'),
  12100: ('to the', 'in the', 'Cashbot HQ Lobby'),
@@ -4771,12 +4771,17 @@ ShardPageHelpIntro = 'Each District is a copy of the Toontown world.'
 ShardPageHelpWhere = '  You are currently in the "%s" District.'
 ShardPageHelpWelcomeValley = '  You are currently in the "Welcome Valley" District, within "%s".'
 ShardPageHelpMove = '  To move to a new District, click on its name.'
-ShardPagePopulationTotal = 'Total Toontown Population:\n%d'
+ShardPagePopulationTotal = 'Total Toontown Population: %d'
+ShardPagePopulationDistrict = '\nPopulation: %s'
+ShardPageInvasionAlert = 'ALERT! %s are invading the district!'
+ShardPageMegaInvasionAlert = 'ALERT! %s have taken over the district!'
 ShardPageScrollTitle = 'Name            Population'
 ShardPageLow = 'Quiet'
 ShardPageMed = 'Ideal'
 ShardPageHigh = 'Full'
+ShardPageGoTo = 'Teleport\nHere!'
 ShardPageChoiceReject = 'Sorry, that district is full. Please try another one.'
+ShardPageChoiceSpeedchat = 'This district is a SpeedChat only district, meaning you will not be able to use SpeedChat+ to type here.\n\nDo you still want to go to %s?'
 SuitPageTitle = 'Cog Gallery'
 SuitPageMystery = DialogQuestion + DialogQuestion + DialogQuestion
 SuitPageQuota = '%s of %s'

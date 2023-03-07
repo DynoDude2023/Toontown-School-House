@@ -6,6 +6,7 @@ from panda3d.core import *
 from direct.showbase import DirectObject
 from toontown.toon import ToonAvatarPanel
 from toontown.toontowngui import TTDialog
+from libotp import *
 
 class GroupPanel(DirectObject.DirectObject):
     notify = DirectNotifyGlobal.directNotify.newCategory('GroupPanel')
