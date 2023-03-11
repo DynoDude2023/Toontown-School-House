@@ -11,6 +11,8 @@ from pandac.PandaModules import VirtualFileMountHTTP, VirtualFileSystem, Filenam
 from panda3d.core import *
 from direct.showbase import AppRunnerGlobal
 from libotp.nametag.NametagGroup import NametagGroup
+from direct.controls.ControlManager import CollisionHandlerRayStart
+from panda3d.core import *
 import string
 import os
 
@@ -360,6 +362,7 @@ class Suit(Avatar.Avatar):
         self.isDisguised=0
         self.isWaiter=0
         self.isRental=0
+        self.__suitsStuckToFloor = []
 
     def delete(self):
         try:
@@ -412,6 +415,25 @@ class Suit(Avatar.Avatar):
         cB=decode_sRGB_float(b)
         return VBase4(float(cR), float(cG), float(cB), alpha)
 
+    def stickSuit(self):
+        rayNode = CollisionNode('stickSuitToFloor')
+        rayNode.addSolid(CollisionRay(0.0, 0.0, CollisionHandlerRayStart, 0.0, 0.0, -1.0))
+        rayNode.setFromCollideMask(ToontownGlobals.FloorBitmask)
+        rayNode.setIntoCollideMask(BitMask32.allOff())
+        ray = NodePath(rayNode)
+        lifter = CollisionHandlerFloor()
+        lifter.setOffset(ToontownGlobals.FloorOffset)
+        lifter.setReach(10.0)
+        suitRay = ray.instanceTo(self)
+        lifter.addCollider(suitRay, self)
+        base.cTrav.addCollider(suitRay, lifter)
+        self.__suitsStuckToFloor.append(suitRay)
+    
+    def unstickSuit(self):
+        for suitRay in self.__suitsStuckToFloor:
+            base.cTrav.removeCollider(suitRay)
+
+        
     def generateSuit(self):
         dna = self.style
         self.headParts = []
@@ -737,14 +759,8 @@ class Suit(Avatar.Avatar):
             modelRoot = self
         self.isWaiter = 1
         torsoTex = loader.loadTexture('phase_3.5/maps/waiter_m_blazer.jpg')
-        torsoTex.setMinfilter(Texture.FTLinearMipmapLinear)
-        torsoTex.setMagfilter(Texture.FTLinear)
         legTex = loader.loadTexture('phase_3.5/maps/waiter_m_leg.jpg')
-        legTex.setMinfilter(Texture.FTLinearMipmapLinear)
-        legTex.setMagfilter(Texture.FTLinear)
         armTex = loader.loadTexture('phase_3.5/maps/waiter_m_sleeve.jpg')
-        armTex.setMinfilter(Texture.FTLinearMipmapLinear)
-        armTex.setMagfilter(Texture.FTLinear)
         modelRoot.find('**/torso').setTexture(torsoTex, 1)
         modelRoot.find('**/arms').setTexture(armTex, 1)
         modelRoot.find('**/legs').setTexture(legTex, 1)
@@ -784,9 +800,6 @@ class Suit(Avatar.Avatar):
                 headPart.setTwoSided(True)
             if self.headTexture:
                 headTex=loader.loadTexture('phase_' + str(phase) + '/maps/' + self.headTexture)
-                headTex.setMinfilter(Texture.FTNearestMipmapLinear)
-                headTex.setMagfilter(Texture.FTNearest)
-                headTex.setAnisotropicDegree(16)
                 headPart.setTexture(headTex, 1)
             if self.headColor:
                 headPart.setColor(self.headColor)
@@ -810,8 +823,6 @@ class Suit(Avatar.Avatar):
             tieTex=loader.loadTexture('phase_5/maps/cog_robot_tie_legal.jpg')
         elif dept == 'm':
             tieTex=loader.loadTexture('phase_5/maps/cog_robot_tie_money.jpg')
-        tieTex.setMinfilter(Texture.FTNearestMipmapLinear)
-        tieTex.setMagfilter(Texture.FTNearest)
         tie.setTexture(tieTex, 1)
 
     def generateCorporateMedallion(self):
