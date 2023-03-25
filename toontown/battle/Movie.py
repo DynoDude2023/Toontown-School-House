@@ -649,7 +649,7 @@ class Movie(DirectObject.DirectObject):
                             targetIndex = suits.index(s)
                             sdict = {}
                             sdict['suit'] = target
-                            sdict['hp'] = hps[targetIndex]
+                            sdict['hp'] = sdict['suit'].gagTrackDamages[ta[TOON_TRACK_COL]]
                             if ta[TOON_TRACK_COL] == NPCSOS and track == DROP and hps[targetIndex] == 0:
                                 continue
                             sdict['kbbonus'] = kbbonuses[targetIndex]
@@ -692,9 +692,12 @@ class Movie(DirectObject.DirectObject):
 
                         sdict['leftSuits'] = leftSuits
                         sdict['rightSuits'] = rightSuits
-                        sdict['hp'] = hps[targetIndex]
+                        sdict['hp'] = sdict['suit'].gagTrackDamages[ta[TOON_TRACK_COL]]
+                        
                         sdict['kbbonus'] = kbbonuses[targetIndex]
                         sdict['died'] = ta[SUIT_DIED_COL] & 1 << targetIndex
+                        if sdict['suit'].comboDamage + sdict['hp'] > sdict['suit'].getHP():
+                            sdict['died'] = 1
                         sdict['revived'] = ta[SUIT_REVIVE_COL] & 1 << targetIndex
                         if sdict['revived'] != 0:
                             pass
@@ -704,7 +707,9 @@ class Movie(DirectObject.DirectObject):
                             adict['target'] = [sdict]
                         else:
                             adict['target'] = sdict
-                adict['hpbonus'] = ta[TOON_HPBONUS_COL]
+                targetId = ta[TOON_TGT_COL]
+                suit = self.battle.findSuit(targetId)
+                adict['hpbonus'] = 1
                 adict['sidestep'] = ta[TOON_ACCBONUS_COL]
                 if 'npcId' in adict:
                     adict['sidestep'] = 0

@@ -1269,7 +1269,12 @@ dclass DistributedSuitPlanner : DistributedObject {
   buildingListResponse(uint8[]);
 };
 
-dclass DistributedSuitBase : DistributedObject {
+dclass BattleAvatar : DistributedObject {
+  setComboDamage(int64) broadcast ram;
+  setGagDamage(int64, int64) broadcast ram;
+};
+
+dclass DistributedSuitBase : BattleAvatar {
   denyBattle();
   setDNAString(blob) required broadcast ram;
   setLevelDist(int16) required broadcast ram;
@@ -1279,6 +1284,7 @@ dclass DistributedSuitBase : DistributedObject {
   setHP(int16) required broadcast ram;
   addStatusEffectVisual(string) broadcast ram;
   removeStatusEffectVisual(string) broadcast ram;
+  setComboDamage(int64) broadcast ram;
 };
 
 dclass DistributedSuit : DistributedSuitBase {
@@ -1537,9 +1543,6 @@ dclass DistributedBattleBase : DistributedObject {
   joinDone(uint32) airecv clsend;
   requestAttack(int8, int8, int32) airecv clsend;
   requestPetProxy(uint32) airecv clsend;
-};
-
-dclass BattleAvatar : DistributedObject {
 };
 
 dclass DistributedBattle : DistributedBattleBase {

@@ -619,31 +619,27 @@ class BattleCalculatorAI:
             self.notify.debug('ACC BONUS: toon attack received accuracy ' + 'bonus of ' + str(self.AccuracyBonuses[numPrevHits]) + ' from previous attack by (' + str(attack[TOON_ID_COL]) + ') which hit')
         return self.AccuracyBonuses[numPrevHits]
 
-    def __applyToonAttackDamages(self, toonId, hpbonus = 0, kbbonus = 0):
+    def __applyToonAttackDamages(self, toonId, suit, hpbonus = 0, kbbonus = 0):
         totalDamages = 0
         if not self.APPLY_HEALTH_ADJUSTMENTS:
             return totalDamages
         attack = self.battle.toonAttacks[toonId]
         track = self.__getActualTrack(attack)
         if track != NO_ATTACK and track != SOS and track != TRAP and track != NPCSOS:
-            targets = self.__getToonTargets(attack)
-            for position in xrange(len(targets)):
-                if hpbonus:
-                    if targets[position] in self.__createToonTargetList(toonId):
-                        damageDone = attack[TOON_HPBONUS_COL]
-                    else:
-                        damageDone = 0
-                elif kbbonus:
-                    if targets[position] in self.__createToonTargetList(toonId):
-                        damageDone = attack[TOON_KBBONUS_COL][position]
-                    else:
-                        damageDone = 0
+            position = self.battle.activeSuits.index(suit)
+            if kbbonus:
+                damageDone = attack[TOON_KBBONUS_COL][position]
+            else:
+                if track != HEAL:
+                    damageDone = suit.gagTrackDamages[track]
                 else:
                     damageDone = attack[TOON_HP_COL][position]
-                if damageDone <= 0 or self.immortalSuits:
-                    continue
+                suit = suit
+                if suit.comboDamage:
+                    damageDone += suit.comboDamage
+            for i in xrange(1):
                 if track == HEAL or track == PETSOS:
-                    currTarget = targets[position]
+                    currTarget = suit
                     if self.CAP_HEALS:
                         toonHp = self.__getToonHp(currTarget)
                         toonMaxHp = self.__getToonMaxHp(currTarget)
@@ -653,26 +649,19 @@ class BattleCalculatorAI:
                     self.toonHPAdjusts[currTarget] += damageDone
                     totalDamages = totalDamages + damageDone
                     continue
-                currTarget = targets[position]
-                currTarget.setHP(currTarget.getHP() - damageDone)
-                targetId = currTarget.getDoId()
-                if self.notify.getDebug():
-                    if hpbonus:
-                        self.notify.debug(str(targetId) + ': suit takes ' + str(damageDone) + ' damage from HP-Bonus')
-                    elif kbbonus:
-                        self.notify.debug(str(targetId) + ': suit takes ' + str(damageDone) + ' damage from KB-Bonus')
-                    else:
-                        self.notify.debug(str(targetId) + ': suit takes ' + str(damageDone) + ' damage')
-                totalDamages = totalDamages + damageDone
-                if currTarget.getHP() <= 0:
-                    if currTarget.getSkeleRevives() >= 1:
-                        currTarget.useSkeleRevive()
-                        attack[SUIT_REVIVE_COL] = attack[SUIT_REVIVE_COL] | 1 << position
-                    else:
-                        self.suitLeftBattle(targetId)
-                        attack[SUIT_DIED_COL] = attack[SUIT_DIED_COL] | 1 << position
-                        if self.notify.getDebug():
-                            self.notify.debug('Suit' + str(targetId) + 'bravely expired in combat')
+            currTarget = suit
+            currTarget.setHP(currTarget.getHP() - damageDone)
+            targetId = currTarget.getDoId()
+            totalDamages = totalDamages + damageDone
+            if currTarget.getHP() <= 0:
+                if currTarget.getSkeleRevives() >= 1:
+                    currTarget.useSkeleRevive()
+                    attack[SUIT_REVIVE_COL] = attack[SUIT_REVIVE_COL] | 1 << position
+                else:
+                    self.suitLeftBattle(targetId)
+                    attack[SUIT_DIED_COL] = attack[SUIT_DIED_COL] | 1 << position
+                    if self.notify.getDebug():
+                        self.notify.debug('Suit' + str(targetId) + 'bravely expired in combat')
 
         return totalDamages
 
@@ -744,6 +733,7 @@ class BattleCalculatorAI:
             attackerId = self.toonAtkOrder[attackIndex]
             attack = self.battle.toonAttacks[attackerId]
             track = self.__getActualTrack(attack)
+            suit = self.battle.findSuit(currTgt.getDoId())
             if hp:
                 if track in self.hpBonuses[tgtPos]:
                     self.hpBonuses[tgtPos][track].append([attackIndex, dmg])
@@ -909,10 +899,21 @@ class BattleCalculatorAI:
                         self.__clearAttack(currToonAttack, toon=1)
                         attack = self.battle.toonAttacks[currToonAttack]
                         atkTrack, atkLevel = self.__getActualTrackLevel(attack)
-                damagesDone = self.__applyToonAttackDamages(currToonAttack)
-                self.__applyToonAttackDamages(currToonAttack, hpbonus=1)
+                targets = self.__createToonTargetList(currToonAttack)
+                if atkTrack != HEAL:
+                    for target in targets:
+                        targetIndex = self.battle.activeSuits.index(target)
+                        target.addGagDamage(attack[TOON_HP_COL][targetIndex], atkTrack)
+                damageDone = 0
+                for target in targets:
+                    dmgAddon = self.__applyToonAttackDamages(currToonAttack, target)
+                    damageDone += dmgAddon
+                
                 if atkTrack != LURE and atkTrack != DROP and atkTrack != SOUND:
-                    self.__applyToonAttackDamages(currToonAttack, kbbonus=1)
+                    for target in targets:
+                        dmgAddon = self.__applyToonAttackDamages(currToonAttack, target, kbbonus=1)
+                        damageDone += dmgAddon
+                
                 if lastTrack != atkTrack:
                     lastAttacks = []
                     lastTrack = atkTrack
@@ -921,7 +922,7 @@ class BattleCalculatorAI:
                     if atkTrack == TRAP or atkTrack == LURE:
                         pass
                     elif atkTrack == HEAL:
-                        if damagesDone != 0:
+                        if damageDone != 0:
                             self.__addAttackExp(attack)
                     else:
                         self.__addAttackExp(attack)

@@ -2,7 +2,9 @@
 
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from statusEffect import BattleStatusEffectGlobals
-import importlib
+from toontown.toonbase.ToontownBattleGlobals import *
+from toontown.battle.BattleBase import *
+import importlib, random
 
 class BattleAvatarAI(DistributedObjectAI):
 
@@ -13,9 +15,28 @@ class BattleAvatarAI(DistributedObjectAI):
         self.battle = None
         self.statusEffects = []
         self.statusEffectNames = []
-
+        self.gagTrackDamages = {
+            HEAL: 0,
+            TRAP: 0,
+            LURE: 0,
+            SOUND: 0,
+            THROW: 0,
+            SQUIRT: 0,
+            DROP: 0
+        }
         self.damageMultiplier = 1.0
+        self.comboDamage = 0
+        self.damageDefense = 0
 
+    def setComboDamage(self, damage):
+        self.comboDamage += damage
+        self.sendUpdate('setComboDamage', [damage])
+    
+    def addGagDamage(self, damage, gagTrack):
+        damage -= self.damageDefense
+        self.gagTrackDamages[gagTrack] += damage
+        self.sendUpdate('setGagDamage', [damage, gagTrack])
+    
     def appendStatusEffect(self, effectName):
         if effectName not in self.statusEffectNames:
             effectFile = importlib.import_module(BattleStatusEffectGlobals.STATUS_FOLDER + '.' + BattleStatusEffectGlobals.STATUS_NAME_2_FILE[effectName])
@@ -26,6 +47,15 @@ class BattleAvatarAI(DistributedObjectAI):
             self.av.sendUpdate('addStatusEffectVisual', [effectName])
 
     def calculateRound(self):
+        self.gagTrackDamages = {
+            HEAL: 0,
+            TRAP: 0,
+            LURE: 0,
+            SOUND: 0,
+            THROW: 0,
+            SQUIRT: 0,
+            DROP: 0
+        }
         for effect in self.statusEffects:
             if effect.getStatusEffectDuration() > 0 and not effect.effectedTarget:
                 effect.doEffectOnBattle()

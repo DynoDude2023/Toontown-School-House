@@ -29,7 +29,7 @@ from toontown.battle.statusEffect.BattleStatusEffectGlobals import *
 from direct.interval.IntervalGlobal import *
 from panda3d.core import *
 from toontown.battle import BattleParticles
-
+from toontown.battle import BattleAvatar
 
 class StatusEffectVisual:
 
@@ -52,7 +52,7 @@ class StatusEffectVisual:
         self.visualWall.hide()
         self.visualInterval.finish()
 
-class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBase.SuitBase):
+class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBase.SuitBase, BattleAvatar.BattleAvatar):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedSuitBase')
 
     def __init__(self, cr):
@@ -65,6 +65,7 @@ class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBa
         DistributedAvatar.DistributedAvatar.__init__(self, cr)
         Suit.Suit.__init__(self)
         SuitBase.SuitBase.__init__(self)
+        BattleAvatar.BattleAvatar.__init__(self, cr)
         self.activeShadow = 0
         self.virtual = 0
         self.battleDetectName = None

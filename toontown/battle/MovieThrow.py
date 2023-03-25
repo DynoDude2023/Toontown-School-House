@@ -369,7 +369,7 @@ def __throwPie(throw, delay, hitCount):
             bonusTrack.append(Func(suit.showHpText, -kbbonus, 2, openEnded=0, attackTrack=THROW_TRACK))
         if hpbonus > 0:
             bonusTrack.append(Wait(0.75))
-            bonusTrack.append(Func(suit.showHpText, -hpbonus, 1, openEnded=0, attackTrack=THROW_TRACK))
+            bonusTrack.append(Func(suit.showHpText, -suit.comboDamage, 1, openEnded=0))
         if revived != 0:
             suitResponseTrack.append(MovieUtil.createSuitReviveTrack(suit, toon, battle))
         elif died != 0:
@@ -534,8 +534,8 @@ def __throwGroupPie(throw, delay, groupHitDict):
         revived = target['revived']
         if hitSuit:
             singleSuitResponseTrack = Sequence()
-            showDamage = Func(suit.showHpText, -hp, openEnded=0, attackTrack=THROW_TRACK)
-            updateHealthBar = Func(suit.updateHealthBar, hp)
+            showDamage = Func(suit.showHpText, -suit.gagTrackDamages[THROW], openEnded=0, attackTrack=THROW_TRACK)
+            updateHealthBar = Func(suit.updateHealthBar, suit.gagTrackDamages[THROW])
             sival = []
             if kbbonus > 0:
                 suitPos, suitHpr = battle.getActorPosHpr(suit)
@@ -565,7 +565,7 @@ def __throwGroupPie(throw, delay, groupHitDict):
                 bonusTrack.append(Func(suit.showHpText, -kbbonus, 2, openEnded=0, attackTrack=THROW_TRACK))
             if hpbonus > 0:
                 bonusTrack.append(Wait(0.75))
-                bonusTrack.append(Func(suit.showHpText, -hpbonus, 1, openEnded=0, attackTrack=THROW_TRACK))
+                bonusTrack.append(Func(suit.showHpText, -suit.comboDamage, 1, openEnded=0))
             if revived != 0:
                 singleSuitResponseTrack.append(MovieUtil.createSuitReviveTrack(suit, toon, battle))
             elif died != 0:

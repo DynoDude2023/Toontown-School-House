@@ -101,7 +101,8 @@ class DistributedLevelBattleAI(DistributedBattleAI.DistributedBattleAI):
         self.notify.debug('DistributedLevelBattleAI.enterFaceOff()')
         self.joinableFsm.request('Joinable')
         self.runableFsm.request('Unrunable')
-        self.suits[0].releaseControl()
+        for suit in self.suits:
+            suit.releaseControl()
         faceOffTime = self.calcToonMoveTime(self.pos, self.initialSuitPos) + FACEOFF_TAUNT_T + SERVER_BUFFER_TIME
         self.notify.debug('faceOffTime = %s' % faceOffTime)
         self.timer.startCallback(faceOffTime, self.__serverFaceOffDone)

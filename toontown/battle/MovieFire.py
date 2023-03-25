@@ -334,7 +334,7 @@ ActorInterval(kapow, 'kapow'), Func(kapow.hide)), LerpPosInterval(suit, 3.0, Poi
             bonusTrack.append(Func(suit.showHpText, -kbbonus, 2, openEnded=0))
         if hpbonus > 0:
             bonusTrack.append(Wait(0.75))
-            bonusTrack.append(Func(suit.showHpText, -hpbonus, 1, openEnded=0))
+            bonusTrack.append(Func(suit.showHpText, -suit.comboDamage, 1, openEnded=0))
         suitResponseTrack = Parallel(suitResponseTrack, bonusTrack)
     return [toonTrack,
      soundTrack,

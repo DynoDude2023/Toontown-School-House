@@ -76,8 +76,8 @@ def __getSuitTrack(sound, lastSoundThatHit, delay, hitCount, targets, totalDamag
             battle = sound['battle']
             kbbonus = target['kbbonus']
             suitTrack = Sequence()
-            showDamage = Func(suit.showHpText, -totalDamage, openEnded=0)
-            updateHealthBar = Func(suit.updateHealthBar, totalDamage)
+            showDamage = Func(suit.showHpText, -suit.gagTrackDamages[SOUND], openEnded=0)
+            updateHealthBar = Func(suit.updateHealthBar, suit.gagTrackDamages[SOUND])
             if isUber:
                 breakEffect = BattleParticles.createParticleEffect(file='soundBreak')
                 breakEffect.setDepthWrite(0)
@@ -103,7 +103,7 @@ def __getSuitTrack(sound, lastSoundThatHit, delay, hitCount, targets, totalDamag
                 suitTrack.append(Func(battle.unlureSuit, suit))
             bonusTrack = None
             if hpbonus > 0:
-                bonusTrack = Sequence(Wait(delay + tSuitReact + delay + 0.75 + uberDelay), Func(suit.showHpText, -hpbonus, 1, openEnded=0))
+                bonusTrack = Sequence(Wait(delay + tSuitReact + delay + 0.75 + uberDelay), Func(suit.showHpText, -suit.comboDamage, 1, openEnded=0))
             suitTrack.append(Func(suit.loop, 'neutral'))
             if bonusTrack == None:
                 tracks.append(suitTrack)

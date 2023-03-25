@@ -196,8 +196,8 @@ def __getSuitTrack(suit, tContact, tDodge, hp, hpbonus, kbbonus, anim, died, lef
             sival = Parallel(ActorInterval(suit, anim), MovieUtil.createSuitStunInterval(suit, beforeStun, afterStun))
         else:
             sival = ActorInterval(suit, anim)
-        showDamage = Func(suit.showHpText, -hp, openEnded=0, attackTrack=SQUIRT_TRACK)
-        updateHealthBar = Func(suit.updateHealthBar, hp)
+        showDamage = Func(suit.showHpText, -suit.gagTrackDamages[SQUIRT], openEnded=0, attackTrack=SQUIRT_TRACK)
+        updateHealthBar = Func(suit.updateHealthBar, suit.gagTrackDamages[SQUIRT])
         suitTrack.append(Wait(tContact))
         suitTrack.append(showDamage)
         suitTrack.append(updateHealthBar)
@@ -215,7 +215,7 @@ def __getSuitTrack(suit, tContact, tDodge, hp, hpbonus, kbbonus, anim, died, lef
             bonusTrack.append(Func(suit.showHpText, -kbbonus, 2, openEnded=0, attackTrack=SQUIRT_TRACK))
         if hpbonus > 0:
             bonusTrack.append(Wait(0.75))
-            bonusTrack.append(Func(suit.showHpText, -hpbonus, 1, openEnded=0, attackTrack=SQUIRT_TRACK))
+            bonusTrack.append(Func(suit.showHpText, -suit.comboDamage, 1, openEnded=0))
         if geyser:
             walkBack = __createSuitResetPosTrack(suit, battle)
             suitTrack.append(walkBack)
