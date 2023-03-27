@@ -19,46 +19,59 @@ class QuestManagerAI:
             toon.d_setQuests(toon.getQuests())
 
     def recoverItems(self, toon, suitsKilled, zoneId):
-        recovered, notRecovered = ([] for _ in xrange(2))
+        recovered, notRecovered = [], []
         for index, quest in enumerate(self.__toonQuestsList2Quests(toon.quests)):
             if isinstance(quest, Quests.RecoverItemQuest):
-                isComplete = quest.getCompletionStatus(toon, toon.quests[index])
-                if isComplete == Quests.COMPLETE:
+                if quest.getCompletionStatus(toon, toon.quests[index]) == Quests.COMPLETE:
                     continue
-
-                if quest.isLocationMatch(zoneId):
-                    if quest.getHolder() == Quests.Any or quest.getHolderType() in ['type', 'track', 'level']:
-                        for suit in suitsKilled:
-                            if quest.getCompletionStatus(toon, toon.quests[index]) == Quests.COMPLETE:
-                                break
-
-                            if (quest.getHolder() == Quests.Any) or (
-                                    quest.getHolderType() == 'type' and quest.getHolder() == suit['type']) or (
-                                    quest.getHolderType() == 'track' and quest.getHolder() == suit['track']) or (
-                                    quest.getHolderType() == 'level' and quest.getHolder() <= suit['level']):
-                                # This seems to be how Disney did it.
-                                progress = toon.quests[index][4] & pow(2, 16) - 1
-                                completion = quest.testRecover(progress)
-                                if completion[0]:
-                                    # Recovered!
-                                    recovered.append(quest.getItem())
-                                    self.__incrementQuestProgress(toon.quests[index])
-                                else:
-                                    # Not recovered. Sad!
-                                    notRecovered.append(quest.getItem())
-
-        if toon.quests:
-            toon.d_setQuests(toon.getQuests())
-
+                if quest.isLocationMatch(zoneId) and self.__isSuitMatch(quest, suitsKilled):
+                    progress = toon.quests[index][4] & pow(2, 16) - 1
+                    if quest.testRecover(progress)[0]:
+                        recovered.append(quest.getItem())
+                        self.__incrementQuestProgress(toon.quests[index])
+                    else:
+                        notRecovered.append(quest.getItem())
+        self.__updateToonQuests(toon)
         return recovered, notRecovered
 
     def toonKilledCogs(self, toon, suitsKilled, zoneId, activeToons):
         for index, quest in enumerate(self.__toonQuestsList2Quests(toon.quests)):
             if isinstance(quest, Quests.CogQuest):
                 for suit in suitsKilled:
-                    for _ in xrange(quest.doesCogCount(toon.getDoId(), suit, zoneId, activeToons)):
-                        self.__incrementQuestProgress(toon.quests[index])
+                    count = quest.doesCogCount(toon.getDoId(), suit, zoneId, activeToons)
+                    self.__incrementQuestProgressCounter(toon.quests[index], count)
+        self.__updateToonQuests(toon)
 
+    def __isSuitMatch(self, quest, suitsKilled):
+        holder = quest.getHolder()
+        holderType = quest.getHolderType()
+        for suit in suitsKilled:
+            if holder == Quests.Any or \
+            holderType == 'type' and holder == suit['type'] or \
+            holderType == 'track' and holder == suit['track'] or \
+            holderType == 'level' and holder <= suit['level']:
+                return True
+        return False
+
+    def __incrementQuestProgressCounter(self, quests, count):
+        progress = quests[4] & pow(2, 16) - 1
+        progress += count
+        quests[4] = (quests[4] & ~pow(2, 16) | progress) & 0xFFFFFFFF
+        # Note: the above line is equivalent to:
+        # quests[4] = (quests[4] & 0xFFFF0000) | (progress & 0xFFFF)
+        # quests[4] &= 0xFFFFFFFF
+        # but more concise and efficient
+    
+    def __incrementQuestProgress(self, quests, count=1):
+        progress = quests[4] & pow(2, 16) - 1
+        progress += count
+        quests[4] = (quests[4] & ~pow(2, 16) | progress) & 0xFFFFFFFF
+        # Note: the above line is equivalent to:
+        # quests[4] = (quests[4] & 0xFFFF0000) | (progress & 0xFFFF)
+        # quests[4] &= 0xFFFFFFFF
+        # but more concise and efficient
+
+    def __updateToonQuests(self, toon):
         if toon.quests:
             toon.d_setQuests(toon.getQuests())
 
@@ -66,31 +79,37 @@ class QuestManagerAI:
         pass
 
     def toonKilledBuilding(self, toon, track, difficulty, floors, zoneId, activeToons):
-        # Thank you difficulty, very cool!
-        for index, quest in enumerate(self.__toonQuestsList2Quests(toon.quests)):
-            if isinstance(quest, Quests.BuildingQuest):
-                if quest.isLocationMatch(zoneId):
-                    if quest.getBuildingTrack() == Quests.Any or quest.getBuildingTrack() == track:
-                        if floors >= quest.getNumFloors():
-                            for _ in xrange(quest.doesBuildingCount(toon.getDoId(), activeToons)):
-                                self.__incrementQuestProgress(toon.quests[index])
-
-        if toon.quests:
-            toon.d_setQuests(toon.getQuests())
+        for quest in self.getMatchingBuildingQuests(toon, track, floors, zoneId, activeToons):
+            self.incrementQuestProgress(toon, quest)
+        toon.d_setQuests(toon.getQuests())
 
     def toonDefeatedFactory(self, toon, factoryId, activeToonVictors):
-        for index, quest in enumerate(self.__toonQuestsList2Quests(toon.quests)):
-            if isinstance(quest, Quests.FactoryQuest):
-                for _ in xrange(quest.doesFactoryCount(toon.getDoId(), factoryId, activeToonVictors)):
-                    self.__incrementQuestProgress(toon.quests[index])
+        for quest in self.getMatchingFactoryQuests(toon, factoryId, activeToonVictors):
+            self.incrementQuestProgress(toon, quest)
+        toon.d_setQuests(toon.getQuests())
 
+    def getMatchingBuildingQuests(self, toon, track, floors, zoneId, activeToons):
+        return [quest for quest in self.__toonQuestsList2Quests(toon.quests)
+                if isinstance(quest, Quests.BuildingQuest)
+                and quest.isLocationMatch(zoneId)
+                and (quest.getBuildingTrack() == Quests.Any or quest.getBuildingTrack() == track)
+                and floors >= quest.getNumFloors()
+                for _ in range(quest.doesBuildingCount(toon.getDoId(), activeToons))]
+
+    def getMatchingFactoryQuests(self, toon, factoryId, activeToonVictors):
+        return [quest for quest in self.__toonQuestsList2Quests(toon.quests)
+                if isinstance(quest, Quests.FactoryQuest)
+                for _ in range(quest.doesFactoryCount(toon.getDoId(), factoryId, activeToonVictors))]
+
+    def incrementQuestProgress(self, toon, quest):
+        self.__incrementQuestProgress(quest)
         if toon.quests:
             toon.d_setQuests(toon.getQuests())
 
     def toonRecoveredCogSuitPart(self, toon, zoneId, toonList):
         pass
-
-    def toonDefeatedMint(self, toon, mintId, activeToonVictors):
+    
+    def __updateMintQuests(self, toon, mintId, activeToonVictors):
         for index, quest in enumerate(self.__toonQuestsList2Quests(toon.quests)):
             if isinstance(quest, Quests.MintQuest):
                 for _ in xrange(quest.doesMintCount(toon.getDoId(), mintId, activeToonVictors)):
@@ -98,9 +117,9 @@ class QuestManagerAI:
 
         if toon.quests:
             toon.d_setQuests(toon.getQuests())
-
-    def toonDefeatedStage(self, toon, stageId, activeToonVictors):
-        pass
+    
+    def toonDefeatedMint(self, toon, mintId, activeToonVictors):
+        self.__updateMintQuests(toon, mintId, activeToonVictors)
 
     def hasTailorClothingTicket(self, toon, npc):
         for index, quest in enumerate(self.__toonQuestsList2Quests(toon.quests)):
@@ -109,28 +128,37 @@ class QuestManagerAI:
                 return True
 
         return False
+    
+    def toonDefeatedStage(self, toon, stageId, activeToonVictors):
+        pass
 
     def requestInteract(self, avId, npc):
+        # Get the avatar object associated with the given avId
         av = self.air.doId2do.get(avId)
         if not av:
             return
 
+        # Loop through the avatar's quests and check if any are complete
         for index, quest in enumerate(self.__toonQuestsList2Quests(av.quests)):
             questId, fromNpcId, toNpcId, rewardId, toonProgress = av.quests[index]
             isComplete = quest.getCompletionStatus(av, av.quests[index], npc)
             if isComplete != Quests.COMPLETE:
                 continue
 
+            # If the avatar is in the tutorial, move to the next step
             if avId in self.air.tutorialManager.avId2fsm.keys():
                 self.air.tutorialManager.avId2fsm[avId].demand('Tunnel')
 
+            # If the quest is a DeliverGagQuest, remove the gags from the avatar's inventory
             if isinstance(quest, Quests.DeliverGagQuest):
                 track, level = quest.getGagType()
                 av.inventory.setItem(track, level, av.inventory.numItem(track, level) - quest.getNumGags())
                 av.b_setInventory(av.inventory.makeNetString())
 
+            # Get the next quest for the avatar
             nextQuest = Quests.getNextQuest(questId, npc, av)
             if nextQuest == (Quests.NA, Quests.NA):
+                # If there is no next quest, complete the current quest and give the reward
                 if isinstance(quest, Quests.TrackChoiceQuest):
                     npc.presentTrackChoice(avId, questId, quest.getChoices())
                     return
@@ -141,6 +169,7 @@ class QuestManagerAI:
                 self.giveReward(av, rewardId)
                 return
             else:
+                # If there is a next quest, complete the current quest and give the next quest
                 self.completeQuest(av, questId)
                 nextQuestId = nextQuest[0]
                 nextRewardId = Quests.getFinalRewardId(questId, 1)
@@ -148,17 +177,20 @@ class QuestManagerAI:
                 self.npcGiveQuest(npc, av, nextQuestId, nextRewardId, nextToNpcId)
                 return
 
+        # If the avatar has reached their quest carry limit, reject the interaction
         if len(self.__toonQuestsList2Quests(av.quests)) >= av.getQuestCarryLimit():
             npc.rejectAvatar(avId)
             return
 
+        # If the avatar is in the tutorial and hasn't received their first reward, give them a quest
         if avId in self.air.tutorialManager.avId2fsm.keys():
             if av.getRewardHistory()[0] == 0:
                 self.npcGiveQuest(npc, av, 101, Quests.findFinalRewardId(101)[0], Quests.getQuestToNpcId(101),
-                                  storeReward=True)
+                                storeReward=True)
                 self.air.tutorialManager.avId2fsm[avId].demand('Battle')
                 return
 
+        # Choose the best quests for the avatar based on their reward history and present them to the avatar
         tier = av.getRewardHistory()[0]
         if Quests.avatarHasAllRequiredRewards(av, tier):
             if not Quests.avatarWorkingOnRequiredRewards(av):
@@ -181,8 +213,6 @@ class QuestManagerAI:
     def __toonQuestsList2Quests(self, quests):
         return [Quests.getQuest(x[0]) for x in quests]
 
-    def avatarCancelled(self, avId):
-        pass
 
     def avatarChoseQuest(self, avId, npc, questId, rewardId, toNpcId):
         av = self.air.doId2do.get(avId)

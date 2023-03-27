@@ -111,18 +111,12 @@ def getSuitBodyType(name):
 
 def getSuitDept(name):
     index = suitHeadTypes.index(name)
-    if index < suitsPerDept:
-        return suitDepts[0]
-    elif index < suitsPerDept * 2:
-        return suitDepts[1]
-    elif index < suitsPerDept * 3:
-        return suitDepts[2]
-    elif index < suitsPerDept * 4:
-        return suitDepts[3]
+    dept_index = index // suitsPerDept
+    if dept_index < len(suitDepts):
+        return suitDepts[dept_index]
     else:
-        print 'Unknown dept for suit name: ', name
+        print('Unknown dept for suit name:', name)
         return None
-    return None
 
 
 def getDeptFullname(dept):
@@ -147,6 +141,9 @@ def getRandomSuitType(level, rng = random):
 
 def getRandomSuitTypeExtra(level, rng = random):
     return random.randint(max(level - 7, 1), min(level, 8))
+
+def getRandomSuitTypeSuitInterior(level, rng = random):
+    return random.randint(max(level - 5, 1), min(level, 8))
 
 def getRandomSuitByDept(dept):
     deptNumber = suitDepts.index(dept)

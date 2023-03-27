@@ -463,6 +463,7 @@ class NewbieQuest:
 
         return num
 
+from toontown.suit import SuitDNA
 
 class CogQuest(LocationBasedQuest):
     def __init__(self, id, quest):
@@ -497,15 +498,16 @@ class CogQuest(LocationBasedQuest):
     def getCogNameString(self):
         numCogs = self.getNumCogs()
         cogType = self.getCogType()
+        dept = SuitDNA.getSuitDept(cogType)
         if numCogs == 1:
             if cogType == Any:
                 return TTLocalizer.Cog
             else:
-                return SuitBattleGlobals.SuitAttributes[cogType]['singularname']
+                return SuitBattleGlobals.SuitAttributes[dept][cogType]['singularname']
         elif cogType == Any:
             return TTLocalizer.Cogs
         else:
-            return SuitBattleGlobals.SuitAttributes[cogType]['pluralname']
+            return SuitBattleGlobals.SuitAttributes[dept][cogType]['pluralname']
 
     def getObjectiveStrings(self):
         cogName = self.getCogNameString()
