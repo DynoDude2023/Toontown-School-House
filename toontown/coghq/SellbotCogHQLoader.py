@@ -37,6 +37,7 @@ class SellbotCogHQLoader(CogHQLoader.CogHQLoader):
 
     def load(self, zoneId):
         CogHQLoader.CogHQLoader.load(self, zoneId)
+        self.hood.startSky()
         Toon.loadSellbotHQAnims()
 
     def unloadPlaceGeom(self):
@@ -138,6 +139,7 @@ class SellbotCogHQLoader(CogHQLoader.CogHQLoader):
         CogHQLoader.CogHQLoader.loadPlaceGeom(self, zoneId)
 
     def unload(self):
+        self.hood.setNoFog()
         CogHQLoader.CogHQLoader.unload(self)
         Toon.unloadSellbotHQAnims()
 

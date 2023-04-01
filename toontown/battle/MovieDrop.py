@@ -410,7 +410,7 @@ def __createSuitTrack(drop, delay, level, alreadyDodged, alreadyTeased, target, 
             suitGettingHit.append(SoundInterval(gotHitSound, node=toon))
         suitTrack.append(suitGettingHit)
         bonusTrack = None
-        bonusTrack= Sequence(Wait(delay + tObjectAppears + 0.75), suit.comboDamageShowup)
+        bonusTrack= Sequence(Wait(delay + tObjectAppears + 0.75), Func(suit.showHpText, -suit.comboDamage, 1, openEnded=0))
         if revived != 0:
             suitTrack.append(MovieUtil.createSuitReviveTrack(suit, toon, battle, npcs))
         elif died != 0:

@@ -39,7 +39,7 @@ want-news-tab false
 
 # Gameplay settings
 want-gardening true
-want-cogdominiums true
+want-cogdominiums false
 want-emblems true
 
 # Misc. settings

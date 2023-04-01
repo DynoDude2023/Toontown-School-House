@@ -12,7 +12,6 @@ from direct.interval.IntervalGlobal import *
 import calendar
 from copy import deepcopy
 from toontown.speedchat import TTSCJellybeanJamMenu
-import invasionDetails
 decorationHolidays = [ToontownGlobals.WINTER_DECORATIONS,
  ToontownGlobals.WACKY_WINTER_DECORATIONS,
  ToontownGlobals.HALLOWEEN_PROPS,

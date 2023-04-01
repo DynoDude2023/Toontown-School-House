@@ -361,6 +361,8 @@ class DistributedBossbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             newSuit.b_setSkelecog(1)
         newSuit.b_setSkeleRevives(revives)
         return newSuit
+    
+    
 
     def __setupSuitInfo(self, suit, bldgTrack, suitLevel, suitType):
         dna = SuitDNA.SuitDNA()

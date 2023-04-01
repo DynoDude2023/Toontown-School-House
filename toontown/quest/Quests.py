@@ -68,8 +68,6 @@ LAWBOT_HQ_TIER = 18
 BOSSBOT_HQ_TIER = 32
 ELDER_TIER = 49
 LOOPING_FINAL_TIER = ELDER_TIER
-MAGIC_QUESTS = 100
-SELLBOT_DISGUISE_TASKS = 120
 VISIT_QUEST_ID = 1000
 TROLLEY_QUEST_ID = 110
 FIRST_COG_QUEST_ID = 145
@@ -80,18 +78,6 @@ SELLBOT_HQ_NEWBIE_HP = 50
 CASHBOT_HQ_NEWBIE_HP = 85
 from toontown.toonbase.ToontownGlobals import FT_FullSuit, FT_Leg, FT_Arm, FT_Torso
 QuestRandGen = random.Random()
-
-trackV2NamesS = ['a Version 2.0 Bossbot', 'a Version 2.0 Lawbot', 'a Version 2.0 Cashbot', 'a Version 2.0 Sellbot']
-trackV2NamesP = ['Version 2.0 Bossbots', 'Version 2.0 Lawbots', 'Version 2.0 Cashbots', 'Version 2.0 Sellbots']
-
-tierToSuitDNADict = {0: ['f', 'bf', 'sc', 'cc'],
-                     1: ['p', 'b', 'pp', 'tm'],
-                     2: ['ym', 'dt', 'tw', 'nd'],
-                     3: ['mm', 'ac', 'bc', 'gh'],
-                     4: ['ds', 'bs', 'nc', 'ms'],
-                     5: ['hh', 'sd', 'mb', 'tf'],
-                     6: ['cr', 'le', 'ls', 'm'],
-                     7: ['tbc', 'bw', 'rb', 'mh']}
 
 def seedRandomGen(npcId, avId, tier, rewardHistory):
     QuestRandGen.seed(npcId * 100 + avId + tier + len(rewardHistory))
@@ -463,7 +449,6 @@ class NewbieQuest:
 
         return num
 
-from toontown.suit import SuitDNA
 
 class CogQuest(LocationBasedQuest):
     def __init__(self, id, quest):
@@ -498,16 +483,15 @@ class CogQuest(LocationBasedQuest):
     def getCogNameString(self):
         numCogs = self.getNumCogs()
         cogType = self.getCogType()
-        dept = SuitDNA.getSuitDept(cogType)
         if numCogs == 1:
             if cogType == Any:
                 return TTLocalizer.Cog
             else:
-                return SuitBattleGlobals.SuitAttributes[dept][cogType]['singularname']
+                return SuitBattleGlobals.SuitAttributes[cogType]['singularname']
         elif cogType == Any:
             return TTLocalizer.Cogs
         else:
-            return SuitBattleGlobals.SuitAttributes[dept][cogType]['pluralname']
+            return SuitBattleGlobals.SuitAttributes[cogType]['pluralname']
 
     def getObjectiveStrings(self):
         cogName = self.getCogNameString()
@@ -631,67 +615,6 @@ class CogTrackQuest(CogQuest):
         questCogTrack = self.getCogTrack()
         return questCogTrack == cogDict['track'] and avId in cogDict['activeToons'] and self.isLocationMatch(zoneId)
 
-class CogLevelTypeQuest(CogQuest):
-    def __init__(self, id, quest):
-        CogQuest.__init__(self, id, quest)
-        self.checkNumCogs(self.quest[1])
-        self.checkCogLevel(self.quest[2])
-        self.checkCogType(self.quest[3])
-
-    def getCogType(self):
-        return self.quest[3]
-
-    def getCogLevel(self):
-        return self.quest[2]
-
-    def getProgressString(self, avatar, questDesc):
-        if self.getCompletionStatus(avatar, questDesc) == COMPLETE:
-            return CompleteString
-        elif self.getNumCogs() == 1:
-            return ''
-        else:
-            return TTLocalizer.QuestsCogLevelQuestProgress % {'progress': questDesc[4],
-             'numCogs': self.getNumCogs()}
-
-    def getObjectiveStrings(self):
-        count = self.getNumCogs()
-        level = self.getCogLevel()
-        name = self.getCogNameString()
-        if count == 1:
-            text = TTLocalizer.QuestsCogLevelQuestDesc
-        else:
-            text = TTLocalizer.QuestsCogLevelQuestDescC
-        return (text % {'count': count,
-          'level': level,
-          'name': name},)
-
-    def getString(self):
-        return TTLocalizer.QuestsCogLevelQuestDefeat % self.getObjectiveStrings()[0]
-
-    def getSCStrings(self, toNpcId, progress):
-        if progress >= self.getNumCogs():
-            return getFinishToonTaskSCStrings(toNpcId)
-        count = self.getNumCogs()
-        level = self.getCogLevel()
-        name = self.getCogNameString()
-        if count == 1:
-            text = TTLocalizer.QuestsCogLevelQuestDesc
-        else:
-            text = TTLocalizer.QuestsCogLevelQuestDescI
-        objective = text % {'level': level,
-         'name': name}
-        location = self.getLocationName()
-        return TTLocalizer.QuestsCogLevelQuestSCString % {'objective': objective,
-         'location': location}
-
-    def getHeadlineString(self):
-        return TTLocalizer.QuestsCogLevelQuestHeadline
-    
-
-    def doesCogCount(self, avId, cogDict, zoneId, avList):
-        questCogType = self.getCogType()
-        questCogLevel = self.getCogLevel()
-        return questCogType is Any or questCogType is cogDict['type'] and questCogLevel <= cogDict['level'] and avId in cogDict['activeToons'] and self.isLocationMatch(zoneId)
 
 class CogLevelQuest(CogQuest):
     def __init__(self, id, quest):
@@ -17744,38 +17667,7 @@ QuestDict = {
          2001,
          4216,
          NA,
-         TTLocalizer.QuestDialogDict[12032]),
- 20000: (MAGIC_QUESTS,
-       Start,
-       (CogQuest,
-        Anywhere,
-        25,
-        'ms'),
-       2001,
-       2001,
-       NA,
-       NA,
-       DefaultDialog),
- 20100: (SELLBOT_DISGUISE_TASKS,
-       Start,
-       (CogLevelQuest,
-        ToontownGlobals.SellbotFactoryExt,
-        10,
-        5),
-       2001,
-       2001,
-       1000,
-       NA,
-       DefaultDialog),}
-
-#SELLBOT_DISGUISE_TASKS
-
-"""
-(CogLevelQuest,
-         ToontownGlobals.ToontownCentral,
-         8,
-         3),
-"""
+         TTLocalizer.QuestDialogDict[12032])}
 
 Tier2QuestsDict = {}
 for questId, questDesc in QuestDict.items():
@@ -18324,21 +18216,6 @@ class Reward:
     def getPosterString(self):
         return 'base class'
 
-class TelemarketerPromotionReward(Reward):
-    def __init__(self, id, reward):
-        Reward.__init__(self, id, reward)
-
-    def sendRewardAI(self, av):
-        pass
-
-    def countReward(self, qrc):
-        pass
-
-    def getString(self):
-        return "Your Sellbot Disguise has been promoted to Telemarketer!"
-
-    def getPosterString(self):
-        return "Reward: Telemarketer Promotion"
 
 class MaxHpReward(Reward):
     def __init__(self, id, reward):
@@ -18967,7 +18844,6 @@ RewardDict = {100: (MaxHpReward, 1),
  905: (TrackCompleteReward, ToontownBattleGlobals.THROW_TRACK),
  906: (TrackCompleteReward, ToontownBattleGlobals.SQUIRT_TRACK),
  907: (TrackCompleteReward, ToontownBattleGlobals.DROP_TRACK),
- 1000: (TelemarketerPromotionReward, 0),
  2205: (CheesyEffectReward,
         ToontownGlobals.CEBigToon,
         2000,

@@ -71,6 +71,8 @@ from toontown.battle import DistributedBattle/AI
 from toontown.battle import DistributedBattleBldg/AI
 from toontown.battle import BattleAvatar/AI
 from toontown.tutorial import DistributedBattleTutorial/AI
+from toontown.suit import DistributedGoonObstacle/AI
+from toontown.suit import DistributedObstacleBase/AI
 from toontown.coghq import DistributedBattleFactory/AI
 from toontown.battle import DistributedBattleFinal/AI
 from toontown.safezone import DistributedBoat/AI
@@ -3954,6 +3956,28 @@ dclass DistributedTrashcanZeroMgr : DistributedPhaseEventMgr {
 };
 
 dclass DistributedSillyMeterMgr : DistributedPhaseEventMgr {
+};
+
+dclass DistributedObstacleBase : DistributedObject {
+  setOuch(uint8 penalty) airecv clsend;
+  zapToon(int16/10, int16/10, int16/10, int16/10, int16/10, int16/10, uint8, int16) airecv clsend;
+  showZapToon(uint32, int16/10, int16/10, int16/10, int16/10, int16/10, int16/10, uint8, int16) broadcast;
+  trapFire(bool isChopper) airecv clsend;
+  showObstacle() broadcast ram;
+  setPos(int16/10 x, int16/10 y, int16/10 z) broadcast ram;
+  setHpr(int16/10 h, int16/10 p, int16/10 r) broadcast ram;
+  setPosHpr(int16/10 x, int16/10 y, int16/10 z, int16/10 h, int16/10 p, int16/10 r) broadcast ram;
+  setScale(int16/10 sx, int16/10 sy, int16/10 sz) broadcast ram;
+};
+
+dclass DistributedGoonObstacle : DistributedObstacleBase {
+  requestBattle(int16/10 pauseTime) airecv clsend;
+  requestStunned(int16/10 pauseTime) airecv clsend;
+  setStrength(uint8 strength) broadcast ram;
+  setPath(int16/10 xi, int16/10 yi, int16/10 zi, int16/10 xf, int16/10 yf, int16/10 zf) broadcast ram;
+  setPathDuration(uint8 pathDuration) broadcast ram;
+  setReverseTheta(bool reverseTheta) broadcast ram;
+  setMovie(uint8 mode, uint32 avId, int32/10 pauseTime, int16 timestamp) broadcast ram;
 };
 
 dclass TTOffMagicWordManager : DistributedObject {

@@ -93,7 +93,10 @@ class DistributedBattle(DistributedBattleBase.DistributedBattleBase):
         toonTrack = Sequence()
         suitTrack.append(Func(suit.loop, 'neutral'))
         suitTrack.append(Func(suit.headsUp, toon))
-        taunt = SuitBattleGlobals.getFaceoffTaunt(suit.getStyleName(), suit.doId)
+        if self.zoneId >= 11000 and self.zoneId < 12000:
+            taunt = random.choice(SuitBattleGlobals.SuitTauntGlobals[11000])
+        else:
+            taunt = SuitBattleGlobals.getFaceoffTaunt(suit.getStyleName(), suit.doId)
         suitTrack.append(Func(suit.setChatAbsolute, taunt, CFSpeech | CFTimeout))
         toonTrack.append(Func(toon.loop, 'neutral'))
         toonTrack.append(Func(toon.headsUp, suit))

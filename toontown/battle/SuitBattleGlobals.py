@@ -255,6 +255,22 @@ WATERCOOLER = SuitAttacks.keys().index('Watercooler')
 WITHDRAWAL = SuitAttacks.keys().index('Withdrawal')
 WRITE_OFF = SuitAttacks.keys().index('WriteOff')
 
+SuitTauntGlobals = {11000: ["Speak to the Vice President.",
+                            "The smell of fresh Oil and Smog on the work shift.",
+                            "Get of this here property of C.O.G.S Inc.!",
+                            "Your walking on C.O.G.S Inc. property now!",
+                            "Daisy Garden will be begging on it's knees.",
+                            "Caughing? Good.",
+                            "Don't touch the suit.",
+                            "I've alerted security.",
+                            "Your Lungs will hate you later.",
+                            "We stood off your playground's property -- But now your on OURS!.",
+                            "Get your disgusting feet off our property!",
+                            "H.R will have a field day with you.",
+                            "If Cog Resources contacts are boss -- you can kiss your playground goodbye!",
+                            "Speak to the C.R.O, toon.",
+                            "You made the Vice President the laughing stock!",
+                            "Don't slip, toon."]}
 def getFaceoffTaunt(suitName, doId):
     if suitName in SuitFaceoffTaunts:
         taunts = SuitFaceoffTaunts[suitName]

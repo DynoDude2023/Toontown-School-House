@@ -285,7 +285,6 @@ def doDefault(attack):
         attack['id'], attack['name'], attack['animName'], do_attack = suit_attacks[suitName]
         return do_attack(attack)
     else:
-        notify.error(f'doDefault() - unsupported suit type: {suitName}')
         return None
 
 

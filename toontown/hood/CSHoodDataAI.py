@@ -9,6 +9,7 @@ from toontown.coghq import LobbyManagerAI
 from toontown.building import DistributedVPElevatorAI
 from toontown.suit import DistributedSellbotBossAI
 from toontown.building import DistributedBoardingPartyAI
+from toontown.suit import DistributedGoonObstacleAI
 
 class CSHoodDataAI(HoodDataAI.HoodDataAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('CSHoodDataAI')
@@ -65,3 +66,17 @@ class CSHoodDataAI(HoodDataAI.HoodDataAI):
         intDoor0.generateWithRequired(ToontownGlobals.SellbotLobby)
         intDoor0.sendUpdate('setDoorIndex', [intDoor0.getDoorIndex()])
         self.addDistObj(intDoor0)
+
+        newGoon = DistributedGoonObstacleAI.DistributedGoonObstacleAI(self.air)
+        newGoon.generateWithRequired(ToontownGlobals.SellbotHQ)
+        newGoon.d_setPosHpr(-27.830, -50, 10.095, 0, 0, 0)
+        newGoon.b_setStrength(15)
+        newGoon.d_setPath(
+            -27.830, -50, 10.095,
+            35.231, -50, 10.095
+        )
+        newGoon.d_setPathDuration(25)
+        newGoon.d_setReverseTheta(0)
+
+        newGoon.startGoon()
+        newGoon.d_showObstacle()
