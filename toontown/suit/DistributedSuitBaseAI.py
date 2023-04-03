@@ -25,6 +25,9 @@ class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.Su
         self.KBBonus = 0
         return
 
+    def toonUp(self, healing):
+        self.sendUpdate('toonUp', [healing])
+    
     def generate(self):
         DistributedAvatarAI.DistributedAvatarAI.generate(self)
 
@@ -78,6 +81,14 @@ class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.Su
         self.setLevel(level)
         return None
 
+    def setupSuitDNACustom(self, level, type, track):
+        dna = SuitDNA.SuitDNA()
+        dna.newSuit(type)
+        self.dna = dna
+        self.track = track
+        self.setLevel(level)
+        return None
+    
     def getDNAString(self):
         if self.dna:
             return self.dna.makeNetString()
@@ -144,6 +155,9 @@ class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.Su
         else:
             self.currHP = hp
         return None
+    
+    def getMaxHP(self):
+        return self.maxHP
 
     def b_setHP(self, hp):
         self.setHP(hp)

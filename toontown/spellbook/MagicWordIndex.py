@@ -1359,6 +1359,22 @@ class RestockFlowerSpecials(MagicWord):
         for x in (100, 101, 102, 103, 105, 106, 107, 108, 109, 130, 131, 135):
             toon.addGardenItem(x, 99)
 
+class MakeGroup(MagicWord):
+    desc = "Make a Toon Group."
+    execLocation = MagicWordConfig.EXEC_LOC_SERVER
+
+    def handleWord(self, invoker, avId, toon, *args):
+        toon.makeAToonGroup()
+
+class addMember(MagicWord):
+    desc = "Add a Toon to the Group."
+    arguments = [("id", int, True)]
+    execLocation = MagicWordConfig.EXEC_LOC_SERVER
+    
+
+    def handleWord(self, invoker, avId, toon, *args):
+        memberId = args[0]
+        toon.addToonToGroup(memberId)
 
 class MaxDoodle(MagicWord):
     desc = "Maxes the target's doodle."

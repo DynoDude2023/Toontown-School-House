@@ -3,10 +3,12 @@ BATTLE_STATUS_INFINITE = 1
 
 BATTLE_STATUS_EFFECT_SOAKED = 'soaked'
 BATTLE_STATUS_EFFECT_COMBO = 'comboDamage'
+BATTLE_STATUS_EFFECT_CASH_CONTROLLED = 'cash_controlled'
 
 STATUS_FOLDER = 'toontown.battle.statusEffect'
 STATUS_NAME_2_FILE = {BATTLE_STATUS_EFFECT_SOAKED: 'BattleStatusSoakedAI',
-                      BATTLE_STATUS_EFFECT_COMBO: 'BattleStatusComboDamageAI'}
+                      BATTLE_STATUS_EFFECT_COMBO: 'BattleStatusComboDamageAI',
+                      BATTLE_STATUS_EFFECT_CASH_CONTROLLED: 'BattleStatusCashControlledAI'}
 
 STATUS_EFFECT2VISUAL_COLOR = {BATTLE_STATUS_EFFECT_SOAKED: (0.0, 0.0, 1.0, 1.0),
                               BATTLE_STATUS_EFFECT_COMBO: (0.5, 0.5, 0.0, 1.0)}

@@ -6,7 +6,7 @@ from toontown.suit import DistributedSuitAI
 import SuitBuildingGlobals, types
 
 class SuitPlannerInteriorAI:
-    notify = DirectNotifyGlobal.directNotify.newCategory('SuitPlannerInteriorAI')
+    notify = DirectNotifyGlobal.directNotify.newCategory('SuitInteriorPlannerInteriorAI')
 
     def __init__(self, numFloors, bldgLevel, bldgTrack, zone, respectInvasions=1):
         self.dbg_nSuits1stRound = config.GetBool('n-suits-1st-round', 0)
@@ -40,62 +40,89 @@ class SuitPlannerInteriorAI:
         for currFloor in xrange(numFloors):
             infoDict = {}
             lvls = self.__genLevelList(bldgLevel, currFloor, numFloors)
-            activeDicts = self.__genActiveSuits(lvls, bldgTrack, currFloor, numFloors, bldgLevel)
-            reserveDicts = self.__genReserveSuits(lvls, bldgTrack, currFloor, numFloors, bldgLevel, activeDicts)
+            activeDicts = []
+            maxActive = min(4, len(lvls))
+            if self.dbg_nSuits1stRound:
+                numActive = min(self.dbg_nSuits1stRound, maxActive)
+            else:
+                numActive = random.randint(1, maxActive)
+            if currFloor + 1 == numFloors and len(lvls) > 1:
+                origBossSpot = len(lvls) - 1
+                if numActive == 1:
+                    newBossSpot = numActive - 1
+                else:
+                    newBossSpot = numActive - 2
+                tmp = lvls[newBossSpot]
+                lvls[newBossSpot] = lvls[origBossSpot]
+                lvls[origBossSpot] = tmp
+            bldgInfo = SuitBuildingGlobals.SuitBuildingInfo[bldgLevel]
+            if len(bldgInfo) > SuitBuildingGlobals.SUIT_BLDG_INFO_REVIVES:
+                revives = bldgInfo[SuitBuildingGlobals.SUIT_BLDG_INFO_REVIVES][0]
+            else:
+                revives = 0
+            for currActive in xrange(numActive - 1, -1, -1):
+                level = lvls[currActive]
+                type = self.__genNormalSuitType(level)
+                activeDict = {}
+                activeDict['type'] = type
+                activeDict['track'] = bldgTrack
+                activeDict['level'] = level
+                activeDict['revives'] = revives
+                activeDicts.append(activeDict)
+
             infoDict['activeSuits'] = activeDicts
+            reserveDicts = []
+            numReserve = len(lvls) - numActive
+            joinChances = self.__genJoinChances(numReserve)
+            for currReserve in xrange(numReserve):
+                level = lvls[currReserve + numActive]
+                type = self.__genNormalSuitType(level)
+                reserveDict = {}
+                reserveDict['type'] = type
+                reserveDict['track'] = bldgTrack
+                reserveDict['level'] = level
+                reserveDict['revives'] = revives
+                reserveDict['joinChance'] = joinChances[currReserve]
+                reserveDicts.append(reserveDict)
+
             infoDict['reserveSuits'] = reserveDicts
             self.suitInfos.append(infoDict)
 
+    def __genNormalSuitType(self, lvl):
+        if self.dbg_defaultSuitType != None:
+            return self.dbg_defaultSuitType
+        return SuitDNA.getRandomSuitTypeSuitInterior(lvl)
+
     def __genLevelList(self, bldgLevel, currFloor, numFloors):
-        lvls = []
-        for i in xrange(bldgLevel):
-            if i == bldgLevel - 1 and currFloor + 1 == numFloors:
-                lvls.append(SuitBuildingGlobals.SUIT_BLDG_INFO_BOSS_LVLS)
-            else:
-                lvls.append(random.choice(SuitBuildingGlobals.SuitBuildingInfo[i][SuitBuildingGlobals.SUIT_BLDG_INFO_BOSS_LVLS]))
-        return lvls
-
-    def __genNormalSuitType(self, level):
-        return SuitDNA.getRandomSuitTypeSuitInterior(level)
-
-    def __genActiveSuits(self, lvls, bldgTrack, currFloor, numFloors, bldgLevel):
-        activeDicts = []
-        maxActive = min(4, len(lvls))
-        if self.dbg_nSuits1stRound:
-            numActive = min(self.dbg_nSuits1stRound, maxActive)
-        else:
-            numActive = random.randint(1, maxActive)
-        if currFloor + 1 == numFloors and len(lvls) > 1:
-            origBossSpot = len(lvls) - 1
-            if numActive == 1:
-                newBossSpot = numActive - 1
-            else:
-                newBossSpot = numActive - 2
-            lvls[newBossSpot], lvls[origBossSpot] = lvls[origBossSpot], lvls[newBossSpot]
         bldgInfo = SuitBuildingGlobals.SuitBuildingInfo[bldgLevel]
-        revives = bldgInfo[SuitBuildingGlobals.SUIT_BLDG_INFO_REVIVES][0] if len(bldgInfo) > SuitBuildingGlobals.SUIT_BLDG_INFO_REVIVES else 0
-        for currActive in xrange(numActive - 1, -1, -1):
-            level = lvls[currActive]
-            type = self.__genNormalSuitType(level)
-            activeDicts.append({'type': type, 'track': bldgTrack, 'level': level, 'revives': revives})
-        return activeDicts
+        if self.dbg_1SuitPerFloor:
+            return [1]
+        else:
+            if self.dbg_4SuitsPerFloor:
+                return [5, 6, 7, 10]
+        lvlPoolRange = bldgInfo[SuitBuildingGlobals.SUIT_BLDG_INFO_LVL_POOL]
+        maxFloors = bldgInfo[SuitBuildingGlobals.SUIT_BLDG_INFO_FLOORS][1]
+        lvlPoolMults = bldgInfo[SuitBuildingGlobals.SUIT_BLDG_INFO_LVL_POOL_MULTS]
+        floorIdx = min(currFloor, maxFloors - 1)
+        lvlPoolMin = lvlPoolRange[0] * lvlPoolMults[floorIdx]
+        lvlPoolMax = lvlPoolRange[1] * lvlPoolMults[floorIdx]
+        lvlPool = random.randint(int(lvlPoolMin), int(lvlPoolMax))
+        lvlMin = bldgInfo[SuitBuildingGlobals.SUIT_BLDG_INFO_SUIT_LVLS][0]
+        lvlMax = bldgInfo[SuitBuildingGlobals.SUIT_BLDG_INFO_SUIT_LVLS][1]
+        self.notify.debug('Level Pool: ' + str(lvlPool))
+        lvlList = []
+        while lvlPool >= lvlMin:
+            newLvl = random.randint(lvlMin, min(lvlPool, lvlMax))
+            lvlList.append(newLvl)
+            lvlPool -= newLvl
 
-    def __genJoinChances(self, numReserve):
-        joinChances = []
-        for i in xrange(numReserve):
-            joinChances.append(random.randint(1, 100))
-        return joinChances
-
-    def __genReserveSuits(self, lvls, bldgTrack, currFloor, numFloors, bldgLevel, activeDicts):
-        reserveDicts = []
-        numReserve = len(lvls) - len(activeDicts)
-        joinChances = self.__genJoinChances(numReserve)
-        revives = 0
-        for currReserve in xrange(numReserve):
-            level = lvls[currReserve + len(activeDicts)]
-            type = self.__genNormalSuitType(level)
-            reserveDicts.append({'type': type, 'track': bldgTrack, 'level': level, 'revives': revives, 'joinChance': joinChances[currReserve]})
-        return reserveDicts
+        if currFloor + 1 == numFloors:
+            bossLvlRange = bldgInfo[SuitBuildingGlobals.SUIT_BLDG_INFO_BOSS_LVLS]
+            newLvl = random.randint(bossLvlRange[0], bossLvlRange[1])
+            lvlList.append(newLvl)
+        lvlList.sort(cmp)
+        self.notify.debug('LevelList: ' + repr(lvlList))
+        return lvlList
 
     def __setupSuitInfo(self, suit, bldgTrack, suitLevel, suitType):
         suitName, skeleton = simbase.air.suitInvasionManager.getInvadingCog()

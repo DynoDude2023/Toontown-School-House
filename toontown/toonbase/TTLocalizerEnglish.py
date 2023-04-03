@@ -74,7 +74,7 @@ lDonaldsDreamland = "Donald's Dreamland"
 lMinniesMelodyland = "Minnie's Melodyland"
 lToontownCentral = 'Toontown Central'
 lToonHQ = 'Toon HQ'
-lSellbotHQ = 'Sellbot HQ'
+lSellbotHQ = 'Smellbot HQ'
 lGoofySpeedway = 'Goofy Speedway'
 lOutdoorZone = "Chip 'n Dale's Acorn Acres"
 lGolfZone = "Chip 'n Dale's MiniGolf"
@@ -105,30 +105,30 @@ GlobalStreetNames = {20000: ('to', 'on', 'Tutorial Terrace'),
  9000: ('to the', 'in the', 'Playground'),
  9100: ('to', 'on', 'Lullaby Lane'),
  9200: ('to', 'on', 'Pajama Place'),
- 10000: ('to', 'in', 'Bossbot HQ Country Club'),
- 10100: ('to the', 'in the', 'Bossbot HQ Lobby'),
+ 10000: ('to', 'in', 'Bassbot HQ'),
+ 10100: ('to the', 'in the', 'Bassbot HQ Lobby'),
  10200: ('to the', 'in the', 'The Clubhouse'),
  10300: ('to the', 'in the', 'Executive Offices'),
  10400: ('to the', 'in the', 'Executive Offices Walkway'),
- 10500: ('to the', 'in the', 'The Front Three'),
- 10600: ('to the', 'in the', 'The Middle Six'),
- 10700: ('to the', 'in the', 'The Back Nine'),
- 11000: ('to the', 'in the', 'Sellbot HQ Courtyard'),
- 11100: ('to the', 'in the', 'Sellbot HQ Lobby'),
- 11200: ('to the', '', 'Sellbot Factory Exterior'),
- 11500: ('to the', 'in the', 'Sellbot Factory'),
- 12000: ('to', 'in', 'Cashbot Train Yard'),
- 12100: ('to the', 'in the', 'Cashbot HQ Lobby'),
- 12500: ('to the', 'in the', 'Cashbot Coin Mint'),
- 12600: ('to the', 'in the', 'Cashbot Dollar Mint'),
- 12700: ('to the', 'in the', 'Cashbot Bullion Mint'),
- 13000: ('to', 'in', 'Lawbot HQ Courtyard'),
+ 10500: ('to the', 'in the', 'The Front Uhhh....Three?'),
+ 10600: ('to the', 'in the', 'The Middle Seven...? no wait, the other one.'),
+ 10700: ('to the', 'in the', 'One Hour Doungeon, no, too bad. L + Ratio.'),
+ 11000: ('to the', 'in the', 'Smellbot HQ Courtyard'),
+ 11100: ('to the', 'in the', 'Smellbot HQ Lobby'),
+ 11200: ('to the', '', 'Smellbot Factory Exterior'),
+ 11500: ('to the', 'in the', 'Smellbot Factory'),
+ 12000: ('to', 'in', 'Greedbot Train Yard'),
+ 12100: ('to the', 'in the', 'Greedbot HQ Lobby'),
+ 12500: ('to the', 'in the', 'Greedbot Coin Mint'),
+ 12600: ('to the', 'in the', 'Greedbot Dollar Mint'),
+ 12700: ('to the', 'in the', 'Greedbot Bullion Mint'),
+ 13000: ('to', 'in', 'Nentendobot HQ Courtyard'),
  13100: ('to the', 'in the', 'Courthouse Lobby'),
  13200: ('to the', 'in the', "DA's Office Lobby"),
- 13300: ('to the', 'in the', 'Lawbot A Office'),
- 13400: ('to the', 'in the', 'Lawbot B Office'),
- 13500: ('to the', 'in the', 'Lawbot C Office'),
- 13600: ('to the', 'in the', 'Lawbot D Office'),
+ 13300: ('to the', 'in the', 'OBJECTION!'),
+ 13400: ('to the', 'in the', 'Your still here...?'),
+ 13500: ('to the', 'in the', 'Uhhh, C....?'),
+ 13600: ('to the', 'in the', 'Ok this is the Jesse Shell office.'),
  17000: ('to the', 'in the', 'Playground'),}
 DonaldsDock = ('to', 'in', lDonaldsDock)
 ToontownCentral = ('to', 'in', lToontownCentral)
@@ -139,7 +139,7 @@ OutdoorZone = ('to', 'in', lOutdoorZone)
 FunnyFarm = ('to the', 'in the', 'Funny Farm')
 GoofySpeedway = ('to', 'in', lGoofySpeedway)
 DonaldsDreamland = ('to', 'in', lDonaldsDreamland)
-BossbotHQ = ('to', 'in', 'Bossbot HQ')
+BossbotHQ = ('to', 'in', 'Bassbot HQ')
 SellbotHQ = ('to', 'in', 'Sellbot HQ')
 CashbotHQ = ('to', 'in', 'Cashbot HQ')
 LawbotHQ = ('to', 'in', 'Lawbot HQ')
@@ -4894,6 +4894,7 @@ EmoteAnnoyed = 'Annoyed'
 EmoteSleep = 'Sleepy'
 TIPPageTitle = 'TIP'
 SuitBaseNameWithLevel = '%(name)s\n%(dept)s\nLevel %(level)s'
+SuitBaseNameWithLevelNoDept = '%(name)s\nLevel %(level)s'
 HealthForceAcknowledgeMessage = 'You cannot leave the playground until your Laff meter is smiling!'
 InventoryTotalGags = 'Total gags\n%d / %d'
 InventroyPinkSlips = '%s Pink Slips'

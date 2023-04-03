@@ -201,6 +201,9 @@ def __getSuitTrack(suit, tContact, tDodge, hp, hpbonus, kbbonus, anim, died, lef
         suitTrack.append(Wait(tContact))
         suitTrack.append(showDamage)
         suitTrack.append(updateHealthBar)
+        if suit.hasStatusEffectVisual('soaked'):
+            suitTrack.append(Func(suit.setPlayRate, 0.85, 'neutral'))
+            suitTrack.append(Func(suit.setColorScale, 0.8, 0.8, 1.0, 1.0))
         if not geyser:
             suitTrack.append(sival)
         elif not uberRepeat:

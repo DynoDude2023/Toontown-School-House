@@ -45,6 +45,11 @@ class BattleAvatarAI(DistributedObjectAI):
             self.statusEffectNames.append(effectName)
             self.statusEffects.append(effect)
             self.av.sendUpdate('addStatusEffectVisual', [effectName])
+    
+    def hasStatusEffect(self, effectName):
+        if effectName in self.statusEffectNames:
+            return True
+        return False
 
     def calculateRound(self):
         self.gagTrackDamages = {

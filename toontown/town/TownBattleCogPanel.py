@@ -10,6 +10,7 @@ from direct.task.Task import Task
 from direct.gui.DirectGui import *
 from toontown.toonbase import TTLocalizer
 from direct.gui.DirectGui import *
+from toontown.battle.statusEffect.BattleStatusEffectGlobals import *
 class TownBattleCogPanel(DirectFrame):
     notify = DirectNotifyGlobal.directNotify.newCategory('TownBattleCogPanel')
     healthColors = (Vec4(0, 1, 0, 1),
@@ -78,8 +79,10 @@ class TownBattleCogPanel(DirectFrame):
 
     def statusEffects(self):
         text = self.cog._name + "\n"
-        if self.cog.hasStatusEffectVisual('soaked'):
+        if self.cog.hasStatusEffectVisual(BATTLE_STATUS_EFFECT_SOAKED):
             text +=  "SOAKED: This cog Will only do 20% of its normal damage.\n"
+        if self.cog.hasStatusEffectVisual(BATTLE_STATUS_EFFECT_CASH_CONTROLLED):
+            text +=  "CASH CONTROLLED: This Cashbot is under Control of a angy Short Change, they will resist 8 damage to gags and will deal 25% more damage, will heal 20 percent of their max HP each round if under half health.\n"
         base.localAvatar.setSystemMessage(0, text)
 
     def setLevelText(self, hp, revives = 0):

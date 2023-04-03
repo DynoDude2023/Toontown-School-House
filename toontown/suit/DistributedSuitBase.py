@@ -30,27 +30,58 @@ from direct.interval.IntervalGlobal import *
 from panda3d.core import *
 from toontown.battle import BattleParticles
 from toontown.battle import BattleAvatar
+from toontown.battle import MovieUtil
+import random
 
 class StatusEffectVisual:
 
     def __init__(self, effectName, suit, visualType=STATUS_VISUAL_PIXIE_WALL):
         self.effectName = effectName
         self.visualType = visualType
+        self.suit = suit
 
-        if self.visualType == STATUS_VISUAL_PIXIE_WALL:
-            self.visualWall = BattleParticles.createParticleEffect(file='pixieDrop', color=STATUS_EFFECT2VISUAL_COLOR[self.effectName])
-            self.visualInterval = ParticleInterval(self.visualWall, suit, False, duration=60, cleanup=False)
-            self.visualParticals = self.visualWall.getParticlesNamed('particles-1')
-            self.visualParticals.renderer.setCenterColor(STATUS_EFFECT2VISUAL_COLOR[self.effectName])
-            self.visualParticals.renderer.setEdgeColor(STATUS_EFFECT2VISUAL_COLOR[self.effectName])
+        
+        if effectName == BATTLE_STATUS_EFFECT_CASH_CONTROLLED:
+            anims=self.suit.generateAnimDict()
+            suitBodyType = self.suit.style.body
+            anims['neutral']='phase_5/models/char/tt_a_ene_cg'+ suitBodyType + '_controlidle.bam'
+            self.suit.loadAnims(anims)
+            self.suit.loop('neutral')
+            self.suit.setToDept(customDept=random.choice(['c', 'l', 'm', 's', 'scrapped']))
+            self.suit.shortChangeControlled = True
+            self.controlProp = loader.loadModel('phase_5/models/props/ttr_r_prp_bat_antenna')
+            self.controlPropStatic = loader.loadModel('phase_5/models/props/ttr_m_prp_bat_antennaStatic')
+        elif effectName == BATTLE_STATUS_EFFECT_SOAKED:
+            pass
+        else:
+            if self.visualType == STATUS_VISUAL_PIXIE_WALL:
+                self.visualWall = BattleParticles.createParticleEffect(file='pixieDrop', color=STATUS_EFFECT2VISUAL_COLOR[self.effectName])
+                self.visualInterval = ParticleInterval(self.visualWall, suit, False, duration=60, cleanup=False)
+                self.visualParticals = self.visualWall.getParticlesNamed('particles-1')
+                self.visualParticals.renderer.setCenterColor(STATUS_EFFECT2VISUAL_COLOR[self.effectName])
+                self.visualParticals.renderer.setEdgeColor(STATUS_EFFECT2VISUAL_COLOR[self.effectName])
 
     def startVisualInterval(self):
-        self.visualWall.show()
-        self.visualInterval.loop()
+        if self.effectName == BATTLE_STATUS_EFFECT_CASH_CONTROLLED:
+            self.controlProp.reparentTo(self.suit.find('**/def_head'))
+            self.controlPropStatic.reparentTo(self.controlProp)
+            self.controlPropStatic.setPos(0, -0.12, 3)
+            self.suit.headParts.append(self.controlProp)
+            self.suit.headParts.append(self.controlPropStatic)
+        else:
+            if self.effectName != BATTLE_STATUS_EFFECT_SOAKED:
+                self.visualWall.show()
+                self.visualInterval.loop()
 
     def stopVisualInterval(self):
-        self.visualWall.hide()
-        self.visualInterval.finish()
+        if self.effectName == BATTLE_STATUS_EFFECT_CASH_CONTROLLED:
+            self.controlProp.detachNode()
+            self.controlProp.removeNode()
+            self.controlPropStatic.removeNode()
+        else:
+            if self.effectName != BATTLE_STATUS_EFFECT_SOAKED:
+                self.visualWall.hide()
+                self.visualInterval.finish()
 
 class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBase.SuitBase, BattleAvatar.BattleAvatar):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedSuitBase')
@@ -86,9 +117,18 @@ class DistributedSuitBase(DistributedAvatar.DistributedAvatar, Suit.Suit, SuitBa
         self.maxSkeleRevives = 0
         self.sillySurgeText = False
         self.interactivePropTrackBonus = -1
+        self.shortChangeControlled = False
         self.statusEffectVisuals={}
         return
-
+    
+    def toonUp(self, healing):
+        healing = MovieUtil.cogHealMovie(self, healing)
+        healing.start()
+    
+    def setChatAbsolute(self, chatString, chatFlags, dialogue = None, interrupt = 1):
+        self.nametag.setChat(chatString, chatFlags)
+        self.playCurrentDialogue(dialogue, chatFlags, interrupt)
+    
     def setVirtual(self, virtual):
         pass
 

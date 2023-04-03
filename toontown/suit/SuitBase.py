@@ -39,6 +39,13 @@ class SuitBase:
         else:
             self.notify.error('called getStyleDept() before dna was set!')
             return 'unknown'
+    
+    def getCustomDept(self, dept):
+        if hasattr(self, 'dna') and self.dna:
+            return SuitDNA.getDeptFullname(dept)
+        else:
+            self.notify.error('called getStyleDept() before dna was set!')
+            return 'unknown'
 
     def getLevel(self):
         return self.level

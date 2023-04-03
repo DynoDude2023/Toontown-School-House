@@ -1,4 +1,1 @@
-Toontown Online Resources
-========================
-
-Game resources (models, audio, textures, etc.) for Toontown Online.
+April Fools, Your town has been raided by are oil addicted shortchanges that are mind controlling a bean counter near you, trollololololol.

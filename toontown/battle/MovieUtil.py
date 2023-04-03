@@ -150,6 +150,12 @@ def avatarFacePoint(av, other = render):
     pnt.setZ(pnt[2] + av.getHeight())
     return pnt
 
+def cogHealMovie(suit, hp):
+    showHealing = Func(suit.showHpText, hp, openEnded=1)
+    updateHealthBar = Func(suit.updateHealthBar, -hp)
+    toonUpSfx = loader.loadSfx('phase_11/audio/sfx/ttr_s_ara_lhq_toonup.ogg')
+    healTrack = Parallel(showHealing, updateHealthBar, SoundInterval(toonUpSfx, node=suit))
+    return healTrack
 
 def insertDeathSuit(suit, deathSuit, battle = None, pos = None, hpr = None):
     holdParent = suit.getParent()

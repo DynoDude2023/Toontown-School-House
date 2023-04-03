@@ -20,6 +20,7 @@ from toontown.hood import ZoneUtil
 from toontown.distributed import DelayDelete
 from toontown.toon import TTEmote
 from otp.avatar import Emote
+import random
 
 class DistributedBattleBase(DistributedNode.DistributedNode, BattleBase):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedBattleBase')
@@ -1067,6 +1068,7 @@ class DistributedBattleBase(DistributedNode.DistributedNode, BattleBase):
             self.startTimer(ts)
         if self.needAdjustTownBattle == 1:
             self.__adjustTownBattle()
+
         return None
 
     def exitWaitForInput(self):

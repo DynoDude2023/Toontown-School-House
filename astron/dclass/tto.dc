@@ -350,6 +350,7 @@ from toontown.cogdominium import DistCogdoCraneCog/AI
 from toontown.spellbook import TTOffMagicWordManager/AI
 from toontown.events import DistributedEvent/AI
 from toontown.events import DistributedInvasion/AI
+from toontown.groups import ToonGroup/AI
 
 typedef uint8 bool;
 
@@ -1283,6 +1284,7 @@ dclass DistributedSuitBase : BattleAvatar {
   setBrushOff(int16) broadcast;
   setSkelecog(uint8) required broadcast ram;
   setSkeleRevives(uint8) required broadcast ram;
+  toonUp(int64) broadcast;
   setHP(int16) required broadcast ram;
   addStatusEffectVisual(string) broadcast ram;
   removeStatusEffectVisual(string) broadcast ram;
@@ -3984,4 +3986,10 @@ dclass TTOffMagicWordManager : DistributedObject {
   requestExecuteMagicWord(int8, int8, int16, uint32, string) airecv clsend;
   executeMagicWord(string, string, uint32[], blob, int8, int8, int16, uint32);
   generateResponse(string, string, blob, string, int8, int8, int16, uint32, string);
+};
+
+dclass ToonGroup : DistributedObject {
+  setOwnerId(uint64) broadcast ram;
+  setMaxMembers(int64) broadcast ram;
+  addMember(uint64) broadcast ram;
 };

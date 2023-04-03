@@ -15,6 +15,7 @@ from toontown.building import SuitBuildingGlobals
 from toontown.building.DistributedBuildingAI import DistributedBuildingAI
 from toontown.toonbase import ToontownBattleGlobals
 from toontown.toonbase import ToontownGlobals
+from toontown.battle.statusEffect.BattleStatusEffectGlobals import *
 import math, time, random
 
 class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlannerBase.SuitPlannerBase):
@@ -304,6 +305,7 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
     def createNewSuit(self, blockNumbers, streetPoints, toonBlockTakeover=None, cogdoTakeover=None, minPathLen=None, maxPathLen=None, buildingHeight=None, suitLevel=None, suitType=None, suitTrack=None, suitName=None, skelecog=None, revives=None):
         startPoint = None
         blockNumber = None
+        isControlledBeanCounter = random.choice([0, 0, 0, 0, 0, 1])
         if self.notify.getDebug():
             self.notify.debug('Choosing origin from %d+%d possibles.' % (len(streetPoints), len(blockNumbers)))
         while startPoint == None and len(blockNumbers) > 0:
@@ -393,7 +395,12 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
             else:
                 suitLevel = self.SuitHoodInfo[self.hoodInfoIdx][self.SUIT_HOOD_INFO_LVL][-1] + 1
         suitLevel, suitType, suitTrack = self.pickLevelTypeAndTrack(suitLevel, suitType, suitTrack)
-        newSuit.setupSuitDNA(suitLevel, suitType, suitTrack)
+        if isControlledBeanCounter:
+            if suitLevel < 4:
+                suitLevel = 4
+            newSuit.setupSuitDNACustom(suitLevel, 'bc', 'm')
+        else:
+            newSuit.setupSuitDNA(suitLevel, suitType, suitTrack)
         newSuit.buildingHeight = buildingHeight
         gotDestination = self.chooseDestination(newSuit, startTime, toonBlockTakeover=toonBlockTakeover, cogdoTakeover=cogdoTakeover, minPathLen=minPathLen, maxPathLen=maxPathLen)
         if not gotDestination:
@@ -409,6 +416,9 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
             newSuit.setSkeleRevives(revives)
         newSuit.generateWithRequired(newSuit.zoneId)
         newSuit.moveToNextLeg(None)
+        if isControlledBeanCounter:
+            newSuit.appendStatusEffect(BATTLE_STATUS_EFFECT_CASH_CONTROLLED)
+            newSuit.calculateRound()
         self.suitList.append(newSuit)
         if newSuit.flyInSuit:
             self.numFlyInSuits += 1

@@ -13,8 +13,7 @@ from direct.showbase import AppRunnerGlobal
 from libotp.nametag.NametagGroup import NametagGroup
 from direct.controls.ControlManager import CollisionHandlerRayStart
 from panda3d.core import *
-import string
-import os
+import string, os, random
 
 aSize=6.06
 bSize=5.29
@@ -730,6 +729,63 @@ class Suit(Avatar.Avatar):
             self.rightHand=self.find('**/def_joint_right_hold')
             self.shadowJoint=self.find('**/def_shadow')
             self.nametagJoint=self.find('**/def_nameTag')
+
+        if base.config.GetBool('want-new-cogs', 0):
+            if dept == 'c':
+                texType='bossbot'
+            elif dept == 'm':
+                texType='cashbot'
+            elif dept == 'l':
+                texType='lawbot'
+            elif dept == 's':
+                texType='sellbot'
+            if self.find('**/body').isEmpty():
+                __doItTheOldWay__()
+            else:
+                filepath='phase_3.5/maps/tt_t_ene_' + texType + '.jpg'
+                if cogExists('/maps/tt_t_ene_' + texType + '.jpg'):
+                    bodyTex=loader.loadTexture(filepath)
+                    self.find('**/body').setTexture(bodyTex, 1)
+                self.leftHand=self.find('**/def_joint_left_hold')
+                self.rightHand=self.find('**/def_joint_right_hold')
+                self.shadowJoint=self.find('**/def_shadow')
+                self.nametagJoint=self.find('**/def_nameTag')
+        else:
+            __doItTheOldWay__()
+    
+    def setToDept(self, modelRoot=None, customDept='m'):
+        if not modelRoot:
+            modelRoot=self
+        dept=customDept
+        phase=3.5
+
+        def __doItTheOldWay__():
+            if customDept == 'scrapped':
+                torsoTex=loader.loadTexture('phase_%s/maps/%s_blazer.jpg' % (phase, random.choice(['c', 'm', 'l', 's'])))
+                legTex=loader.loadTexture('phase_%s/maps/%s_leg.jpg' % (phase, random.choice(['c', 'm', 'l', 's'])))
+                armTex=loader.loadTexture('phase_%s/maps/%s_sleeve.jpg' % (phase, random.choice(['c', 'm', 'l', 's'])))
+            else:
+                torsoTex=loader.loadTexture('phase_%s/maps/%s_blazer.jpg' % (phase, dept))
+                legTex=loader.loadTexture('phase_%s/maps/%s_leg.jpg' % (phase, dept))
+                armTex=loader.loadTexture('phase_%s/maps/%s_sleeve.jpg' % (phase, dept))
+            modelRoot.find('**/torso').setTexture(torsoTex, 1)
+            modelRoot.find('**/arms').setTexture(armTex, 1)
+            modelRoot.find('**/legs').setTexture(legTex, 1)
+            modelRoot.find('**/hands').setColor(self.handColor)
+            self.leftHand=self.find('**/def_joint_left_hold')
+            self.rightHand=self.find('**/def_joint_right_hold')
+            self.shadowJoint=self.find('**/def_shadow')
+            self.nametagJoint=self.find('**/def_nameTag')
+            
+            if customDept == 'scrapped':
+                nameInfo=TTLocalizer.SuitBaseNameWithLevelNoDept % {'name': self._name,
+                                                            'level': self.getActualLevel()}
+                self.setDisplayName(nameInfo)
+            else:
+                nameInfo=TTLocalizer.SuitBaseNameWithLevel % {'name': self._name,
+                                                            'dept': self.getCustomDept(customDept),
+                                                            'level': self.getActualLevel()}
+                self.setDisplayName(nameInfo)
 
         if base.config.GetBool('want-new-cogs', 0):
             if dept == 'c':

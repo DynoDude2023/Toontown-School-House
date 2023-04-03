@@ -1,5 +1,6 @@
 from otp.ai.AIBaseGlobal import *
 from panda3d.core import *
+from otp.distributed.OtpDoGlobals import OTP_ZONE_ID_MANAGEMENT
 from otp.otpbase import OTPGlobals
 from direct.directnotify import DirectNotifyGlobal
 import ToonDNA
@@ -46,7 +47,9 @@ from toontown.toonbase import TTLocalizer
 from toontown.catalog import CatalogAccessoryItem
 from toontown.minigame import MinigameCreatorAI
 import ModuleListAI
+from toontown.groups import ToonGroupAI
 from toontown.battle import BattleAvatarAI
+from otp.otpbase.OTPGlobals import *
 if simbase.wantPets:
     from toontown.pets import PetLookerAI, PetObserve
 else:
@@ -99,6 +102,7 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         self.glasses = (0, 0, 0)
         self.backpack = (0, 0, 0)
         self.shoes = (0, 0, 0)
+        self.toonGroup = None
         self.cogTypes = [0,
          0,
          0,
@@ -218,6 +222,13 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         DistributedPlayerAI.DistributedPlayerAI.generate(self)
         DistributedSmoothNodeAI.DistributedSmoothNodeAI.generate(self)
 
+    def makeAToonGroup(self):
+        self.toonGroup = ToonGroupAI.ToonGroupAI(self.air, self.doId)
+        self.toonGroup.generateWithRequired(OTP_ZONE_ID_MANAGEMENT)
+    
+    def addToonToGroup(self, memberId):
+        self.toonGroup.addMember(memberId)
+    
     def announceGenerate(self):
         DistributedPlayerAI.DistributedPlayerAI.announceGenerate(self)
         DistributedSmoothNodeAI.DistributedSmoothNodeAI.announceGenerate(self)

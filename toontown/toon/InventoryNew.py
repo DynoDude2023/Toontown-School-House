@@ -260,6 +260,21 @@ class InventoryNew(InventoryBase.InventoryBase, DirectFrame):
             pass
         else:
             messenger.send('inventory-selection', [track, level])
+    
+    def handleSelection(self, track, level):
+        if self.activateMode == 'purchaseDelete' or self.activateMode == 'bookDelete' or self.activateMode == 'storePurchaseDelete':
+            if self.numItem(track, level):
+                self.useItem(track, level)
+                self.updateGUI(track, level)
+                messenger.send('inventory-deletion', [track, level])
+                self.showDetail(track, level)
+        elif self.activateMode == 'purchase' or self.activateMode == 'storePurchase':
+            messenger.send('inventory-selection', [track, level])
+            self.showDetail(track, level)
+        elif self.gagTutMode:
+            pass
+        else:
+            messenger.send('inventory-selection', [track, level])
 
     def __handleRun(self):
         messenger.send('inventory-run')

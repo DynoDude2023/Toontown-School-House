@@ -660,6 +660,7 @@ class BattleCalculatorAI:
                 else:
                     self.suitLeftBattle(targetId)
                     attack[SUIT_DIED_COL] = attack[SUIT_DIED_COL] | 1 << position
+                    self.battle.battleListener.trackKilledSuit(currTarget)
                     if self.notify.getDebug():
                         self.notify.debug('Suit' + str(targetId) + 'bravely expired in combat')
 
@@ -1190,6 +1191,8 @@ class BattleCalculatorAI:
                     if self.notify.getDebug():
                         self.notify.debug('Toon %d has died, removing' % t)
                     self.toonLeftBattle(t)
+                    toon = self.battle.getToon(t)
+                    self.battle.battleListener.trackSaddenedToon(toon)
                     attack[TOON_DIED_COL] = attack[TOON_DIED_COL] | 1 << position
                 if self.notify.getDebug():
                     self.notify.debug('Toon ' + str(t) + ' takes ' + str(attack[SUIT_HP_COL][position]) + ' damage')
@@ -1264,6 +1267,7 @@ class BattleCalculatorAI:
                 if self.notify.getDebug():
                     self.notify.debug('Suit attack: ' + str(self.battle.suitAttacks[i]))
                 attack[SUIT_BEFORE_TOONS_COL] = 0
+                self.battle.battleListener.trackSuitAttack(attack)
 
     def __updateLureTimeouts(self):
         if self.notify.getDebug():

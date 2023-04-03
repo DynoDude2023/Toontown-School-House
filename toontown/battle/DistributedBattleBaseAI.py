@@ -6,6 +6,7 @@ from toontown.toonbase.ToontownBattleGlobals import *
 from SuitBattleGlobals import *
 from panda3d.core import *
 import BattleExperienceAI
+from toontown.battle.battle_general.BattleListenerAI import BattleListenerAI
 from direct.distributed import DistributedObjectAI
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
@@ -18,6 +19,7 @@ from toontown.toonbase import ToontownGlobals
 import random
 from toontown.toon import NPCToons
 from toontown.pets import DistributedPetProxyAI
+from toontown.battle.statusEffect.BattleStatusEffectGlobals import *
 
 class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBase):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedBattleBaseAI')
@@ -49,6 +51,7 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
         self.toonMerits = {}
         self.toonParts = {}
         self.battleCalc = BattleCalculatorAI.BattleCalculatorAI(self, tutorialFlag)
+        self.battleListener = BattleListenerAI(self)
         if self.air.suitInvasionManager.getInvading():
             mult = getInvasionMultiplier()
             self.battleCalc.setSkillCreditMultiplier(mult)
@@ -1259,6 +1262,9 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
         self.runableFsm.request('Runable')
         self.resetResponses()
         self.__requestAdjust()
+        for suit in self.activeSuits:
+            if suit.getHP() < suit.getMaxHP() * .50 and suit.hasStatusEffect(BATTLE_STATUS_EFFECT_CASH_CONTROLLED):
+                suit.toonUp(int(suit.getMaxHP() * .20))
         if not self.tutorialFlag:
             self.timer.startCallback(SERVER_INPUT_TIMEOUT, self.__serverTimedOut)
         self.npcAttacks = {}

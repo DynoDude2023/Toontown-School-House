@@ -11,16 +11,19 @@ class BattleTargetStatusEffectAI(BattleStatusEffectAI):
         BattleStatusEffectAI.__init__(self, battle)
         self.battle = battle
         self.statusType = BattleStatusEffectGlobals.BATTLE_STATUS_INFINITE
-        self.statusEffectName = 'soaked'
+        self.statusEffectName = 'cash_controlled'
         self.statusEffectDuration = 2
         self.statusEffectValues = {'20%': 0.20}
         self.statusEffectTargetId = None
 
     def doEffectOnBattle(self):
-        if self.statusEffectTargetId and self.statusEffectDuration > 0:
+        if self.statusEffectTargetId and not self.effectedTarget:
             target = self.statusEffectTargetId
             if target:
-                target.damageMultiplier -= self.statusEffectValues['20%']
+                target.damageDefense += 8
+                self.effectedTarget = 1
+                target.damageMultiplier += .25
 
     def reset(self):
-        self.statusEffectTargetId.damageMultiplier += 0.80
+        self.damageDefense -= 8
+        self.damageMultiplier -= .25
