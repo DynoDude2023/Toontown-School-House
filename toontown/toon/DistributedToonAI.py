@@ -89,6 +89,7 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         self.fishTank = None
         self.experience = None
         self.quests = []
+        self.side_quests = []
         self.cogs = []
         self.cogCounts = []
         self.NPCFriendsDict = {}
@@ -1684,6 +1685,88 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
     def addQuest(self, quest, finalReward, recordHistory = 1):
         self.quests.append(quest)
         self.b_setQuests(self.quests)
+        if recordHistory:
+            if quest[0] != Quests.VISIT_QUEST_ID:
+                newQuestHistory = self.questHistory + [quest[0]]
+                while newQuestHistory.count(Quests.VISIT_QUEST_ID) != 0:
+                    newQuestHistory.remove(Quests.VISIT_QUEST_ID)
+
+                self.b_setQuestHistory(newQuestHistory)
+                if finalReward:
+                    newRewardHistory = self.rewardHistory + [finalReward]
+                    self.b_setRewardHistory(self.rewardTier, newRewardHistory)
+    
+    def b_setSideQuests(self, questList):
+        flattenedQuests = []
+        for quest in questList:
+            flattenedQuests.extend(quest)
+
+        self.setSideQuests(flattenedQuests)
+        self.d_setSideQuests(flattenedQuests)
+
+    def d_setSideQuests(self, flattenedQuests):
+        self.sendUpdate('setSideQuests', [flattenedQuests])
+
+    def setSideQuests(self, flattenedQuests):
+        self.notify.debug('setting quests to %s' % flattenedQuests)
+        questList = []
+        questLen = 5
+        for i in xrange(0, len(flattenedQuests), questLen):
+            questList.append(flattenedQuests[i:i + questLen])
+
+        self.side_quests = questList
+
+    def getSideQuests(self):
+        flattenedQuests = []
+        for quest in self.side_quests:
+            flattenedQuests.extend(quest)
+
+        return flattenedQuests
+
+    def getSideQuest(self, questId, visitNpcId = None, rewardId = None):
+        for quest in self.side_quests:
+            if quest[0] != questId:
+                continue
+            if visitNpcId != None:
+                if visitNpcId != quest[1] and visitNpcId != quest[2]:
+                    continue
+            if rewardId != None:
+                if rewardId != quest[3]:
+                    continue
+            return quest
+
+        return
+
+    def hasSideQuest(self, questId, visitNpcId = None, rewardId = None):
+        if self.getQuest(questId, visitNpcId=visitNpcId, rewardId=rewardId) == None:
+            return False
+        else:
+            return True
+        return
+
+    def removeSideQuest(self, id, visitNpcId = None):
+        index = -1
+        for i in xrange(len(self.side_quests)):
+            if self.side_quests[i][0] == id:
+                if visitNpcId:
+                    otherId = self.side_quests[i][2]
+                    if visitNpcId == otherId:
+                        index = i
+                        break
+                else:
+                    index = i
+                    break
+
+        if index >= 0:
+            del self.side_quests[i]
+            self.b_setSideQuests(self.side_quests)
+            return 1
+        else:
+            return 0
+
+    def addSideQuest(self, quest, finalReward, recordHistory = 1):
+        self.side_quests.append(quest)
+        self.b_setSideQuests(self.side_quests)
         if recordHistory:
             if quest[0] != Quests.VISIT_QUEST_ID:
                 newQuestHistory = self.questHistory + [quest[0]]

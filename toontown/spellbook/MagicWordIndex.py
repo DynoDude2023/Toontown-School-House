@@ -247,6 +247,18 @@ class addQuest(MagicWord):
         toon.addQuest((questId, Quests.getQuestFromNpcId(questId), Quests.getQuestToNpcId(questId), Quests.getQuestReward(questId, toon), 0), 0)
         return "Quest added."
 
+class addSideQuest(MagicWord):
+    aliases = ["toontaskSide"]
+    desc = "Adds a Quest from a Quest ID."
+    execLocation = MagicWordConfig.EXEC_LOC_SERVER
+    arguments = [("questId", int, True)]
+
+    def handleWord(self, invoker, avId, toon, *args):
+        questId = args[0]
+        
+        toon.addSideQuest((questId, Quests.getQuestFromNpcId(questId), Quests.getQuestToNpcId(questId), Quests.getQuestReward(questId, toon), 0), 0)
+        return "Quest added."
+
 class MaxToon(MagicWord):
     aliases = ["max", "idkfa"]
     desc = "Maxes out the target's stats. You can provide a gag track to exclude from the target's unlocked tracks."

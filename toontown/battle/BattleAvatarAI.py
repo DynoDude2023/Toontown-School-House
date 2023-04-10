@@ -27,7 +27,14 @@ class BattleAvatarAI(DistributedObjectAI):
         self.damageMultiplier = 1.0
         self.comboDamage = 0
         self.damageDefense = 0
+        self.attackDamages = {0: 0,
+                              1: 0,
+                              2: 0,
+                              3: 0}
 
+    def trackAttackDamages(self, damage, toonIndex):
+        self.attackDamages[toonIndex] += damage
+    
     def setComboDamage(self, damage):
         self.comboDamage += damage
         self.sendUpdate('setComboDamage', [damage])

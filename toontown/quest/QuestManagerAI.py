@@ -49,6 +49,39 @@ class QuestManagerAI:
 
         if toon.quests:
             toon.d_setQuests(toon.getQuests())
+        
+        for index, quest in enumerate(self.__toonQuestsList2Quests(toon.side_quests)):
+            if isinstance(quest, Quests.RecoverItemQuest):
+                isComplete = quest.getCompletionStatus(toon, toon.side_quests[index])
+                if isComplete == Quests.COMPLETE:
+                    continue
+
+                if quest.isLocationMatch(zoneId):
+                    if quest.getHolder() == Quests.Any or quest.getHolderType() in ['type', 'track', 'level']:
+                        for suit in suitsKilled:
+                            if quest.getCompletionStatus(toon, toon.side_quests[index]) == Quests.COMPLETE:
+                                break
+
+                            if (quest.getHolder() == Quests.Any) or (
+                                    quest.getHolderType() == 'type' and quest.getHolder() == suit['type']) or (
+                                    quest.getHolderType() == 'track' and quest.getHolder() == suit['track']) or (
+                                    quest.getHolderType() == 'level' and quest.getHolder() <= suit['level']):
+                                # This seems to be how Disney did it.
+                                progress = toon.side_quests[index][4] & pow(2, 16) - 1
+                                completion = quest.testRecover(progress)
+                                if completion[0]:
+                                    # Recovered!
+                                    recovered.append(quest.getItem())
+                                    self.__incrementQuestProgress(toon.side_quests[index])
+                                else:
+                                    # Not recovered. Sad!
+                                    notRecovered.append(quest.getItem())
+
+        if toon.quests:
+            toon.d_setQuests(toon.getQuests())
+        
+        if toon.side_quests:
+            toon.d_setSideQuests(toon.getSideQuests())
 
         return recovered, notRecovered
 
@@ -61,6 +94,15 @@ class QuestManagerAI:
 
         if toon.quests:
             toon.d_setQuests(toon.getQuests())
+        
+        for index, quest in enumerate(self.__toonQuestsList2Quests(toon.side_quests)):
+            if isinstance(quest, Quests.CogQuest):
+                for suit in suitsKilled:
+                    for _ in xrange(quest.doesCogCount(toon.getDoId(), suit, zoneId, activeToons)):
+                        self.__incrementQuestProgress(toon.side_quests[index])
+
+        if toon.side_quests:
+            toon.d_setSideQuests(toon.getSideQuests())
 
     def toonKilledCogdo(self, toon, difficulty, numFloors, zoneId, activeToons):
         pass
@@ -77,6 +119,17 @@ class QuestManagerAI:
 
         if toon.quests:
             toon.d_setQuests(toon.getQuests())
+        
+        for index, quest in enumerate(self.__toonQuestsList2Quests(toon.side_quests)):
+            if isinstance(quest, Quests.BuildingQuest):
+                if quest.isLocationMatch(zoneId):
+                    if quest.getBuildingTrack() == Quests.Any or quest.getBuildingTrack() == track:
+                        if floors >= quest.getNumFloors():
+                            for _ in xrange(quest.doesBuildingCount(toon.getDoId(), activeToons)):
+                                self.__incrementQuestProgress(toon.side_quests[index])
+
+        if toon.side_quests:
+            toon.d_setSideQuests(toon.getQuests())
 
     def toonDefeatedFactory(self, toon, factoryId, activeToonVictors):
         for index, quest in enumerate(self.__toonQuestsList2Quests(toon.quests)):
@@ -118,6 +171,39 @@ class QuestManagerAI:
         for index, quest in enumerate(self.__toonQuestsList2Quests(av.quests)):
             questId, fromNpcId, toNpcId, rewardId, toonProgress = av.quests[index]
             isComplete = quest.getCompletionStatus(av, av.quests[index], npc)
+            if isComplete != Quests.COMPLETE:
+                continue
+
+            if avId in self.air.tutorialManager.avId2fsm.keys():
+                self.air.tutorialManager.avId2fsm[avId].demand('Tunnel')
+
+            if isinstance(quest, Quests.DeliverGagQuest):
+                track, level = quest.getGagType()
+                av.inventory.setItem(track, level, av.inventory.numItem(track, level) - quest.getNumGags())
+                av.b_setInventory(av.inventory.makeNetString())
+
+            nextQuest = Quests.getNextQuest(questId, npc, av)
+            if nextQuest == (Quests.NA, Quests.NA):
+                if isinstance(quest, Quests.TrackChoiceQuest):
+                    npc.presentTrackChoice(avId, questId, quest.getChoices())
+                    return
+
+                rewardId = Quests.getAvatarRewardId(av, questId)
+                npc.completeQuest(avId, questId, rewardId)
+                self.completeQuest(av, questId)
+                self.giveReward(av, rewardId)
+                return
+            else:
+                self.completeQuest(av, questId)
+                nextQuestId = nextQuest[0]
+                nextRewardId = Quests.getFinalRewardId(questId, 1)
+                nextToNpcId = nextQuest[1]
+                self.npcGiveQuest(npc, av, nextQuestId, nextRewardId, nextToNpcId)
+                return
+        
+        for index, quest in enumerate(self.__toonQuestsList2Quests(av.side_quests)):
+            questId, fromNpcId, toNpcId, rewardId, toonProgress = av.side_quests[index]
+            isComplete = quest.getCompletionStatus(av, av.side_quests[index], npc)
             if isComplete != Quests.COMPLETE:
                 continue
 

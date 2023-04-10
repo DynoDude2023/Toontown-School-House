@@ -6,7 +6,7 @@ from toontown.toon import NPCToons
 from toontown.hood import ZoneUtil
 from toontown.toonbase import ToontownGlobals
 from toontown.toonbase import TTLocalizer
-from toontown.quest import QuestBookPoster
+from toontown.quest import QuestBookPoster, QuestSideBookPoster
 from direct.directnotify import DirectNotifyGlobal
 
 class QuestPage(ShtikerPage.ShtikerPage):
@@ -15,6 +15,10 @@ class QuestPage(ShtikerPage.ShtikerPage):
     def __init__(self):
         ShtikerPage.ShtikerPage.__init__(self)
         self.quests = {0: None,
+         1: None,
+         2: None,
+         3: None}
+        self.side_quests = {0: None,
          1: None,
          2: None,
          3: None}
@@ -46,15 +50,42 @@ class QuestPage(ShtikerPage.ShtikerPage):
           0,
           0,
           0))
+        sideQuestFramePlaceList = ((-1.45,
+          0,
+          0.25,
+          0,
+          0,
+          0),
+         (-1.45,
+          0,
+          -0.35,
+          0,
+          0,
+          0),
+         (1.45, 0, 0.25, 0, 0, 0),
+         (1.45,
+          0,
+          -0.35,
+          0,
+          0,
+          0))
         self.questFrames = []
+        self.sideQuestFrames = []
         for i in xrange(ToontownGlobals.MaxQuestCarryLimit):
             frame = QuestBookPoster.QuestBookPoster(reverse=i > 1, mapIndex=i + 1)
             frame.reparentTo(self)
             frame.setPosHpr(*questFramePlaceList[i])
             frame.setScale(1.06)
             self.questFrames.append(frame)
+        for i in xrange(ToontownGlobals.MaxQuestCarryLimit):
+            frame = QuestSideBookPoster.QuestBookPoster(reverse=i > 1, mapIndex=i + 1)
+            frame.reparentTo(self)
+            frame.setPosHpr(*sideQuestFramePlaceList[i])
+            frame.setScale(0.6)
+            self.sideQuestFrames.append(frame)
 
         self.accept('questsChanged', self.updatePage)
+        self.accept('sideQuestsChanged', self.updateSidePage)
         return
 
     def acceptOnscreenHooks(self):
@@ -81,8 +112,24 @@ class QuestPage(ShtikerPage.ShtikerPage):
     def fillQuestFrame(self, questDesc, index):
         self.questFrames[index].update(questDesc)
         self.quests[index] = questDesc
+    
+    def clearSideQuestFrame(self, index):
+        self.sideQuestFrames[index].clear()
+        self.side_quests[index] = None
+        return
+
+    def fillSideQuestFrame(self, questDesc, index):
+        self.sideQuestFrames[index].update(questDesc)
+        self.side_quests[index] = questDesc
 
     def getLowestUnusedIndex(self):
+        for i in xrange(ToontownGlobals.MaxQuestCarryLimit):
+            if self.quests[i] == None:
+                return i
+
+        return -1
+    
+    def getLowestUnusedSideIndex(self):
         for i in xrange(ToontownGlobals.MaxQuestCarryLimit):
             if self.quests[i] == None:
                 return i
@@ -121,9 +168,43 @@ class QuestPage(ShtikerPage.ShtikerPage):
 
         messenger.send('questPageUpdated')
         return
+    
+    def updateSidePage(self):
+        self.notify.debug('updatePage()')
+        newQuests = base.localAvatar.side_quests
+        carryLimit = base.localAvatar.getQuestCarryLimit()
+        for i in xrange(ToontownGlobals.MaxQuestCarryLimit):
+            if i < carryLimit:
+                self.sideQuestFrames[i].show()
+            else:
+                self.sideQuestFrames[i].hide()
+
+        for index, questDesc in self.side_quests.items():
+            if questDesc is not None and list(questDesc) not in newQuests:
+                self.clearSideQuestFrame(index)
+
+        for questDesc in newQuests:
+            newQuestDesc = tuple(questDesc)
+            if newQuestDesc not in self.side_quests.values():
+                index = self.getLowestUnusedSideIndex()
+                self.fillSideQuestFrame(newQuestDesc, index)
+
+        for i, questDesc in self.side_quests.iteritems():
+            if questDesc:
+                if self.canDeleteQuest(questDesc):
+                    self.sideQuestFrames[i].setDeleteCallback(self.__deleteQuest)
+                else:
+                    self.sideQuestFrames[i].setDeleteCallback(None)
+                self.sideQuestFrames[i].update(questDesc)
+            else:
+                self.sideQuestFrames[i].unbindMouseEnter()
+
+        messenger.send('questPageUpdated')
+        return
 
     def enter(self):
         self.updatePage()
+        self.updateSidePage()
         ShtikerPage.ShtikerPage.enter(self)
 
     def exit(self):
@@ -145,8 +226,13 @@ class QuestPage(ShtikerPage.ShtikerPage):
         for i in xrange(ToontownGlobals.MaxQuestCarryLimit):
             if hasattr(self.questFrames[i], 'mapIndex'):
                 self.questFrames[i].mapIndex.show()
+        
+        for i in xrange(ToontownGlobals.MaxQuestCarryLimit):
+            if hasattr(self.questFrames[i], 'mapIndex'):
+                self.sideQuestFrames[i].mapIndex.show()
 
         self.updatePage()
+        self.updateSidePage()
         self.reparentTo(aspect2d)
         self.title.hide()
         self.show()
@@ -162,6 +248,10 @@ class QuestPage(ShtikerPage.ShtikerPage):
         for i in xrange(ToontownGlobals.MaxQuestCarryLimit):
             if hasattr(self.questFrames[i], 'mapIndex'):
                 self.questFrames[i].mapIndex.hide()
+        
+        for i in xrange(ToontownGlobals.MaxQuestCarryLimit):
+            if hasattr(self.questFrames[i], 'mapIndex'):
+                self.sideQuestFrames[i].mapIndex.hide()
 
         self.reparentTo(self.book)
         self.title.show()

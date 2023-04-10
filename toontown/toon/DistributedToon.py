@@ -1081,6 +1081,16 @@ class DistributedToon(DistributedPlayer.DistributedPlayer, Toon.Toon, Distribute
         self.quests = questList
         if self == base.localAvatar:
             messenger.send('questsChanged')
+    
+    def setSideQuests(self, flattenedQuests):
+        questList = []
+        questLen = 5
+        for i in xrange(0, len(flattenedQuests), questLen):
+            questList.append(flattenedQuests[i:i + questLen])
+
+        self.side_quests = questList
+        if self == base.localAvatar:
+            messenger.send('sideQuestsChanged')
 
     def setQuestCarryLimit(self, limit):
         self.questCarryLimit = limit

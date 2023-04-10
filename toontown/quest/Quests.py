@@ -487,11 +487,11 @@ class CogQuest(LocationBasedQuest):
             if cogType == Any:
                 return TTLocalizer.Cog
             else:
-                return SuitBattleGlobals.SuitAttributes[cogType]['singularname']
+                return SuitBattleGlobals.SuitAttributeslol[cogType]['singularname']
         elif cogType == Any:
             return TTLocalizer.Cogs
         else:
-            return SuitBattleGlobals.SuitAttributes[cogType]['pluralname']
+            return SuitBattleGlobals.SuitAttributeslol[cogType]['pluralname']
 
     def getObjectiveStrings(self):
         cogName = self.getCogNameString()
@@ -17667,7 +17667,18 @@ QuestDict = {
          2001,
          4216,
          NA,
-         TTLocalizer.QuestDialogDict[12032])}
+         TTLocalizer.QuestDialogDict[12032]),
+ 14000: (300,
+         Start,
+         (CogQuest,
+          Anywhere,
+          1,
+          'ms'),
+         2001,
+         2001,
+         NA,
+         NA,
+         DefaultDialog)}
 
 Tier2QuestsDict = {}
 for questId, questDesc in QuestDict.items():

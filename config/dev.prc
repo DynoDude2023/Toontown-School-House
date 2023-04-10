@@ -40,6 +40,8 @@ vfs-mount resources/ttr_phs_event_01.toontask /
 vfs-mount resources/ttr_phs_estate_01.toontask /
 vfs-mount resources/ttr_phs_kaboomberg_01.toontask /
 vfs-mount resources/ttr_phs_media_01.toontask /
+vfs-mount resources/ttr_phs_ttc_01.toontask /
+
 
 
 # DC file
