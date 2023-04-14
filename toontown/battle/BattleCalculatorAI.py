@@ -1392,6 +1392,7 @@ class BattleCalculatorAI:
                                 0,
                                 0,
                                 0]
+            self.addCustomAttack(suit, suitAttackCustom, 0)
         
         for suit in self.battle.activeSuits:
             for toonId in self.battle.activeToons:
@@ -1410,9 +1411,10 @@ class BattleCalculatorAI:
         return None
     
     def addCustomAttack(self, suit, movie, toonIndex):
-        damagesTaken = movie[SUIT_HP_COL][SUIT_TGT_COL]
-        suit.trackAttackDamages(damagesTaken, toonIndex)
-        self.battle.suitAttacks.append(movie)
+        if self.__suitCanAttack(suit.doId):
+            damagesTaken = movie[SUIT_HP_COL][SUIT_TGT_COL]
+            suit.trackAttackDamages(damagesTaken, toonIndex)
+            self.battle.suitAttacks.append(movie)
         
     
     def calcSuitAttack(self, suit):
