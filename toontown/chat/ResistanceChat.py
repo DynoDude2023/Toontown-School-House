@@ -11,6 +11,7 @@ EFFECT_RADIUS = 30
 RESISTANCE_TOONUP = 0
 RESISTANCE_RESTOCK = 1
 RESISTANCE_MONEY = 2
+resistanceMenuCFO = [RESISTANCE_TOONUP, RESISTANCE_RESTOCK]
 resistanceMenu = [RESISTANCE_TOONUP, RESISTANCE_RESTOCK, RESISTANCE_MONEY]
 resistanceDict = {RESISTANCE_TOONUP: {'menuName': TTL.ResistanceToonupMenu,
                      'itemText': TTL.ResistanceToonupItem,
@@ -119,7 +120,27 @@ def getItemValue(textId):
 
 
 def getRandomId():
-    menuIndex = random.choice(resistanceMenu)
+    menuIndex = random.choice(resistanceMenuCFO)
+    itemIndex = random.choice(getItems(menuIndex))
+    return encodeId(menuIndex, itemIndex)
+
+def getRandomJellybeanId():
+    menuIndex = RESISTANCE_MONEY
+    itemIndex = random.choice(getItems(menuIndex))
+    return encodeId(menuIndex, itemIndex)
+
+def getJellybeanId(index):
+    menuIndex = RESISTANCE_MONEY
+    itemIndex = index
+    return encodeId(menuIndex, itemIndex)
+
+def getRandomHealId():
+    menuIndex = RESISTANCE_TOONUP
+    itemIndex = random.choice(getItems(menuIndex))
+    return encodeId(menuIndex, itemIndex)
+
+def getRandomRestockId():
+    menuIndex = RESISTANCE_RESTOCK
     itemIndex = random.choice(getItems(menuIndex))
     return encodeId(menuIndex, itemIndex)
 

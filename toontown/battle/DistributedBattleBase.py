@@ -863,6 +863,8 @@ class DistributedBattleBase(DistributedNode.DistributedNode, BattleBase):
         track = self.__createJoinInterval(toon, pos, hpr, trackName, ts, self.__handleToonJoinDone, toon=1)
         if toon != base.localAvatar:
             toon.animFSM.request('off')
+        else:
+            NametagGlobals.setMasterNametagsActive(1)
         track.start(ts)
         track.delayDelete = DelayDelete.DelayDelete(toon, '__makeToonJoin')
         self.storeInterval(track, trackName)
@@ -885,7 +887,7 @@ class DistributedBattleBase(DistributedNode.DistributedNode, BattleBase):
         toon.loop('neutral')
         toon.setPosHpr(self, pos, hpr)
         if base.localAvatar == toon:
-            currStateName = self.fsm.getCurrentState().getName()
+            NametagGlobals.setMasterNametagsActive(1)
 
     def __makeAvsActive(self, suits, toons):
         self.notify.debug('__makeAvsActive()')
@@ -1030,8 +1032,9 @@ class DistributedBattleBase(DistributedNode.DistributedNode, BattleBase):
                 height = suit.height
         camera.setPosHpr((x, y, z + height), self.camHpr)
         base.camLens.setMinFov(self.camMenuFov / (4.0 / 3.0))
-
+        
         NametagGlobals.setMasterArrowsOn(0)
+        NametagGlobals.setMasterNametagsActive(1)
         self.townBattle.setState('Attack')
         self.accept(self.localToonBattleEvent, self.__handleLocalToonBattleEvent)
 
@@ -1198,6 +1201,7 @@ class DistributedBattleBase(DistributedNode.DistributedNode, BattleBase):
         self.delayDeleteMembers()
         if self.hasLocalToon():
             NametagGlobals.setMasterArrowsOn(0)
+            NametagGlobals.setMasterNametagsActive(1)
         if ToontownBattleGlobals.SkipMovie:
             self.movie.play(ts, self.__handleMovieDone)
             self.movie.finish()

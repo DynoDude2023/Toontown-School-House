@@ -26,3 +26,13 @@ class ToontownSettings(Settings):
         smoothAnims = self.getBool('game', 'interpolate-animations', False)
         loadPrcFileData('toonBase Settings Interpolating Animations', 'interpolate-animations %s' % smoothAnims)
         self.updateSetting('game', 'interpolate-animations', smoothAnims)
+        
+        # Setting for Contrast Nametags.
+        contrast_names = self.getBool('game', 'contrast-nametags', False)
+        loadPrcFileData('toonBase Settings Contrast Nametags', 'contrast-nametags %s' % contrast_names)
+        self.updateSetting('game', 'contrast-nametags', contrast_names)
+        
+        # Setting for Nametag Scale.
+        scale_names = self.getFloat('game', 'nametag-scale', 1.4)
+        loadPrcFileData('toonBase Settings Nametag Scale', 'nametag-scale %s' % scale_names)
+        self.updateSetting('game', 'nametag-scale', scale_names)

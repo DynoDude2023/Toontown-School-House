@@ -139,6 +139,7 @@ class ToonBase(OTPBase.OTPBase):
         self.oldY = max(1, base.win.getYSize())
         self.aspectRatio = float(self.oldX) / self.oldY
         self.aspect2d.setAntialias(AntialiasAttrib.MMultisample)
+        
 
         self.wantCustomKeybinds = self.settings.getBool('game', 'customKeybinds', False)
 

@@ -1,0 +1,3 @@
+- CFO will only give Toon-up and Restock Unites (3 unites per cfo!), One will be random, One will be a Restock, and One will be a Toon-up.
+- The Mints now give Jellybean unites with the ammount and worth of the unite depending on which mint you do.
+- You can now click cog & toon pannels during battle.

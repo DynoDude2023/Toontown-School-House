@@ -222,7 +222,7 @@ class Place(StateData.StateData, FriendsListManager.FriendsListManager):
         self.enablePeriodTimer()
 
     def exitWalk(self):
-        self.exitFLM()
+        #self.exitFLM()
         if base.cr.productName in ['DisneyOnline-US', 'ES'] and not base.cr.isPaid() and base.localAvatar.tutorialAck and not base.cr.whiteListChatEnabled:
             base.localAvatar.chatMgr.obscure(1, 0)
         self.disablePeriodTimer()

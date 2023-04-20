@@ -7,6 +7,20 @@ from toontown.battle.BattleBase import *
 import CogDisguiseGlobals
 from toontown.toonbase.ToontownBattleGlobals import getMintCreditMultiplier
 from direct.showbase.PythonUtil import addListsByValue
+from toontown.chat import ResistanceChat
+import random
+
+mintId2Reward = {
+    ToontownGlobals.CashbotMintIntA: [0, 1, 1],
+    ToontownGlobals.CashbotMintIntA: [1, 2, 2],
+    ToontownGlobals.CashbotMintIntA: [2, 3, 3]
+}
+
+mintId2RewardAmmount = {
+    ToontownGlobals.CashbotMintIntA: 2,
+    ToontownGlobals.CashbotMintIntA: 2,
+    ToontownGlobals.CashbotMintIntA: 3
+}
 
 class DistributedMintBattleAI(DistributedLevelBattleAI.DistributedLevelBattleAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedMintBattleAI')
@@ -36,6 +50,9 @@ class DistributedMintBattleAI(DistributedLevelBattleAI.DistributedLevelBattleAI)
             self.toonItems[toon.doId][0].extend(recovered)
             self.toonItems[toon.doId][1].extend(notRecovered)
             meritArray = self.air.promotionMgr.recoverMerits(toon, self.suitsKilled, self.getTaskZoneId(), getMintCreditMultiplier(self.getTaskZoneId()), extraMerits=extraMerits)
+            self.jellybeanRewards = [ResistanceChat.getJellybeanId(random.randint(mintId2Reward[self.level.mintId]))] * mintId2RewardAmmount[self.level.mintId]
+            for rwrd in self.jellybeanRewards:
+                toon.addResistanceMessage(rwrd)
             if toon.doId in self.helpfulToons:
                 self.toonMerits[toon.doId] = addListsByValue(self.toonMerits[toon.doId], meritArray)
             else:

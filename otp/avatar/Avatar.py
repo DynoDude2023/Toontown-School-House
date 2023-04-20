@@ -57,7 +57,7 @@ class Avatar(Actor, ShadowCaster):
         self.collTube = None
         self.battleTube = None
         self.scale = 1.0
-        self.nametagScale = 1.0
+        self.nametagScale = base.settings.getBool('game', 'nametag-scale', 1)
         self.height = 0.0
         self.battleTubeHeight = 0.0
         self.battleTubeRadius = 0.0
@@ -234,12 +234,14 @@ class Avatar(Actor, ShadowCaster):
         self._name = name
         if hasattr(self, 'nametag'):
             self.nametag.setName(name)
+        self.setNametagScale(base.settings.getBool('game', 'nametag-scale', 1))
 
     def setDisplayName(self, str):
         if hasattr(self, 'isDisguised'):
             if self.isDisguised:
                 return
         self.nametag.setDisplayName(str)
+        self.setNametagScale(base.settings.getBool('game', 'nametag-scale', 1))
 
     def getFont(self):
         return self.__font

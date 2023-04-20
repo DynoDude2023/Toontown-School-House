@@ -12,16 +12,17 @@ def getSpeechBalloon3d():
     return _speech_balloon_3d
 
 
-_global_nametag_scale = 1.0
+_global_nametag_scale = 1
 
 
 def setGlobalNametagScale(global_nametag_scale):
     global _global_nametag_scale
-    _global_nametag_scale = global_nametag_scale
+    difference = 1 - base.settings.getFloat('game', 'nametag-scale', 1)
+    _global_nametag_scale = global_nametag_scale + difference
 
 
 def getGlobalNametagScale():
-    return _global_nametag_scale
+    return base.settings.getFloat('game', 'nametag-scale', 1)
 
 
 _camera = NodePath()
@@ -322,7 +323,7 @@ _name_bg = [
 ]
 
 
-def getNameBg(color_code, state):
+def getNameBg(color_code, state):    
     return _name_bg[4 * color_code + state]
 
 
@@ -396,7 +397,14 @@ _name_fg = [
 
 
 def getNameFg(color_code, state):
-    return _name_fg[4 * color_code + state]
+    if base.settings.getBool('game', 'contrast-nametags', False):
+        color = _name_fg[4 * color_code + state]
+        color[0] -= .15
+        color[1] -= .15
+        color[2] -= .15
+        return color
+    else:
+        return _name_fg[4 * color_code + state]
 
 
 def getNameWordwrap():
