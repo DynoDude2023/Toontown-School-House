@@ -1392,7 +1392,6 @@ class BattleCalculatorAI:
                                 0,
                                 0,
                                 0]
-            self.addCustomAttack(suit, suitAttackCustom, 0)
         
         for suit in self.battle.activeSuits:
             for toonId in self.battle.activeToons:
