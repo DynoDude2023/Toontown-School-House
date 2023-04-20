@@ -9,7 +9,6 @@ from direct.directnotify import DirectNotifyGlobal
 import random
 import MovieCamera
 import MovieUtil
-from MovieUtil import calcAvgSuitPos
 notify = DirectNotifyGlobal.directNotify.newCategory('MovieThrow')
 hitSoundFiles = ('AA_tart_only.ogg', 'AA_slice_only.ogg', 'AA_slice_only.ogg', 'AA_slice_only.ogg', 'AA_slice_only.ogg', 'AA_wholepie_only.ogg', 'AA_wholepie_only.ogg')
 tPieLeavesHand = 2.7
@@ -18,6 +17,17 @@ tSuitDodges = 2.45
 ratioMissToHit = 1.5
 tPieShrink = 0.7
 pieFlyTaskName = 'MovieThrow-pieFly'
+
+def calcAvgSuitPos(throw):
+    battle = throw['battle']
+    avgSuitPos = Point3(0, 0, 0)
+    numTargets = len(throw['target'])
+    for i in xrange(numTargets):
+        suit = throw['target'][i]['suit']
+        avgSuitPos += suit.getPos(battle)
+
+    avgSuitPos /= numTargets
+    return avgSuitPos
 
 def addHit(dict, suitId, hitCount):
     if suitId in dict:

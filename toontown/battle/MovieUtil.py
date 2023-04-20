@@ -299,50 +299,105 @@ def createSuitReviveTrack(suit, toon, battle, npcs = []):
 
     return Parallel(suitTrack, deathSoundTrack, gears1Track, gears2MTrack, toonMTrack)
 
+from direct.showbase.PythonUtil import weightedChoice, randFloat, lerp
+
+import MovieFire
 
 def createSuitDeathTrack(suit, toon, battle, npcs = []):
-    suitTrack = Sequence()
-    suitPos, suitHpr = battle.getActorPosHpr(suit)
-    if hasattr(suit, 'battleTrapProp') and suit.battleTrapProp and suit.battleTrapProp.getName() == 'traintrack' and not suit.battleTrapProp.isHidden():
-        suitTrack.append(createTrainTrackAppearTrack(suit, toon, battle, npcs))
-    deathSuit = suit.getLoseActor()
-    suitTrack.append(Func(notify.debug, 'before insertDeathSuit'))
-    suitTrack.append(Func(insertDeathSuit, suit, deathSuit, battle, suitPos, suitHpr))
-    suitTrack.append(Func(notify.debug, 'before actorInterval lose'))
-    suitTrack.append(ActorInterval(deathSuit, 'lose', duration=SUIT_LOSE_DURATION))
-    suitTrack.append(Func(notify.debug, 'before removeDeathSuit'))
-    suitTrack.append(Func(removeDeathSuit, suit, deathSuit, name='remove-death-suit'))
-    suitTrack.append(Func(notify.debug, 'after removeDeathSuit'))
-    spinningSound = base.loader.loadSfx('phase_3.5/audio/sfx/Cog_Death.ogg')
-    deathSound = base.loader.loadSfx('phase_3.5/audio/sfx/ENC_cogfall_apart.ogg')
-    deathSoundTrack = Sequence(Wait(0.8), SoundInterval(spinningSound, duration=1.2, startTime=1.5, volume=0.2, node=deathSuit), SoundInterval(spinningSound, duration=3.0, startTime=0.6, volume=0.8, node=deathSuit), SoundInterval(deathSound, volume=0.32, node=deathSuit))
-    BattleParticles.loadParticles()
-    smallGears = BattleParticles.createParticleEffect(file='gearExplosionSmall')
-    singleGear = BattleParticles.createParticleEffect('GearExplosion', numParticles=1)
-    smallGearExplosion = BattleParticles.createParticleEffect('GearExplosion', numParticles=10)
-    bigGearExplosion = BattleParticles.createParticleEffect('BigGearExplosion', numParticles=30)
-    gearPoint = Point3(suitPos.getX(), suitPos.getY(), suitPos.getZ() + suit.height - 0.2)
-    smallGears.setPos(gearPoint)
-    singleGear.setPos(gearPoint)
-    smallGears.setDepthWrite(False)
-    singleGear.setDepthWrite(False)
-    smallGearExplosion.setPos(gearPoint)
-    bigGearExplosion.setPos(gearPoint)
-    smallGearExplosion.setDepthWrite(False)
-    bigGearExplosion.setDepthWrite(False)
-    explosionTrack = Sequence()
-    explosionTrack.append(Wait(5.4))
-    explosionTrack.append(createKapowExplosionTrack(battle, explosionPoint=gearPoint))
-    gears1Track = Sequence(Wait(2.1), ParticleInterval(smallGears, battle, worldRelative=0, duration=4.3, cleanup=True), name='gears1Track')
-    gears2MTrack = Track((0.0, explosionTrack), (0.7, ParticleInterval(singleGear, battle, worldRelative=0, duration=5.7, cleanup=True)), (5.2, ParticleInterval(smallGearExplosion, battle, worldRelative=0, duration=1.2, cleanup=True)), (5.4, ParticleInterval(bigGearExplosion, battle, worldRelative=0, duration=1.0, cleanup=True)), name='gears2MTrack')
-    toonMTrack = Parallel(name='toonMTrack')
-    for mtoon in battle.toons:
-        toonMTrack.append(Sequence(Wait(1.0), ActorInterval(mtoon, 'duck'), ActorInterval(mtoon, 'duck', startTime=1.8), Func(mtoon.loop, 'neutral')))
-
-    for mtoon in npcs:
-        toonMTrack.append(Sequence(Wait(1.0), ActorInterval(mtoon, 'duck'), ActorInterval(mtoon, 'duck', startTime=1.8), Func(mtoon.loop, 'neutral')))
-
-    return Parallel(suitTrack, deathSoundTrack, gears1Track, gears2MTrack, toonMTrack)
+    delay = 0.0
+    hitCount = 1
+    suitPos = suit.getPos(battle)
+    origHpr = toon.getHpr(battle)
+    hitSoundFiles = ('AA_tart_only.ogg', 'AA_slice_only.ogg', 'AA_slice_only.ogg', 'AA_slice_only.ogg', 'AA_slice_only.ogg', 'AA_wholepie_only.ogg', 'AA_wholepie_only.ogg')
+    tPieLeavesHand = 2.7
+    tPieHitsSuit = 3.0
+    tSuitDodges = 2.45
+    ratioMissToHit = 1.5
+    tPieShrink = 0.7
+    pieFlyTaskName = 'MovieThrow-pieFly'
+    hitSuit = 1
+    showCannon = 1
+    button = globalPropPool.getProp('button')
+    buttonType = globalPropPool.getPropType('button')
+    button2 = copyProp(button)
+    buttons = [button, button2]
+    hands = toon.getLeftHands()
+    toonTrack = Sequence()
+    toonFace = Func(toon.headsUp, battle, suitPos)
+    toonTrack.append(ActorInterval(toon, 'duck'))
+    toonTrack.append(Func(toon.loop, 'neutral'))
+    toonTrack.append(Func(toon.setHpr, battle, origHpr))
+    buttonTrack = Sequence()
+    buttonShow = Func(showProps, buttons, hands)
+    buttonScaleUp = LerpScaleInterval(button, 1.0, button.getScale(), startScale=Point3(0.01, 0.01, 0.01))
+    buttonScaleDown = LerpScaleInterval(button, 1.0, Point3(0.01, 0.01, 0.01), startScale=button.getScale())
+    buttonHide = Func(removeProps, buttons)
+    buttonTrack.append(Wait(delay))
+    buttonTrack.append(buttonShow)
+    buttonTrack.append(buttonScaleUp)
+    buttonTrack.append(Wait(2.5))
+    buttonTrack.append(buttonScaleDown)
+    buttonTrack.append(buttonHide)
+    soundTrack = MovieFire.__getSoundTrack(0, 1, toon)
+    suitResponseTrack = Sequence()
+    reactIval = Sequence()
+    if showCannon:
+        showDamage = Func(suit.showHpText, 0, openEnded=0)
+        updateHealthBar = Func(suit.updateHealthBar, 0)
+        cannon = loader.loadModel('phase_4/models/minigames/toon_cannon')
+        barrel = cannon.find('**/cannon')
+        barrel.setHpr(0, 90, 0)
+        cannonHolder = render.attachNewNode('CannonHolder')
+        cannon.reparentTo(cannonHolder)
+        cannon.setPos(0, 0, -8.6)
+        cannonHolder.setPos(suit.getPos(render))
+        cannonHolder.setHpr(suit.getHpr(render))
+        cannonAttachPoint = barrel.attachNewNode('CannonAttach')
+        kapowAttachPoint = barrel.attachNewNode('kapowAttach')
+        scaleFactor = 1.6
+        iScale = 1 / scaleFactor
+        barrel.setScale(scaleFactor, 1, scaleFactor)
+        cannonAttachPoint.setScale(iScale, 1, iScale)
+        cannonAttachPoint.setPos(0, 6.7, 0)
+        kapowAttachPoint.setPos(0, -0.5, 1.9)
+        suit.reparentTo(cannonAttachPoint)
+        suit.setPos(0, 0, 0)
+        suit.setHpr(0, -90, 0)
+        suitLevel = suit.getActualLevel()
+        deep = 2.5 + suitLevel * 0.2
+        suitScale = 0.9
+        import math
+        suitScale = 0.9 - math.sqrt(suitLevel) * 0.1
+        sival = []
+        posInit = cannonHolder.getPos()
+        posFinal = Point3(posInit[0] + 0.0, posInit[1] + 0.0, posInit[2] + 7.0)
+        kapow = globalPropPool.getProp('kapow')
+        kapow.reparentTo(kapowAttachPoint)
+        kapow.hide()
+        kapow.setScale(0.25)
+        kapow.setBillboardPointEye()
+        smoke = loader.loadModel('phase_4/models/props/test_clouds')
+        smoke.reparentTo(cannonAttachPoint)
+        smoke.setScale(0.5)
+        smoke.hide()
+        smoke.setBillboardPointEye()
+        soundBomb = base.loader.loadSfx('phase_4/audio/sfx/MG_cannon_fire_alt.ogg')
+        playSoundBomb = SoundInterval(soundBomb, node=cannonHolder)
+        soundFly = base.loader.loadSfx('phase_4/audio/sfx/firework_whistle_01.ogg')
+        playSoundFly = SoundInterval(soundFly, node=cannonHolder)
+        soundCannonAdjust = base.loader.loadSfx('phase_4/audio/sfx/MG_cannon_adjust.ogg')
+        playSoundCannonAdjust = SoundInterval(soundCannonAdjust, duration=0.6, node=cannonHolder)
+        soundCogPanic = base.loader.loadSfx('phase_5/audio/sfx/ENC_cogafssm.ogg')
+        playSoundCogPanic = SoundInterval(soundCogPanic, node=cannonHolder)
+        reactIval = Parallel(ActorInterval(suit, 'pie-small-react'), Sequence(Wait(0.0), LerpPosInterval(cannonHolder, 2.0, posFinal, startPos=posInit, blendType='easeInOut'), Parallel(LerpHprInterval(barrel, 0.6, Point3(0, 45, 0), startHpr=Point3(0, 90, 0), blendType='easeIn'), playSoundCannonAdjust), Wait(2.0), Parallel(LerpHprInterval(barrel, 0.6, Point3(0, 90, 0), startHpr=Point3(0, 45, 0), blendType='easeIn'), playSoundCannonAdjust), LerpPosInterval(cannonHolder, 1.0, posInit, startPos=posFinal, blendType='easeInOut')), Sequence(Wait(0.0), Parallel(ActorInterval(suit, 'flail'), Func(suit.showHpText, "Your Fired!", openEnded=0, bonus=1), Func(suit.setToDept, customDept='deptless'), suit.scaleInterval(1.0, suitScale), LerpPosInterval(suit, 0.25, Point3(0, -1.0, 0.0)), Sequence(Wait(0.25), Parallel(playSoundCogPanic, LerpPosInterval(suit, 1.5, Point3(0, -deep, 0.0), blendType='easeIn')))), Wait(2.5), Parallel(playSoundBomb, playSoundFly, Sequence(Func(smoke.show), Parallel(LerpScaleInterval(smoke, 0.5, 3), LerpColorScaleInterval(smoke, 0.5, Vec4(2, 2, 2, 0))), Func(smoke.hide)), Sequence(Func(kapow.show), 
+ActorInterval(kapow, 'kapow'), Func(kapow.hide)), LerpPosInterval(suit, 3.0, Point3(0, 150.0, 0.0)), suit.scaleInterval(3.0, 0.01)), Func(suit.hide)))
+        if hitCount == 1:
+            sival = Sequence(Parallel(reactIval, createSuitStunInterval(suit, 0.3, 1.3)), Wait(0.0), Func(cannonHolder.remove))
+        else:
+            sival = reactIval
+        suitResponseTrack.append(sival)
+        suitResponseTrack = Parallel(suitResponseTrack)
+    return Sequence(Wait(randFloat(0, 0.4)), Parallel(toonTrack, suitResponseTrack))
 
 
 def createSuitDodgeMultitrack(tDodge, suit, leftSuits, rightSuits):

@@ -764,6 +764,10 @@ class Suit(Avatar.Avatar):
                 torsoTex=loader.loadTexture('phase_%s/maps/%s_blazer.jpg' % (phase, random.choice(['c', 'm', 'l', 's'])))
                 legTex=loader.loadTexture('phase_%s/maps/%s_leg.jpg' % (phase, random.choice(['c', 'm', 'l', 's'])))
                 armTex=loader.loadTexture('phase_%s/maps/%s_sleeve.jpg' % (phase, random.choice(['c', 'm', 'l', 's'])))
+            elif customDept == 'deptless':
+                torsoTex=loader.loadTexture('phase_%s/maps/%s_blazer.jpg' % (phase, self.dna.dept))
+                legTex=loader.loadTexture('phase_%s/maps/%s_leg.jpg' % (phase, self.dna.dept))
+                armTex=loader.loadTexture('phase_%s/maps/%s_sleeve.jpg' % (phase, self.dna.dept))
             else:
                 torsoTex=loader.loadTexture('phase_%s/maps/%s_blazer.jpg' % (phase, dept))
                 legTex=loader.loadTexture('phase_%s/maps/%s_leg.jpg' % (phase, dept))
@@ -777,7 +781,7 @@ class Suit(Avatar.Avatar):
             self.shadowJoint=self.find('**/def_shadow')
             self.nametagJoint=self.find('**/def_nameTag')
             
-            if customDept == 'scrapped':
+            if customDept in ['scrapped', 'deptless']:
                 nameInfo=TTLocalizer.SuitBaseNameWithLevelNoDept % {'name': self._name,
                                                             'level': self.getActualLevel()}
                 self.setDisplayName(nameInfo)

@@ -315,6 +315,7 @@ def getSuitTrack(attack, delay = 1e-06, splicedAnims = None):
         track.append(ActorInterval(suit, attack['animName']))
     origPos, origHpr = battle.getActorPosHpr(suit)
     track.append(Func(suit.setHpr, battle, origHpr))
+    track.append(Func(suit.loop, 'neutral'))
 
     def returnTrapToSuit(suit = suit, trapStorage = trapStorage):
         trapProp = trapStorage['trap']
