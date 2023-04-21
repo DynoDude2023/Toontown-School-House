@@ -12,6 +12,8 @@ from panda3d.core import *
 from direct.showbase import AppRunnerGlobal
 from libotp.nametag.NametagGroup import NametagGroup
 from direct.controls.ControlManager import CollisionHandlerRayStart
+from toontown.effects import DustCloud
+from direct.interval.IntervalGlobal import *
 from panda3d.core import *
 import string, os, random
 
@@ -753,7 +755,7 @@ class Suit(Avatar.Avatar):
         else:
             __doItTheOldWay__()
     
-    def setToDept(self, modelRoot=None, customDept='m'):
+    def setToDept(self, modelRoot=None, customDept='m', dustCloud=0):
         if not modelRoot:
             modelRoot=self
         dept=customDept
@@ -765,9 +767,9 @@ class Suit(Avatar.Avatar):
                 legTex=loader.loadTexture('phase_%s/maps/%s_leg.jpg' % (phase, random.choice(['c', 'm', 'l', 's'])))
                 armTex=loader.loadTexture('phase_%s/maps/%s_sleeve.jpg' % (phase, random.choice(['c', 'm', 'l', 's'])))
             elif customDept == 'deptless':
-                torsoTex=loader.loadTexture('phase_%s/maps/%s_blazer.jpg' % (phase, self.dna.dept))
-                legTex=loader.loadTexture('phase_%s/maps/%s_leg.jpg' % (phase, self.dna.dept))
-                armTex=loader.loadTexture('phase_%s/maps/%s_sleeve.jpg' % (phase, self.dna.dept))
+                torsoTex=loader.loadTexture('phase_5/maps/visuals/tt_t_ene_suit_unemployed_blazer.jpg')
+                legTex=loader.loadTexture('phase_5/maps/visuals/tt_t_ene_suit_unemployed_leg.jpg')
+                armTex=loader.loadTexture('phase_5/maps/visuals/tt_t_ene_suit_unemployed_sleeve.jpg')
             else:
                 torsoTex=loader.loadTexture('phase_%s/maps/%s_blazer.jpg' % (phase, dept))
                 legTex=loader.loadTexture('phase_%s/maps/%s_leg.jpg' % (phase, dept))
@@ -780,6 +782,7 @@ class Suit(Avatar.Avatar):
             self.rightHand=self.find('**/def_joint_right_hold')
             self.shadowJoint=self.find('**/def_shadow')
             self.nametagJoint=self.find('**/def_nameTag')
+            
             
             if customDept in ['scrapped', 'deptless']:
                 nameInfo=TTLocalizer.SuitBaseNameWithLevelNoDept % {'name': self._name,
@@ -812,6 +815,18 @@ class Suit(Avatar.Avatar):
                 self.shadowJoint=self.find('**/def_shadow')
                 self.nametagJoint=self.find('**/def_nameTag')
         else:
+            if customDept == 'deptless':
+                from toontown.effects import DustCloud
+                
+                if dustCloud:
+                    dustCloud = DustCloud.DustCloud(fBillboard=0, wantSound=1)
+                    dustCloud.setBillboardAxis(2.0)
+                    dustCloud.setZ(3)
+                    dustCloud.setScale(0.4)
+                    dustCloud.createTrack()
+                    dustCloud.reparentTo(render)
+                    dustCloud.setPos(self, 0, 0, 0)
+                    Sequence(dustCloud.track, Func(dustCloud.destroy)).start()
             __doItTheOldWay__()
 
     def makeWaiter(self, modelRoot=None):
