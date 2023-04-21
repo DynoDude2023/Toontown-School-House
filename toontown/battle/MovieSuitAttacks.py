@@ -118,6 +118,7 @@ def doSuitAttack(attack):
         BITE: doBite,
         BOUNCE_CHECK: doBounceCheck,
         BRAIN_STORM: doBrainStorm,
+        PAYOFF: doPayOff,
         BUZZ_WORD: doBuzzWord,
         CALCULATE: doCalculate,
         CANNED: doCanned,
@@ -1130,6 +1131,61 @@ def doBrainStorm(attack):
     soundTrack = getSoundTrack('SA_brainstorm.ogg', delay=2.6, node=suit)
     return Parallel(suitTrack, toonTrack, cloudPropTrack, soundTrack)
 
+def doPayOff(attack):
+    suit = attack['suit']
+    battle = attack['battle']
+    target = attack['target']
+    toon = target['toon']
+    otherSuitId = suit.wantedTargetId
+    otherSuit = battle.findSuit(otherSuitId)
+    BattleParticles.loadParticles()
+    snowEffect = BattleParticles.createParticleEffect('BrainStorm')
+    snowEffect2 = BattleParticles.createParticleEffect('BrainStorm')
+    snowEffect3 = BattleParticles.createParticleEffect('BrainStorm')
+    effectColor = Vec4(0.65, 0.79, 0.93, 0.85)
+    BattleParticles.setEffectTexture(snowEffect, 'brainstorm-box', color=effectColor)
+    BattleParticles.setEffectTexture(snowEffect2, 'brainstorm-env', color=effectColor)
+    BattleParticles.setEffectTexture(snowEffect3, 'brainstorm-track', color=effectColor)
+    cloud = globalPropPool.getProp('stormcloud')
+    suitType = getSuitBodyType(attack['suitName'])
+    if suitType == 'a':
+        partDelay = 1.2
+        damageDelay = 4.5
+        dodgeDelay = 3.3
+    elif suitType == 'b':
+        partDelay = 1.2
+        damageDelay = 4.5
+        dodgeDelay = 3.3
+    elif suitType == 'c':
+        partDelay = 1.2
+        damageDelay = 4.5
+        dodgeDelay = 3.3
+    suitTrack = getSuitTrack(attack, delay=0.9)
+    initialCloudHeight = suit.height + 3
+    cloudPosPoints = [Point3(0, 3, initialCloudHeight), VBase3(180, 0, 0)]
+    cloudPropTrack = Sequence()
+    cloudPropTrack.append(Func(cloud.pose, 'stormcloud', 0))
+    cloudPropTrack.append(getPropAppearTrack(cloud, suit, cloudPosPoints, 1e-06, Point3(3, 3, 3), scaleUpTime=0.7))
+    cloudPropTrack.append(Func(battle.movie.needRestoreRenderProp, cloud))
+    cloudPropTrack.append(Func(cloud.wrtReparentTo, render))
+    targetPoint = otherSuit.getPos()
+    targetPoint[2] += otherSuit.height + 1
+    cloudPropTrack.append(Wait(1.1))
+    cloudPropTrack.append(LerpPosInterval(cloud, 1, pos=targetPoint))
+    cloudPropTrack.append(Wait(partDelay))
+    healing = MovieUtil.cogHealMovie(otherSuit, suit.getActualLevel()*3)
+    cloudPropTrack.append(Parallel(ParticleInterval(snowEffect, cloud, worldRelative=0, duration=2.2, cleanup=True), healing, Sequence(Wait(0.5), ParticleInterval(snowEffect2, cloud, worldRelative=0, duration=1.7, cleanup=True)), Sequence(Wait(1.0), ParticleInterval(snowEffect3, cloud, worldRelative=0, duration=1.2, cleanup=True)), Sequence(ActorInterval(cloud, 'stormcloud', startTime=3, duration=0.5), ActorInterval(cloud, 'stormcloud', startTime=2.5, duration=0.5), ActorInterval(cloud, 'stormcloud', startTime=1, duration=1.5))))
+    cloudPropTrack.append(Wait(0.4))
+    cloudPropTrack.append(LerpScaleInterval(cloud, 0.5, MovieUtil.PNT3_NEARZERO))
+    cloudPropTrack.append(Func(MovieUtil.removeProp, cloud))
+    cloudPropTrack.append(Func(battle.movie.clearRenderProp, cloud))
+    damageAnims = [['cringe',
+      0.01,
+      0.4,
+      0.8], ['duck', 1e-06, 1.6]]
+    toonTrack = getToonTrack(attack, damageDelay=damageDelay, splicedDamageAnims=damageAnims, dodgeDelay=dodgeDelay, dodgeAnimNames=['sidestep'], showMissedExtraTime=1.1)
+    soundTrack = getSoundTrack('SA_brainstorm.ogg', delay=2.6, node=suit)
+    return Parallel(suitTrack, cloudPropTrack, soundTrack)
 
 def doBuzzWord(attack):
     suit = attack['suit']

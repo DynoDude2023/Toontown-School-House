@@ -31,7 +31,12 @@ class BattleAvatarAI(DistributedObjectAI):
                               1: 0,
                               2: 0,
                               3: 0}
+        self.wantedTargetId = 0
 
+    def wantedTarget(self, targetId):
+        self.wantedTargetId = targetId
+        self.sendUpdate('wantedTarget', [targetId])
+    
     def trackAttackDamages(self, damage, toonIndex):
         self.attackDamages[toonIndex] += damage
     

@@ -477,12 +477,15 @@ def chooseSuitShot(attack, attackDuration):
         camTrack.append(defaultCamera(openShotDuration=1.2))
     elif name == WRITE_OFF:
         camTrack.append(defaultCamera())
+    elif name == PAYOFF:
+        camTrack.append(allGroupLowShot(suit, attackDuration))
     else:
         notify.warning('unknown attack id in chooseSuitShot: %d using default cam' % name)
         camTrack.append(defaultCamera())
     pbpText = attack['playByPlayText'] 
     displayName = TTLocalizer.SuitAttackNames[attack['name']]
     if attack['name'] in TTLocalizer.SuitCheatNames:
+        from toontown.battle import PlayByPlayText
         pbpDc = PlayByPlayText.PlayByPlayText()
         pbpDesc = pbpDc.getShowIntervalDesc(TTLocalizer.SuitCheatDescription[attack['name']], camTrack.getDuration() - 0.5)
         pbpTrack = pbpText.getShowIntervalCheat(displayName, camTrack.getDuration() - 0.5)

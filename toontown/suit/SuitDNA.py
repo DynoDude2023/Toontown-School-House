@@ -38,7 +38,8 @@ suitHeadTypes = ['f',
  'ms',
  'tf',
  'm',
- 'mh']
+ 'mh',
+ 'overtime']
 suitATypes = ['ym',
  'hh',
  'tbc',
@@ -70,7 +71,8 @@ suitCTypes = ['f',
  'tw',
  'mb',
  'cc',
- 'gh']
+ 'gh',
+ 'overtime']
 suitDepts = ['c',
  'l',
  'm',
@@ -108,12 +110,17 @@ def getSuitBodyType(name):
     else:
         print 'Unknown body type for suit name: ', name
 
+customSuits = {
+    'overtime': 'm'
+}
 
 def getSuitDept(name):
     index = suitHeadTypes.index(name)
     dept_index = index // suitsPerDept
     if dept_index < len(suitDepts):
         return suitDepts[dept_index]
+    elif name in customSuits:
+        return customSuits[name]
     else:
         print('Unknown dept for suit name:', name)
         return None
@@ -177,7 +184,7 @@ class SuitDNA(AvatarDNA.AvatarDNA):
         dg = PyDatagram()
         dg.addFixedString(self.type, 1)
         if self.type == 's':
-            dg.addFixedString(self.name, 3)
+            dg.addFixedString(self.name, 20)
             dg.addFixedString(self.dept, 1)
         elif self.type == 'b':
             dg.addFixedString(self.dept, 1)
@@ -192,7 +199,7 @@ class SuitDNA(AvatarDNA.AvatarDNA):
         dgi = PyDatagramIterator(dg)
         self.type = dgi.getFixedString(1)
         if self.type == 's':
-            self.name = dgi.getFixedString(3)
+            self.name = dgi.getFixedString(20)
             self.dept = dgi.getFixedString(1)
             self.body = getSuitBodyType(self.name)
         elif self.type == 'b':

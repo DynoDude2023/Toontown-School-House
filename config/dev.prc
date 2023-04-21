@@ -16,7 +16,7 @@ schellgames-dev false
 exec-chat true
 log-private-info true
 want-qa-regression true
-suits-always-join 1
+suits-always-join 0
 
 # Chat settings
 want-whitelist false

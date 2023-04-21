@@ -8,7 +8,7 @@ from toontown.toon import NPCToons
 from toontown.pets import PetTricks, DistributedPetProxyAI
 from direct.showbase.PythonUtil import lerp
 
-class BattleCalculatorAI:
+class BattleCalculatorControlledAI:
     AccuracyBonuses = [
      0, 20, 40, 60]
     DamageBonuses = [
@@ -1383,41 +1383,21 @@ class BattleCalculatorAI:
         self.__calculateToonAttacks()
         self.handleStatusEffects(1)
         self.__updateLureTimeouts()
-        payOffUsed = False
+        """
         for suit in self.battle.activeSuits:
             self.calcSuitAttack(suit)
-            suit.wantedTarget(0)
-            suitAttackOvertime = [suit.doId,
-                                3,
+            suitAttackCustom = [suit.doId,
                                 0,
-                                [0, 0, 0, 0],
+                                0,
+                                [7, 7, 7, 7],
                                 0,
                                 0,
                                 0]
-            overtimeSuitChoices = []
-            for suitChoice in self.battle.activeSuits:
-                if suitChoice.dna.name != 'overtime':
-                    overtimeSuitChoices.append(suitChoice)
-            pickedSuitId = None
-            if overtimeSuitChoices:
-                pickedSuit = random.choice(overtimeSuitChoices)
-                pickedSuitId = pickedSuit.doId
-            
-            if pickedSuitId:
-                if suit.dna.name == 'overtime' and not self.__combatantDead(pickedSuitId, toon=0):
-                    payOffUsed = True
-                    suit.wantedTarget(pickedSuitId)
-                    self.addCustomAttack(suit, suitAttackOvertime, 0)
-                    
-        
+        """
         for suit in self.battle.activeSuits:
             for toonId in self.battle.activeToons:
                 toon = self.battle.getToon(toonId)
                 toon.setHp(toon.getHp() - suit.attackDamages[self.battle.activeToons.index(toonId)])
-            if payOffUsed and suit.dna.name == 'overtime':
-                healSuitId = suit.wantedTargetId
-                healSuit = self.battle.findSuit(healSuitId)
-                healSuit.setHP(healSuit.getHP() + (healSuit.getActualLevel() * 3))
         
         
             

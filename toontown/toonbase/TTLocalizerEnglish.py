@@ -2396,15 +2396,23 @@ SuitBackStabberP = 'Back Stabbers'
 SuitSpinDoctorP = 'Spin Doctors'
 SuitLegalEagleP = 'Legal Eagles'
 SuitBigWigP = 'Big Wigs'
+
+#-**CUSTOM SUITS**-
+SuitOvertime = 'Overtime'
+SuitOvertimeS = 'an Overtime'
+SuitOvertimeP = 'Overtimes'
+
 SuitFaceoffDefaultTaunts = ['Boo!']
 SuitAttackDefaultTaunts = ['Take that!', 'Take a memo on this!']
-SuitCheatNames = ()
+SuitCheatNames = ('PayOff')
 SuitCheatDescription = {
+       "PayOff": "The Overtime will heal another cog for 3x it's level!"
 }
 SuitAttackNames = {'Audit': 'Audit!',
  'Bite': 'Bite!',
  'BounceCheck': 'Bounce Check!',
  'BrainStorm': 'Brain Storm!',
+ 'PayOff': 'Pay Off!',
  'BuzzWord': 'Buzz Word!',
  'Calculate': 'Calculate!',
  'Canned': 'Canned!',

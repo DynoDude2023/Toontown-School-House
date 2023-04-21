@@ -125,6 +125,9 @@ nc=(('phone', 'phone', 5), ('throw-object', 'throw-object', 5))
 mb=(('magic1', 'magic1', 5), ('throw-paper', 'throw-paper', 3.5))
 ls=(('throw-paper', 'throw-paper', 5), ('throw-object', 'throw-object', 5), ('hold-pencil', 'hold-pencil', 5))
 rb=(('glower', 'glower', 5), ('magic1', 'magic1', 5), ('golf-club-swing', 'golf-club-swing', 5))
+overtime=(('speak', 'speak', 5),
+    ('magic2', 'magic2', 5),
+    ('effort', 'effort', 5),)
 bf=(('pickpocket', 'pickpocket', 5),
     ('rubber-stamp', 'rubber-stamp', 5),
     ('shredder', 'shredder', 3.5),
@@ -580,6 +583,7 @@ class Suit(Avatar.Avatar):
             self.generateBody()
             self.generateHead('moneybags')
             self.setHeight(6.97)
+        #generateHeadCustom
         elif dna.name == 'ls':
             self.scale = 6.5 / bSize
             self.handColor = VBase4(0.5, 0.85, 0.75, 1.0)
@@ -593,6 +597,12 @@ class Suit(Avatar.Avatar):
             self.headTexture = 'robber-baron.jpg'
             self.generateHead('yesman')
             self.setHeight(8.95)
+        elif dna.name == 'overtime':
+            self.scale = 5.3 / cSize
+            self.handColor = VBase4(0.95, 0.95, 0.95, 1.0)
+            self.generateBody()
+            self.generateHeadCustom(3.5, 'ttoff_m_ene_overtime')
+            self.setHeight(6.97)
         elif dna.name == 'cc':
             self.scale = 3.5 / cSize
             self.handColor = VBase4(0.55, 0.65, 1.0, 1.0)
@@ -881,7 +891,13 @@ class Suit(Avatar.Avatar):
             self.headParts.append(headPart)
 
         headModel.removeNode()
-
+    
+    def generateHeadCustom(self, phase, headName):
+        phase_str = str(phase)
+        headModel = loader.loadModel('phase_' + phase_str + "/models/char/" + headName)
+        headModel.reparentTo(self.find('**/def_head'))
+        self.headParts.append(headModel)
+        
     def generateCorporateTie(self, modelPath=None):
         if not modelPath:
             modelPath=self

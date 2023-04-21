@@ -395,12 +395,15 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
             else:
                 suitLevel = self.SuitHoodInfo[self.hoodInfoIdx][self.SUIT_HOOD_INFO_LVL][-1] + 1
         suitLevel, suitType, suitTrack = self.pickLevelTypeAndTrack(suitLevel, suitType, suitTrack)
-        if isControlledBeanCounter:
-            if suitLevel < 4:
-                suitLevel = 4
-            newSuit.setupSuitDNACustom(suitLevel, 'bc', 'm')
+        if suitName in SuitDNA.customSuits:
+            newSuit.setupSuitDNACustom(suitLevel, suitName, SuitDNA.getSuitDept(suitName))
         else:
-            newSuit.setupSuitDNA(suitLevel, suitType, suitTrack)
+            if isControlledBeanCounter:
+                if suitLevel < 4:
+                    suitLevel = 4
+                newSuit.setupSuitDNACustom(suitLevel, 'bc', 'm')
+            else:
+                newSuit.setupSuitDNA(suitLevel, suitType, suitTrack)
         newSuit.buildingHeight = buildingHeight
         gotDestination = self.chooseDestination(newSuit, startTime, toonBlockTakeover=toonBlockTakeover, cogdoTakeover=cogdoTakeover, minPathLen=minPathLen, maxPathLen=maxPathLen)
         if not gotDestination:
@@ -416,7 +419,7 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
             newSuit.setSkeleRevives(revives)
         newSuit.generateWithRequired(newSuit.zoneId)
         newSuit.moveToNextLeg(None)
-        if isControlledBeanCounter:
+        if isControlledBeanCounter and newSuit.dna.name not in SuitDNA.customSuits:
             newSuit.appendStatusEffect(BATTLE_STATUS_EFFECT_CASH_CONTROLLED)
             newSuit.calculateRound()
         self.suitList.append(newSuit)
@@ -1069,6 +1072,9 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
         battle = self.battleMgr.getBattle(zoneId)
         if len(battle.suits) >= 4:
             return 0
+        for suit in battle.suits:
+            if suit.dna.name == 'overtime':
+                return 1
         if battle:
             if simbase.config.GetBool('suits-always-join', 0):
                 return 1

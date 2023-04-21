@@ -22,6 +22,10 @@ class BattleAvatar(DistributedObject.DistributedObject):
             SQUIRT: 0,
             DROP: 0
         }
+        self.wantedTargetId = -1
+    
+    def wantedTarget(self, targetId):
+        self.wantedTargetId = targetId
     
     def setGagDamage(self, damage, gagTrack):
         self.gagTrackDamages[gagTrack] = damage

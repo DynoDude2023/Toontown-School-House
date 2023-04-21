@@ -68,6 +68,7 @@ from toontown.coghq import DistributedCashbotBossCrane/AI
 from toontown.suit import DistributedCashbotBossGoon/AI
 from toontown.battle import DistributedBattleBase/AI
 from toontown.battle import DistributedBattle/AI
+from toontown.battle import DistributedBattleControlled/AI
 from toontown.battle import DistributedBattleBldg/AI
 from toontown.battle import BattleAvatar/AI
 from toontown.tutorial import DistributedBattleTutorial/AI
@@ -1276,6 +1277,7 @@ dclass DistributedSuitPlanner : DistributedObject {
 dclass BattleAvatar : DistributedObject {
   setComboDamage(int64) broadcast ram;
   setGagDamage(int64, int64) broadcast ram;
+  wantedTarget(uint64) broadcast ram;
 };
 
 dclass DistributedSuitBase : BattleAvatar {
@@ -1551,6 +1553,9 @@ dclass DistributedBattleBase : DistributedObject {
 };
 
 dclass DistributedBattle : DistributedBattleBase {
+};
+
+dclass DistributedBattleControlled : DistributedBattle {
 };
 
 dclass DistributedBattleBldg : DistributedBattleBase {
