@@ -4,6 +4,7 @@ import SuitPlannerBase, SuitBase, SuitDNA
 from direct.directnotify import DirectNotifyGlobal
 from toontown.battle import SuitBattleGlobals
 from toontown.battle import BattleAvatarAI
+from toontown.battle.suits import CheatCalculatorAI
 
 class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.SuitBase, BattleAvatarAI.BattleAvatarAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedSuitBaseAI')
@@ -23,8 +24,15 @@ class DistributedSuitBaseAI(DistributedAvatarAI.DistributedAvatarAI, SuitBase.Su
         self.reviveFlag = 0
         self.buildingHeight = None
         self.KBBonus = 0
+        self.cheatCalculator = None
         return
 
+    def setCheatCalculator(self):
+        if self.dna.name == 'overtime':
+            cheatCalc = CheatCalculatorAI.OvertimeCheatCalculator(self)
+            self.cheatCalculator = cheatCalc
+        
+    
     def toonUp(self, healing):
         self.sendUpdate('toonUp', [healing])
     

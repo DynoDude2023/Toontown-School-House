@@ -430,6 +430,8 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
         self.notify.debug('addSuit(%d)' % suit.doId)
         self.newSuits.append(suit)
         self.suits.append(suit)
+        suit.battle = self
+        suit.setCheatCalculator()
         suit.battleTrap = NO_TRAP
         self.numSuitsEver += 1
 

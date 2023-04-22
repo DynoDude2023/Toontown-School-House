@@ -42,7 +42,7 @@ class DistributedSuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
         self.buildingDestination = None
         self.buildingDestinationIsCogdo = False
         return
-
+    
     def stopTasks(self):
         taskMgr.remove(self.taskName('flyAwayNow'))
         taskMgr.remove(self.taskName('danceNowFlyAwayLater'))
